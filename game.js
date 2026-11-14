@@ -77,6 +77,7 @@ const lineText = id => (LANG === 'he' ? window.LINES_HE : window.LINES)[id];
 const voiceDir = () => LANG === 'he' ? 'voice/he/' : 'voice/full/';
 const TITLES = { he: 'נגה והחד-קרן', en: 'Noga and the Unicorn' };
 function applyLang(){ document.documentElement.lang = LANG; const h = document.querySelector('#title h1'); if (h) h.textContent = TITLES[LANG]; document.title = TITLES[LANG]; }
+const VOICE_ALIAS = { pr_05: 'pr_01', pr_12: 'pr_03' };   // two Hebrew clips (pr_05, pr_12) are still pending review: play a generic praise clip meanwhile
 const Voice = {
   q: [], busy: false, files: false, cur: null, timer: null, last: '',
   init(){ this.files = false; const a = new Audio(); a.oncanplaythrough = () => { Voice.files = true; }; a.onerror = () => {}; a.src = voiceDir() + 'ins_01.mp3'; },
@@ -100,7 +101,13 @@ const Voice = {
         u.lang = he ? 'he-IL' : 'en-US'; u.rate = 0.9; u.pitch = id.startsWith('fr_') ? 1.6 : 1.2; u.onend = done; u.onerror = done; sy.speak(u);
       } catch (e) { done(); }
     };
-    if (this.files) { const a = new Audio(voiceDir() + id + '.mp3'); this.cur = a; a.onended = done; a.onerror = tts; a.play().catch(tts); }
+    if (this.files) {
+      const play = (file, retry) => { const a = new Audio(voiceDir() + file + '.mp3'); this.cur = a; a.onended = done;
+        a.onloadedmetadata = () => { if (isFinite(a.duration)) { clearTimeout(Voice.timer); Voice.timer = setTimeout(done, a.duration * 1000 + 1200); } };   // wait for the real length of the clip
+        let missed = false;
+        const miss = () => { if (missed) return; missed = true; if (retry && VOICE_ALIAS[id] && LANG === 'he') play(VOICE_ALIAS[id], false); else tts(); };
+        a.onerror = miss; a.play().catch(miss); };
+      play(id, true); }
     else tts();
   },
   hush(){ this.q.length = 0; try { if (this.cur) this.cur.pause(); window.speechSynthesis && window.speechSynthesis.cancel(); } catch (e) {} this.busy = false; clearTimeout(this.timer); }

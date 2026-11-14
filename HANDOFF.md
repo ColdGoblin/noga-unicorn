@@ -149,3 +149,10 @@ Owner said: add a Dance button, make the levels longer with more things in them,
 - `__g` now also has `P()`, `LV()`, `gnd(x)`, `bonus()`, `plats()` for tests. The Browser pane caches `game.js`: after an edit run `fetch('game.js',{cache:'reload'})` then reload.
 - **Oasis check (14 Nov):** Whisper's Hebrew sample task `t1114141355ncl227` is on the board, sent once. The old English sample task `t1114104526ncl2d2` is still open and now superseded. No Hebrew clips exist yet (`voice\he\sample` does not exist), so the CHECK (5 playable mp3s, exact `LINES_HE` text, not whispery, owner judges by ear) has not run.
 - Backup of the previous `game.js` was in a scratch folder only; the branch still has nothing committed.
+
+## Update 14 Nov (evening): Whisper's Hebrew voices are in the game
+
+- Whisper delivered `noga_he_voice_package.zip` (project root): 108 mp3 + 2 pending-review (`pr_05` hooray, `pr_12` you found it, pronunciation unconfirmed) + manifest and QA (automatic transcription only, nobody has listened to them all). The 5 files in `voice\he\sample\` are copies of the same clips.
+- Owner told me to integrate, so the 108 mp3 are now in `voice\he\` (the game's recording folder). All 108 load and play; the clip for `l1_a` was seen playing inside the game. Voice no longer cuts a clip off by a text-length timer; it waits for the clip's real length.
+- Until `pr_05`/`pr_12` are approved, the game plays `pr_01`/`pr_03` in their place (`VOICE_ALIAS` in game.js). Whisper asked that they not be promoted silently: this is a stand-in, not a promotion.
+- **Not done:** nobody has listened to all 108 in the game; English recordings still do not exist (English falls back to browser speech).

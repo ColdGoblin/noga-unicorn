@@ -20,7 +20,8 @@ const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
 const RB = ['#ff5f7e', '#ffa64d', '#ffe14d', '#6fdc8c', '#5fb8ff', '#b98cff'];
 
 /* ---------- save ---------- */
-const SAVE_KEY = 'nogaUnicorn1';
+const SAVE_KEY = 'nogaUnicorn2';       // new key = everybody starts from zero (progress reset, 14 Nov)
+try { localStorage.removeItem('nogaUnicorn1'); } catch (e) {}
 let save = { done: [false, false, false], dance: false, sup: false };
 try { const o = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null');
   if (o && Array.isArray(o.done)) { save.done = [0, 1, 2].map(i => !!o.done[i]); save.sup = !!o.sup; } } catch (e) {}
@@ -140,7 +141,7 @@ addEventListener('keydown', e => {
 addEventListener('keyup', e => { if (e.key === 'ArrowLeft') keys.left = false; else if (e.key === 'ArrowRight') keys.right = false; });
 /* mouse or finger on the playfield: hold to walk toward the pointer, point above her to jump, click her to dance */
 const ptr = { down: false, cx: 0, cy: 0, id: null };
-function ptrWorld(){ const r = cv.getBoundingClientRect(); return { x: (ptr.cx - r.left) / r.width * VW + camX, y: (ptr.cy - r.top) / r.height * VH }; }
+function ptrWorld(){ const r = cv.getBoundingClientRect(); return { x: (ptr.cx - r.left) / r.width * VW + camX, y: (ptr.cy - r.top) / r.height * VH + camY }; }
 cv.addEventListener('pointerdown', e => {
   if (mode !== 'play' || !p) return; ac(); ptr.cx = e.clientX; ptr.cy = e.clientY; const w = ptrWorld();
   if (save.dance && Math.abs(w.x - p.x) < 90 && w.y > p.y - 200 && w.y < p.y + 12) { wantDance = true; return; }
@@ -171,7 +172,7 @@ const COL = { red: ['#ff5f6e', 'col_01'], blue: ['#5fa8ff', 'col_02'], green: ['
 /* a row of bonus stars along an arc: x0..x1, base height y, bump h (0 = straight line), n stars */
 const arcRow = (x0, x1, y, h, n) => Array.from({ length: n }, (_, i) => { const k = n > 1 ? i / (n - 1) : 0; return { x: Math.round(x0 + (x1 - x0) * k), y: Math.round(y - Math.sin(k * Math.PI) * h) }; });
 const LEVELS = [
-  { name: 'garden', len: 5600, sticker: 1, collect: 'feather', ins: 'ins_11', auto: true, joins: ['bird', 'pitzi'],
+  { name: 'garden', need: 5, len: 5600, sticker: 1, collect: 'feather', ins: 'ins_11', auto: true, joins: ['bird', 'pitzi'],
     finSay: ['fr_01', 'l1_c', 'pr_02'],
     terrain: [{ x0: 0, x1: 700, top: G }, { x0: 700, x1: 900, top: G - 60 }, { x0: 900, x1: 1100, top: G - 120 }, { x0: 1100, x1: 1300, top: G - 60 }, { x0: 1300, x1: 1750, top: G },
               { x0: 1910, x1: 2550, top: G }, { x0: 2550, x1: 2800, top: G - 70 }, { x0: 2800, x1: 3050, top: G - 140 }, { x0: 3050, x1: 3300, top: G - 70 }, { x0: 3300, x1: 3780, top: G },
@@ -180,32 +181,36 @@ const LEVELS = [
     items: [{ x: 560, y: G - 45 }, { x: 1000, y: G - 215 }, { x: 3480, y: G - 345 }],
     bonus: [].concat(arcRow(260, 520, G - 70, 0, 3), arcRow(780, 1220, G - 120, 60, 7), arcRow(1400, 1650, G - 70, 0, 4), arcRow(1700, 1960, G - 80, 130, 5),
       arcRow(2080, 2420, G - 80, 170, 6), arcRow(2600, 3250, G - 215, 50, 8), arcRow(3560, 3760, G - 75, 0, 3), arcRow(3790, 4050, G - 90, 150, 5),
-      arcRow(4150, 4650, G - 70, 90, 7), arcRow(4980, 5250, G - 135, 40, 5)),
+      arcRow(4150, 4650, G - 70, 90, 7), arcRow(4980, 5250, G - 135, 40, 5),
+      arcRow(2900, 2960, G - 315, 0, 2), arcRow(3080, 3140, G - 425, 0, 2), arcRow(3260, 3320, G - 535, 0, 2)),
     plats: [{ x: 1795, w: 90, kind: 'stone' }, { x: 2150, w: 100, kind: 'rock' }, { x: 2330, w: 150, kind: 'mushroom' }, { x: 3830, w: 90, kind: 'stone' }, { x: 3940, w: 90, kind: 'stone' },
-            { x: 4250, w: 110, kind: 'stump' }, { x: 4500, w: 100, kind: 'rock' }, { x: 4700, w: 90, kind: 'stone' }],
+            { x: 4250, w: 110, kind: 'stump' }, { x: 4500, w: 100, kind: 'rock' }, { x: 4700, w: 90, kind: 'stone' },
+            { x: 2860, w: 130, top: G - 250, kind: 'cloud' }, { x: 3040, w: 130, top: G - 360, kind: 'cloud' }, { x: 3220, w: 130, top: G - 470, kind: 'cloud' }],
     pads: [{ x: 3350, w: 170, top: G - 52 }], splash: { x: 1440, w: 150 },
     decos: [{ kind: 'pitzi', x: 300, happy: true }, { kind: 'shluli', x: 1515, happy: true }, { kind: 'bobo', x: 3435 }, { kind: 'mamabird', x: 5510, y: G - 250, happy: true }],
-    cues: [{ x: 0, say: ['l1_a', 'ins_01'], glow: 'br' }, { x: 430, say: ['ins_11'] }, { x: 1330, say: ['ins_06'], glow: 'bd' }, { x: 1560, say: ['ins_02'], glow: 'bj' }, { x: 2100, say: ['ins_05'], glow: 'bj' },
+    cues: [{ x: 0, say: ['l1_a', 'ins_11', 'ins_10', 'num_05', 'ins_01'], glow: 'br' },{ x: 1330, say: ['ins_06'], glow: 'bd' }, { x: 1560, say: ['ins_02'], glow: 'bj' }, { x: 2100, say: ['ins_05'], glow: 'bj' },
            { x: 2650, say: ['l1_b'] }, { x: 3200, say: ['ins_15'] }] },
 
-  { name: 'rainbow', len: 6200, sticker: 2, collect: 'bubble', ins: 'ins_12', joins: ['pitzi'], without: ['pitzi'],
+  { name: 'rainbow', need: 7, len: 6200, sticker: 2, collect: 'bubble', ins: 'ins_12', joins: ['pitzi'], without: ['pitzi'],
     finSay: ['fr_03', 'l2_c', 'pr_02'],
     terrain: [{ x0: 0, x1: 1100, top: G }, { x0: 1400, x1: 2000, top: G }, { x0: 2000, x1: 2250, top: G - 60 }, { x0: 2250, x1: 2500, top: G - 120 }, { x0: 2500, x1: 2750, top: G - 60 }, { x0: 2750, x1: 3050, top: G },
               { x0: 3350, x1: 4000, top: G }, { x0: 4250, x1: 4600, top: G }, { x0: 4600, x1: 4850, top: G - 70 }, { x0: 4850, x1: 5100, top: G - 140 }, { x0: 5100, x1: 5350, top: G - 70 }, { x0: 5350, x1: 6200, top: G }],
     friend: { kind: 'pitzi', x: 5900 },
     items: [{ x: 620, y: G - 130, col: 'red' }, { x: 1250, y: G - 185, col: 'blue' }, { x: 2375, y: G - 200, col: 'green' }, { x: 4975, y: G - 220, col: 'yellow' }],
     bonus: [].concat(arcRow(240, 520, G - 70, 0, 4), arcRow(780, 1000, G - 150, 40, 4), arcRow(1480, 1900, G - 70, 0, 6), arcRow(1520, 2000, G - 250, 40, 5), arcRow(2060, 2740, G - 190, 60, 8),
-      arcRow(2800, 3000, G - 70, 0, 3), arcRow(3360, 3980, G - 70, 0, 6), arcRow(3500, 3900, G - 220, 40, 4), arcRow(4020, 4240, G - 150, 80, 4), arcRow(4300, 4580, G - 70, 0, 4), arcRow(4640, 5300, G - 195, 60, 7), arcRow(5420, 5800, G - 70, 0, 5)),
+      arcRow(2800, 3000, G - 70, 0, 3), arcRow(3360, 3980, G - 70, 0, 6), arcRow(3500, 3900, G - 220, 40, 4), arcRow(4020, 4240, G - 150, 80, 4), arcRow(4300, 4580, G - 70, 0, 4), arcRow(4640, 5300, G - 195, 60, 7), arcRow(5420, 5800, G - 70, 0, 5),
+      arcRow(2080, 2140, G - 405, 0, 2), arcRow(2260, 2320, G - 495, 0, 2), arcRow(2440, 2500, G - 585, 0, 2)),
     plats: [{ x: 690, w: 130, top: G - 75, kind: 'cloud' },
             { x: 1080, w: 170, top: G, kind: 'bigbubble', move: { a: 1080, b: 1250, sp: 0.012 } }, { x: 3030, w: 170, top: G, kind: 'bigbubble', move: { a: 3030, b: 3200, sp: 0.012, ph: 2 } },
             { x: 1540, w: 120, top: G - 90, kind: 'cloud' }, { x: 1720, w: 120, top: G - 170, kind: 'cloud' }, { x: 1880, w: 120, top: G - 250, kind: 'cloud' },
+            { x: 2060, w: 120, top: G - 340, kind: 'cloud' }, { x: 2240, w: 120, top: G - 430, kind: 'cloud' }, { x: 2420, w: 120, top: G - 520, kind: 'cloud' },
             { x: 4060, w: 130, top: G - 75, kind: 'cloud' },
             { x: 3500, w: 120, top: G - 100, kind: 'cloud' }, { x: 3690, w: 120, top: G - 190, kind: 'cloud' }, { x: 3860, w: 120, top: G - 110, kind: 'cloud' },
             { x: 5420, w: 130, top: G - 90, kind: 'cloud' }, { x: 5600, w: 130, top: G - 180, kind: 'cloud' }],
     danceZone: { a: 1450, b: 2000 },
-    cues: [{ x: 0, say: ['fr_02', 'l2_a', 'ins_12'] }, { x: 940, say: ['ins_13'], glow: 'bj' }, { x: 1500, say: ['ins_06'], glow: 'bd', show: 'dance' }, { x: 2250, say: ['l2_b'] }, { x: 2900, say: ['ins_13'] }] },
+    cues: [{ x: 0, say: ['fr_02', 'l2_a', 'ins_12', 'ins_10', 'num_07'] }, { x: 940, say: ['ins_13'], glow: 'bj' }, { x: 1500, say: ['ins_06'], glow: 'bd', show: 'dance' }, { x: 2250, say: ['l2_b'] }, { x: 2900, say: ['ins_13'] }] },
 
-  { name: 'forest', len: 6600, sticker: 3, collect: 'petal', ins: 'ins_14', joins: ['bilam'], arriveSay: 'l3_b',
+  { name: 'forest', need: 10, len: 6600, sticker: 3, collect: 'petal', ins: 'ins_14', joins: ['bilam'], arriveSay: 'l3_b',
     finSay: ['fr_06', 'l3_c', 'pr_17'],
     terrain: [{ x0: 0, x1: 700, top: G }, { x0: 700, x1: 950, top: G - 60 }, { x0: 950, x1: 1200, top: G - 120 }, { x0: 1200, x1: 1450, top: G - 60 }, { x0: 1450, x1: 2300, top: G },
               { x0: 2460, x1: 4300, top: G }, { x0: 4300, x1: 4600, top: G - 70 }, { x0: 4600, x1: 4850, top: G - 130 }, { x0: 4850, x1: 5100, top: G - 70 }, { x0: 5100, x1: 5300, top: G },
@@ -214,10 +219,12 @@ const LEVELS = [
     items: [{ x: 520, y: G - 45 }, { x: 1075, y: G - 215 }, { x: 2010, y: G - 375, high: 0 }, { x: 2680, y: G - 190 }, { x: 3760, y: G - 375, high: 1 }],
     stars: [{ x: 1560, g: 0 }, { x: 1645, g: 0 }, { x: 1730, g: 0 }, { x: 3300, g: 1 }, { x: 3385, g: 1 }, { x: 3470, g: 1 }],
     bonus: [].concat(arcRow(200, 560, G - 70, 0, 5), arcRow(740, 1180, G - 130, 60, 6), arcRow(1260, 1420, G - 130, 0, 3), arcRow(1800, 2300, G - 70, 0, 5), arcRow(2300, 2480, G - 90, 120, 4),
-      arcRow(2560, 3150, G - 70, 0, 7), arcRow(2780, 3000, G - 250, 40, 4), arcRow(3560, 4250, G - 70, 0, 7), arcRow(4320, 5080, G - 210, 60, 9), arcRow(5280, 5480, G - 90, 120, 4), arcRow(5560, 6000, G - 70, 0, 6)),
+      arcRow(2560, 3150, G - 70, 0, 7), arcRow(2780, 3000, G - 250, 40, 4), arcRow(3560, 4250, G - 70, 0, 7), arcRow(4320, 5080, G - 210, 60, 9), arcRow(5280, 5480, G - 90, 120, 4), arcRow(5560, 6000, G - 70, 0, 6),
+      arcRow(2230, 2330, G - 500, 0, 3), arcRow(2470, 2570, G - 610, 0, 3), arcRow(3980, 4080, G - 500, 0, 3), arcRow(4220, 4320, G - 610, 0, 3)),
     plats: [{ x: 1900, w: 230, top: G - 320, kind: 'branch' }, { x: 2600, w: 116, kind: 'rock' }, { x: 2900, w: 110, kind: 'stump' },
-            { x: 3650, w: 230, top: G - 320, kind: 'branch' }, { x: 4020, w: 110, kind: 'stump' }, { x: 5600, w: 116, kind: 'rock' }, { x: 5800, w: 110, kind: 'stump' }],
-    cues: [{ x: 0, say: ['l3_a', 'ins_14'] }, { x: 1400, say: ['ins_15'] }, { x: 3150, say: ['ins_15'] }] }
+            { x: 3650, w: 230, top: G - 320, kind: 'branch' },
+            { x: 2180, w: 200, top: G - 430, kind: 'branch' }, { x: 2420, w: 200, top: G - 540, kind: 'branch' }, { x: 3930, w: 200, top: G - 430, kind: 'branch' }, { x: 4170, w: 200, top: G - 540, kind: 'branch' },{ x: 4020, w: 110, kind: 'stump' }, { x: 5600, w: 116, kind: 'rock' }, { x: 5800, w: 110, kind: 'stump' }],
+    cues: [{ x: 0, say: ['l3_a', 'ins_14', 'ins_10', 'num_10'] }, { x: 1400, say: ['ins_15'] }, { x: 3150, say: ['ins_15'] }] }
 ];
 const REST_W = 1.25;        // picture is a bit wider than the part you stand on
 function prepLevel(lv){
@@ -231,7 +238,7 @@ function prepLevel(lv){
 LEVELS.forEach(prepLevel);
 
 /* ---------- game state ---------- */
-let mode = 'title', li = 0, L = null, p = null, camX = 0, T = 0;
+let mode = 'title', li = 0, L = null, p = null, camX = 0, camY = 0, T = 0;     // camY: how far the view has moved up (0 = ground level, negative = looking up at clouds and treetops)
 let bonus = [], bonusN = 0;
 let terr = [], items = [], stars = [], plats = [], followers = [], parts = [], hist = [], flowers = [];
 let got = 0, meter = 0, fin = null, arrived = false, hintT = 0, maxX = 0, danceN = 0, said = {}, falls = 0, trail = false;
@@ -250,7 +257,7 @@ function startLevel(i){
   plats = L.plats.map(o => ({ ...o, dx: 0 })); terr = L.terrain;
   L.cues.forEach(c => c.done = false);
   followers = paradeFor(i).map(k => ({ kind: k }));
-  parts = []; hist = []; flowers = []; got = 0; meter = 0; fin = null; arrived = false; hintT = 0; maxX = 0; said = {}; falls = 0; trail = false; camX = 0;
+  parts = []; hist = []; flowers = []; got = 0; meter = 0; fin = null; arrived = false; hintT = 0; maxX = 0; said = {}; falls = 0; trail = false; camX = 0; camY = 0;
   L.friend.happy = false; L.friend.bloom = 0; L.friend.fly = 0;
   ['title', 'map', 'end'].forEach(s => $(s).classList.add('hide'));
   Voice.hush(); showButtons(); glow(null); startMusic(i);
@@ -260,9 +267,15 @@ function startLevel(i){
 function groundAt(x){ let t = null; for (const g of terr) if (x > g.x0 - 8 && x < g.x1 + 8 && (t === null || g.top < t)) t = g.top; return t; }
 function inGap(x){ return (L.gaps || []).find(g => x > g.x && x < g.x + g.w); }
 function burst(x, y, n, cols, shape){ for (let i = 0; i < n; i++) parts.push({ x, y, vx: rand(-3, 3), vy: rand(-4.5, -0.5), life: 1, c: cols[i % cols.length], s: rand(5, 11), shape: shape || 'dot', g: 0.12 }); }
-function target(){ const it = items.find(o => !o.got); return it ? { x: it.x, y: it.y } : { x: L.friend.x, y: G - 60 }; }
+const starsOK = () => bonusN >= (L.need || 0);
+const goalMet = () => got === items.length && starsOK();       // to finish a level: all the things AND enough gold stars
+function target(){ const it = items.find(o => !o.got);
+  if (it) return { x: it.x, y: it.y };
+  if (!starsOK()) { const b = bonus.filter(o => !o.got).sort((a, c) => Math.abs(a.x - p.x) - Math.abs(c.x - p.x))[0]; if (b) return { x: b.x, y: b.y }; }
+  return { x: L.friend.x, y: G - 60 }; }
 function curIns(){
   if (got < items.length) return L.ins;
+  if (!starsOK()) return 'ins_10';
   if (Math.abs(p.x - L.friend.x) > 190) return 'ins_24';
   return L.auto ? null : 'ins_06';
 }
@@ -274,7 +287,7 @@ function pickup(it){
   burst(it.x, it.y, 12, RB, 'star');
   Voice.say('num_0' + got);
   if (it.col) Voice.say(COL[it.col][1]);
-  if (got === items.length) { Voice.say('pr_12'); Voice.say('ins_24'); }
+  if (got === items.length) { Voice.say('pr_12'); Voice.say(starsOK() ? 'ins_24' : 'ins_10'); }
   else if (items.length - got === 1) Voice.say('ins_25');
   else praise();
 }
@@ -319,7 +332,7 @@ function update(dt){
   // dance
   if (wantDance && save.dance && p.on && !locked && !dancing) {
     p.dance = 110; p.move = danceN++ % Math.max(1, save.done.filter(Boolean).length); sfx.dance(); if ($('bd').classList.contains('glow')) glow(null);
-    const near = Math.abs(p.x - L.friend.x) < 200 && got === items.length;
+    const near = Math.abs(p.x - L.friend.x) < 200 && goalMet();
     if (near && !L.auto) finish();
     else if (L.danceZone && p.x > L.danceZone.a && p.x < L.danceZone.b) { for (let i = 0; i < 9; i++) flowers.push({ x: p.x + rand(-260, 260), c: RB[i % 6], t: 0 }); if (!said.dz) { said.dz = 1; Voice.say('pr_07'); } progress(); }
     else Voice.sayIfFree(Math.random() < 0.5 ? 'pr_07' : 'pr_08');
@@ -364,7 +377,8 @@ function update(dt){
   const cx = p.x, cy = p.y - 62;
   items.forEach(it => { it.bob += 0.05 * dt; if (!it.got && Math.hypot(it.x - cx, it.y - cy) < 72) pickup(it);
     if (!it.got && hintT > 2400 && it === items.find(o => !o.got)) { it.x += Math.sign(cx - it.x) * 1.4 * dt; it.y += Math.sign(cy - it.y) * 1.0 * dt; } });
-  bonus.forEach(b => { if (!b.got && Math.hypot(b.x - cx, b.y - cy) < 60) { b.got = true; bonusN++; sfx.star(); burst(b.x, b.y, 6, ['#ffe14d', '#fff'], 'star'); if (bonusN % 10 === 0) praise(); } });
+  bonus.forEach(b => { if (!b.got && Math.hypot(b.x - cx, b.y - cy) < 60) { b.got = true; bonusN++; sfx.star(); burst(b.x, b.y, 6, ['#ffe14d', '#fff'], 'star');
+    if (bonusN === L.need) { Voice.say('pr_12'); if (got === items.length) Voice.say('ins_24'); } else if (bonusN % 10 === 0) praise(); } });
   stars.forEach(st => {
     if (!st.got && Math.hypot(st.x - cx, st.y - cy) < 66 && meter < 3) { st.got = true; st.back = 300; meter++; sfx.star(); burst(st.x, st.y, 8, ['#ffe14d', '#fff'], 'star');
       if (meter === 3) { Voice.say('ex_03'); if (!save.sup) { save.sup = true; persist(); showButtons(); Voice.say('ins_08'); } $('bs').classList.add('ready', 'glow'); } }
@@ -373,7 +387,7 @@ function update(dt){
 
   // friend
   const near = Math.abs(p.x - L.friend.x) < 170;
-  if (!fin && got === items.length && near) {
+  if (!fin && goalMet() && near) {
     if (L.auto) finish();
     else if (!arrived) { arrived = true; if (L.arriveSay) Voice.say(L.arriveSay); Voice.say('ins_06'); glow('bd'); }
   }
@@ -402,6 +416,7 @@ function update(dt){
   parts = parts.filter(q => q.life > 0);
   flowers.forEach(f => f.t += dt);
   camX += (clamp(p.x - VW * 0.36, 0, Math.max(0, L.len - VW)) - camX) * 0.12 * dt;
+  camY += (clamp(p.y - 400, -480, 0) - camY) * 0.1 * dt;          // the view rises with her when she climbs up to clouds and branches
 }
 
 /* ---------- drawing: small helpers ---------- */
@@ -565,7 +580,8 @@ function drawWorld(){
   const n = L.name, im = IMG['bg_' + n];
   const sky = { garden: ['#bfe9ff', '#eafff0'], rainbow: ['#ffdff3', '#e6dcff'], forest: ['#cdeccf', '#f4ffd9'] }[n];
   const gr = ctx.createLinearGradient(0, 0, 0, VH); gr.addColorStop(0, sky[0]); gr.addColorStop(1, sky[1]); ctx.fillStyle = gr; ctx.fillRect(0, 0, VW, VH);
-  if (im) { const h = VH, w = h * im.width / im.height, off = -((camX * 0.4) % w); for (let x = off; x < VW; x += w) ctx.drawImage(im, x, 0, w, h); }
+  if (im) { const h = VH, w = h * im.width / im.height, off = -((camX * 0.4) % w), by = -camY * 0.4;
+    for (let x = off; x < VW; x += w) { if (by > 0) ctx.drawImage(im, 0, 0, im.width, 6, x, 0, w, by + 2); ctx.drawImage(im, x, by, w, h); } }
   else if (n === 'garden') {
     ctx.lineWidth = 16; RB.forEach((c, i) => { ctx.strokeStyle = c; ctx.globalAlpha = 0.55; ctx.beginPath(); ctx.arc(VW * 0.7 - camX * 0.05, G + 60, 430 - i * 16, Math.PI, 0); ctx.stroke(); }); ctx.globalAlpha = 1;
     circ(140 - camX * 0.02, 110, 56, '#fff3a8'); hills(0.15, 420, 50, '#c9efc4', 0.004); hills(0.3, 480, 36, '#a9e3a4', 0.006);
@@ -579,7 +595,7 @@ function drawWorld(){
     for (let i = 0; i < 18; i++) circ(((i * 211 - camX * 0.5) % VW + VW) % VW + Math.sin(T * 0.03 + i) * 20, 180 + (i * 53) % 300 + Math.cos(T * 0.04 + i) * 14, 4 + Math.sin(T * 0.1 + i) * 2, 'rgba(255,250,170,.9)');
   }
   // ground: one block per terrain segment; the space between segments is a gap
-  ctx.save(); ctx.translate(-camX, 0);
+  ctx.save(); ctx.translate(-camX, -camY);
   if (n !== 'rainbow') (L.gaps || []).forEach(g => { const wg = ctx.createLinearGradient(0, G + 20, 0, VH); wg.addColorStop(0, '#7fd0ff'); wg.addColorStop(1, '#3d9be0'); ctx.fillStyle = wg; ctx.fillRect(g.x - 2, G + 28, g.w + 4, VH);
     ctx.strokeStyle = 'rgba(255,255,255,.7)'; ctx.lineWidth = 3; for (let k = 0; k < 3; k++) { ctx.beginPath(); for (let x = g.x + 6; x < g.x + g.w - 6; x += 10) ctx.lineTo(x, G + 40 + k * 22 + Math.sin(T * 0.07 + x * 0.1 + k) * 3); ctx.stroke(); } });
   terr.forEach(sg => { const x0 = sg.x0, x1 = sg.x1, top = sg.top;
@@ -596,7 +612,7 @@ function drawWorld(){
 function draw(){
   ctx.setTransform(S, 0, 0, S, 0, 0);
   drawWorld();
-  ctx.save(); ctx.translate(-camX, 0);
+  ctx.save(); ctx.translate(-camX, -camY);
   if (L.splash) { /* puddle is the friend Shluli, drawn with the decos */ }
   flowers.forEach(f => { const k = Math.min(1, f.t / 20); ctx.fillStyle = '#4c9657'; ctx.fillRect(f.x - 2, G - 34 * k, 4, 34 * k); for (let a = 0; a < 5; a++) circ(f.x + Math.cos(a * 1.257) * 11 * k, G - 36 * k + Math.sin(a * 1.257) * 11 * k, 8 * k, f.c); circ(f.x, G - 36 * k, 6 * k, '#fff7c4'); });
   (L.decos || []).forEach(d => { if (d.kind === 'mamabird') { rr(d.x - 16, d.y, 32, G - d.y, 12, '#9a6a45'); circ(d.x - 30, d.y - 30, 70, '#7fcf7a'); circ(d.x + 40, d.y - 10, 60, '#63bd69'); rr(d.x - 90, d.y, 110, 14, 7, '#9a6a45'); drawFriend(d.kind, d.x - 50, d.y + 2, true); }
@@ -631,7 +647,15 @@ function draw(){
   // top bar: what she is collecting, and the star meter
   rr(18, 14, 34 + items.length * 62, 76, 38, 'rgba(255,255,255,.75)');
   items.forEach((it, i) => { ctx.save(); ctx.translate(66 + i * 62, 52); ctx.scale(0.72, 0.72); ctx.globalAlpha = i < got ? 1 : 0.28; drawItem(L.collect, 0, 0, it.col, 0); ctx.restore(); });
-  if (bonus.length) { rr(18, 98, 120, 54, 27, 'rgba(255,255,255,.75)'); star5(50, 125, 19, '#ffd028'); ctx.fillStyle = '#b0409a'; ctx.font = 'bold 30px "Comic Sans MS", sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText(bonusN, 80, 127); }
+  if (bonus.length) { const ok = starsOK(); rr(18, 98, 170, 54, 27, ok ? 'rgba(200,255,210,.85)' : 'rgba(255,255,255,.75)'); star5(50, 125, 19, '#ffd028'); ctx.fillStyle = '#b0409a'; ctx.font = 'bold 30px "Comic Sans MS", sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText(bonusN + ' / ' + (L.need || '?'), 78, 127); }
+  // the goal of the level, big on the screen for the first seconds
+  if (T < 420 && !fin) { const a = T < 360 ? 1 : 1 - (T - 360) / 60, cx = VW / 2, cy = 215; ctx.globalAlpha = a;
+    rr(cx - 330, cy - 75, 660, 150, 40, 'rgba(255,255,255,.88)');
+    ctx.fillStyle = '#b0409a'; ctx.font = 'bold 64px "Comic Sans MS", sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    ctx.save(); ctx.translate(cx - 250, cy); ctx.scale(1.1, 1.1); drawItem(L.collect, 0, 0, (items[0] || {}).col, 0); ctx.restore();
+    ctx.fillText('×' + items.length, cx - 190, cy + 4);
+    star5(cx + 60, cy, 44, '#ffd028'); ctx.fillText('×' + (L.need || 0), cx + 125, cy + 4);
+    ctx.globalAlpha = 1; }
   if (stars.length) { rr(VW - 232, 14, 214, 76, 38, 'rgba(255,255,255,.75)'); for (let i = 0; i < 3; i++) star5(VW - 185 + i * 60, 52, 24 + (meter >= 3 ? Math.sin(T * 0.2 + i) * 3 : 0), i < meter ? '#ffd028' : 'rgba(170,170,190,.45)'); }
 }
 

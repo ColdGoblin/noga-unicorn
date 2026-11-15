@@ -194,8 +194,8 @@ const COL = { red: ['#ff5f6e', 'col_01'], blue: ['#5fa8ff', 'col_02'], green: ['
 /* a row of bonus stars along an arc: x0..x1, base height y, bump h (0 = straight line), n stars */
 const arcRow = (x0, x1, y, h, n) => Array.from({ length: n }, (_, i) => { const k = n > 1 ? i / (n - 1) : 0; return { x: Math.round(x0 + (x1 - x0) * k), y: Math.round(y - Math.sin(k * Math.PI) * h) }; });
 const LEVELS = [
-  { name: 'garden', need: 5, len: 5600, sticker: 1, collect: 'feather', ins: 'ins_11', auto: true, joins: ['bird', 'pitzi', 'luna'],
-    finSay: ['fr_01', 'l1_c', 'pr_02'],
+  { name: 'garden', need: 5, len: 5600, sticker: 1, collect: 'feather', ins: 'ins_11', joins: ['bird', 'pitzi', 'luna'],
+    finSay: ['fr_01', 'l1_c', 'pr_02'], meets: [{ kind: 'pitzi', x: 4400, do: 'dance' }],
     terrain: [{ x0: 0, x1: 700, top: G }, { x0: 700, x1: 900, top: G - 60 }, { x0: 900, x1: 1100, top: G - 120 }, { x0: 1100, x1: 1300, top: G - 60 }, { x0: 1300, x1: 1750, top: G },
               { x0: 1910, x1: 2550, top: G }, { x0: 2550, x1: 2800, top: G - 70 }, { x0: 2800, x1: 3050, top: G - 140 }, { x0: 3050, x1: 3300, top: G - 70 }, { x0: 3300, x1: 3780, top: G },
               { x0: 4060, x1: 4950, top: G }, { x0: 4950, x1: 5150, top: G - 60 }, { x0: 5150, x1: 5420, top: G - 80 }, { x0: 5420, x1: 5600, top: G }],
@@ -214,7 +214,7 @@ const LEVELS = [
            { x: 2650, say: ['l1_b'] }, { x: 3200, say: ['ins_15'] }] },
 
   { name: 'rainbow', need: 7, len: 6200, sticker: 2, collect: 'bubble', ins: 'ins_12', joins: ['pitzi'], without: ['pitzi'],
-    finSay: ['fr_03', 'l2_c', 'pr_02'],
+    finSay: ['fr_03', 'l2_c', 'pr_02'], meets: [{ kind: 'shluli', x: 4400, do: 'jump' }],
     terrain: [{ x0: 0, x1: 1100, top: G }, { x0: 1400, x1: 2000, top: G }, { x0: 2000, x1: 2250, top: G - 60 }, { x0: 2250, x1: 2500, top: G - 120 }, { x0: 2500, x1: 2750, top: G - 60 }, { x0: 2750, x1: 3050, top: G },
               { x0: 3350, x1: 4000, top: G }, { x0: 4250, x1: 4600, top: G }, { x0: 4600, x1: 4850, top: G - 70 }, { x0: 4850, x1: 5100, top: G - 140 }, { x0: 5100, x1: 5350, top: G - 70 }, { x0: 5350, x1: 6200, top: G }],
     friend: { kind: 'pitzi', x: 5900 },
@@ -234,7 +234,7 @@ const LEVELS = [
     cues: [{ x: 0, say: ['fr_02', 'l2_a', 'ins_12', 'ins_10', 'num_07'] }, { x: 940, say: ['ins_13'], glow: 'bj' }, { x: 1500, say: ['ins_06'], glow: 'bd', show: 'dance' }, { x: 2250, say: ['l2_b'] }, { x: 2900, say: ['ins_13'] }] },
 
   { name: 'forest', need: 10, len: 6600, sticker: 3, collect: 'petal', ins: 'ins_14', joins: ['bilam'], arriveSay: 'l3_b',
-    finSay: ['fr_06', 'l3_c', 'pr_17'],
+    finSay: ['fr_06', 'l3_c', 'pr_17'], meets: [{ kind: 'luna', x: 4200, do: 'dance' }],
     terrain: [{ x0: 0, x1: 700, top: G }, { x0: 700, x1: 950, top: G - 60 }, { x0: 950, x1: 1200, top: G - 120 }, { x0: 1200, x1: 1450, top: G - 60 }, { x0: 1450, x1: 2300, top: G },
               { x0: 2460, x1: 4300, top: G }, { x0: 4300, x1: 4600, top: G - 70 }, { x0: 4600, x1: 4850, top: G - 130 }, { x0: 4850, x1: 5100, top: G - 70 }, { x0: 5100, x1: 5300, top: G },
               { x0: 5460, x1: 6600, top: G }],
@@ -368,7 +368,7 @@ LEVELS.forEach(prepLevel);
 
 /* ---------- game state ---------- */
 let mode = 'title', li = 0, L = null, p = null, camX = 0, camY = 0, T = 0;     // camY: how far the view has moved up (0 = ground level, negative = looking up at clouds and treetops)
-let bonus = [], bonusN = 0;
+let bonus = [], bonusN = 0, meets = [];
 let terr = [], items = [], stars = [], plats = [], followers = [], parts = [], hist = [], flowers = [];
 let pocket = [], sts = [];          // pocket: things she carries (up to 4); sts: the places that use them (bowl, oven, nest, plates ...)
 let got = 0, meter = 0, fin = null, arrived = false, hintT = 0, maxX = 0, danceN = 0, said = {}, falls = 0, trail = false;
@@ -392,6 +392,7 @@ function startLevel(i){
     else if (k === 'rhythm') { st.active = false; st.clock = 0; st.hits = 0; st.fb = 0; st.r = st.r || 300; } });
   stars = (L.stars || []).map(o => ({ ...o, y: G - 70, got: false, back: 0 }));
   bonus = (L.bonus || []).map(o => ({ ...o, got: false })); bonusN = 0;
+  meets = (L.meets || []).map(o => ({ ...o, done: false, seen: false, hop: 0 }));
   plats = L.plats.map(o => ({ ...o, dx: 0 })); terr = L.terrain;
   L.cues.forEach(c => c.done = false);
   followers = paradeFor(i).map(k => ({ kind: k }));
@@ -458,6 +459,13 @@ function finish(){
   L.joins.forEach(k => { if (!followers.find(f => f.kind === k) && k !== L.friend.kind) followers.push({ kind: k, enter: 0 }); });
   burst(L.friend.x, G - 120, 40, RB, 'star');
 }
+/* a short meeting with a friend on the way (stages 1-3): the friend asks for a dance or a jump, then hops and a little arc of stars appears */
+function meetDone(m){
+  m.done = true; m.hop = 50; progress(); sfx.star(); burst(m.x, G - 150, 22, RB, 'star'); glow(null);
+  Voice.say(m.do === 'dance' ? 'pr_07' : 'pr_09'); Voice.say('fr_03');
+  const y0 = G - 150; for (let i = 0; i < 5; i++) { const k = i / 4; bonus.push({ x: Math.round(m.x - 130 + 260 * k), y: Math.round(y0 - Math.sin(k * Math.PI) * 60), got: false }); }
+}
+function meetPress(what){ const m = meets.find(o => !o.done && o.do === what && Math.abs(p.x - o.x) < (what === 'dance' ? 260 : 300)); if (m) { meetDone(m); return true; } return false; }
 function endLevel(){
   save.done[li] = true; persist(); mode = 'end'; showButtons(); glow(null);
   $('sticker').innerHTML = '<img alt="" src="art/ui/sticker_' + L.sticker + '.png" onerror="this.onerror=null;this.src=\'art/ui/sticker_8.png\'">'; $('end').classList.remove('hide');
@@ -537,7 +545,7 @@ function update(dt){
   p.vx = ax * 5.2 * (muddy ? 0.45 : 1); if (ax) p.face = ax;
   if (muddy && ax && !said.mud) { said.mud = 1; tone(150, 0.2, 'sine', 0.09, 60); }
   // jump
-  if (wantJump && p.on && !locked && !dancing) { p.vy = L.floaty ? -11.6 : -13.2; p.on = false; p.squash = 1.25; sfx.jump(); if ($('bj').classList.contains('glow')) glow(null); }
+  if (wantJump && p.on && !locked && !dancing) { p.vy = L.floaty ? -11.6 : -13.2; p.on = false; p.squash = 1.25; sfx.jump(); meetPress('jump'); if ($('bj').classList.contains('glow')) glow(null); }
   // super jump
   if (wantSuper && !locked && p.on && meter >= 3) { p.vy = -21.5; p.on = false; p.wings = 1; meter = 0; p.dance = 0; sfx.sup(); Voice.say('ex_04'); $('bs').classList.remove('ready', 'glow'); }
   // dance (a rhythm game nearby takes the press first; the dance picture is shorter then so she can press again on the next beat)
@@ -545,6 +553,7 @@ function update(dt){
     if (rh) { wantDance = false; if ($('bd').classList.contains('glow')) glow(null); const was = rh.active; rhythmPress(rh); p.dance = was ? 40 : 110; p.move = danceN++ % Math.max(1, save.done.filter(Boolean).length); sfx.dance(); } }
   if (wantDance && save.dance && p.on && !locked && !dancing) {
     p.dance = 110; p.move = danceN++ % Math.max(1, save.done.filter(Boolean).length); sfx.dance(); if ($('bd').classList.contains('glow')) glow(null);
+    meetPress('dance');
     const near = Math.abs(p.x - L.friend.x) < 200 && goalMet();
     const cd = sts.find(s => s.dance && !s.done && Math.abs(p.x - s.x) < 280);
     if (cd) { complete(cd); }
@@ -622,6 +631,8 @@ function update(dt){
     if (st.cd <= 0 && Math.abs(p.x - st.x) < (st.r || 140)) { const i = pocket.findIndex(o => o.to === st.id);
       if (i >= 0) { pocket.splice(i, 1); st.have++; st.cd = 16; sfx.pop(); burst(st.x, G - 110, 10, RB, 'star'); if (st.have >= st.need) complete(st); else if (Math.random() < 0.4) praise(); } } });
 
+  // friends she meets on the way: say what to do when she comes close, glow the button
+  meets.forEach(m => { if (m.hop > 0) m.hop -= dt; if (!m.done && !m.seen && !fin && Math.abs(p.x - m.x) < 520) { m.seen = true; Voice.say(m.do === 'dance' ? 'ins_06' : 'ins_02'); glow(m.do === 'dance' ? 'bd' : 'bj'); } });
   // friend
   const near = Math.abs(p.x - L.friend.x) < 170;
   if (!fin && goalMet() && near && !sts.some(o => o.finish)) {
@@ -980,6 +991,8 @@ function draw(){
   flowers.forEach(f => { const k = Math.min(1, f.t / 20); ctx.fillStyle = '#4c9657'; ctx.fillRect(f.x - 2, G - 34 * k, 4, 34 * k); for (let a = 0; a < 5; a++) circ(f.x + Math.cos(a * 1.257) * 11 * k, G - 36 * k + Math.sin(a * 1.257) * 11 * k, 8 * k, f.c); circ(f.x, G - 36 * k, 6 * k, '#fff7c4'); });
   (L.decos || []).forEach(d => { if (d.kind === 'mamabird') { rr(d.x - 16, d.y, 32, G - d.y, 12, '#9a6a45'); circ(d.x - 30, d.y - 30, 70, '#7fcf7a'); circ(d.x + 40, d.y - 10, 60, '#63bd69'); rr(d.x - 90, d.y, 110, 14, 7, '#9a6a45'); drawFriend(d.kind, d.x - 50, d.y + 2, true); }
     else if (!((d.kind === 'pitzi' || d.kind === 'camel') && followers.find(f => f.kind === d.kind))) { const hp = d.hap ? !!(sts.find(s => s.id === d.hap) || {}).done : d.happy; drawFriend(d.kind, d.x, d.y || G, hp, { bounce: d.kind === 'pitzi' || (d.hap && hp), face: d.kind === 'camel' ? -1 : 1 }); } });
+  meets.forEach(m => { const hy = m.hop > 0 ? Math.abs(Math.sin(m.hop * 0.25)) * 60 : 0; drawFriend(m.kind, m.x, G - hy, m.done, { bounce: m.done, face: p.x < m.x ? -1 : 1 });
+    if (!m.done) { const by = G - (FH[m.kind] || 100) - 70 + Math.sin(T * 0.1) * 6; circ(m.x, by, 34, 'rgba(255,255,255,.9)'); ctx.fillStyle = '#ff5fa8'; ctx.font = 'bold 40px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(m.do === 'dance' ? '♪' : '↑', m.x, by + 14); } });
   plats.forEach(drawPlat);
   drawStations();
   // the friend she is helping
@@ -1067,7 +1080,7 @@ showButtons();
 
 /* for testing in the browser console */
 window.__g = {
-  get s(){ return { mode, li, x: p && Math.round(p.x), y: p && Math.round(p.y), on: p && p.on, got, total: items.length, meter, fin: !!fin, followers: followers.map(f => f.kind), said: Voice.last, save }; },
+  get s(){ return { mode, li, meets: meets.map(m => m.kind + (m.done ? "!" : "")), x: p && Math.round(p.x), y: p && Math.round(p.y), on: p && p.on, got, total: items.length, meter, fin: !!fin, followers: followers.map(f => f.kind), said: Voice.last, save }; },
   keys, start: startLevel, P: () => p, sts: () => sts, pocket: () => pocket, goalMet: () => goalMet(), LV: () => L, gnd: groundAt, bonus: () => bonus, plats: () => plats, jump(){ wantJump = true; }, dance(){ wantDance = true; }, sup(){ wantSuper = true; },
-  step(n){ for (let i = 0; i < n; i++) update(1); draw(); }, tp(x){ p.x = x; p.y = G; p.vy = 0; }, items: () => items, reset(){ localStorage.removeItem(SAVE_KEY); }
+  step(n){ for (let i = 0; i < n; i++) update(1); draw(); }, tp(x){ p.x = x; p.y = G; p.vy = 0; }, items: () => items, meets: () => meets, reset(){ localStorage.removeItem(SAVE_KEY); }
 };

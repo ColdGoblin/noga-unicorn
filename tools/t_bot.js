@@ -44,6 +44,6 @@ for (const st of g.sts()) { doStation(st); collect(); }
 for (let pass = 0; pass < 2; pass++) { collect(); for (const st of g.sts()) doStation(st); }
 out.push('items ' + g.s.got + '/' + g.s.total + ' sts ' + g.sts().map(s => s.id + ':' + (s.done ? 1 : 0)).join(' ') + ' stars ' + g.bonus().filter(b => b.got).length + '/' + L.need + ' goalMet ' + g.goalMet());
 const fr = L.friend;
-if (!g.s.fin) { at(fr.x - 100, G); step(150); g.dance(); step(3); }
+if (!g.s.fin) { const gy = g.gnd(fr.x - 100); at(fr.x - 100, gy === null ? G : gy); step(150); g.dance(); step(3); }
 out.push('fin ' + g.s.fin); step(1400); out.push('MODE ' + g.s.mode);
 return out;

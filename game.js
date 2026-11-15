@@ -75,7 +75,7 @@ const sfx = {
 };
 /* recorded music: music/stage1.mp3 ... stage10.mp3 and title.mp3 loop quietly under the voice (the little synth tune is gone: it was the annoying beeping) */
 let musicOn = true; try { musicOn = localStorage.getItem('nogaMusic') !== '0'; } catch (e) {}
-const MUSIC_ALIAS = { stage9: 'stage6', stage10: 'stage8' };      // stand-ins until stage9.mp3 and stage10.mp3 are made
+const MUSIC_ALIAS = {};      // stand-ins if a track is missing (all 11 stages, the title and the finale now have their own)
 const Song = {
   a: null, name: '',
   play(name){ if (this.name === name) return; this.stop(); this.name = name;

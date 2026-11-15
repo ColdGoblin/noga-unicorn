@@ -2,7 +2,7 @@
 
 ## A. Music
 
-Pending. Gemini was inaccessible from the browser control session. The two requested audio files are `music/stage9.mp3` and `music/stage10.mp3`.
+Delivered and browser-tested: `music/stage9.mp3` (Gemini title Twilight at the Oasis, 2:23) and `music/stage10.mp3` (Starlit Ascent, 2:59). Both tracks decoded and were selected as looped stage music in the game.
 
 - **Sheba’s Oasis:** Create a music track: a warm desert evening, soft hand drum, gentle oud and kanun, and occasional shimmering bells. Calm and curious, with a gentle pulse and space for spoken dialogue. Instrumental children’s game music, no vocals, loopable.
 - **Moon Mountain:** Create a music track: a dreamy night climb with soft celesta, slow harp arpeggios and quiet warm pads. Twinkling, gently magical, and spacious underneath narration. Instrumental children’s game music, no vocals, loopable.

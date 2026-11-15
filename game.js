@@ -44,7 +44,8 @@ load('donkeyFull','art/hero/donkey_full.png'); load('donkeyHappy', 'art/hero/don
 ['stone', 'rock', 'mushroom', 'stump', 'branch', 'cloud', 'oven', 'oven_lit', 'bowl', 'bowl_dough', 'candle_unlit', 'candle_lit', 'nest', 'tree_roots', 'teapot', 'mud', 'haybale', 'gate', 'plank_bridge', 'trampoline', 'trampoline_squash', 'cotton_candy_platform', 'shadow_stage', 'party_firework', 'table', 'well', 'well_full', 'sandmound', 'palm', 'windswirl', 'lantern_red', 'lantern_blue', 'lantern_green', 'lantern_yellow', 'lantern_red_lit', 'lantern_blue_lit', 'lantern_green_lit', 'lantern_yellow_lit'].forEach(k => load('prop_' + k, 'art/props/prop_' + k + '.png'));
 ['apple', 'ball', 'leaf'].forEach(k => load('riddle_' + k, 'art/items/riddle_' + k + '.png'));
 ['garden', 'rainbow', 'forest', 'sky', 'farm', 'shabbat', 'night', 'castle', 'oasis', 'moon'].forEach(k => load('bg_' + k, 'art/bg/bg_' + k + '.jpg'));
-load('bg_party', 'art/bg/bg_castle.jpg');       // stage 11 (the party) uses the castle backdrop until there is a picture of its own
+load('bg_party', 'art/bg/bg_party.jpg'); load('bg_party_fallback', 'art/bg/bg_castle.jpg'); load('bg_finale', 'art/bg/bg_finale.jpg');
+['firework_pink', 'firework_gold', 'firework_blue', 'heart_pink', 'heart_red', 'heart_gold', 'confetti', 'bunting', 'dancefloor', 'discoball'].forEach(k => load('prop_' + k, 'art/props/prop_' + k + '.png'));       // stage 11 (the party) uses the castle backdrop until there is a picture of its own
 /* opaque box of each scenery picture: [x, y, w, h] inside its file (so only the drawing is placed, not the empty margin) */
 const PB = { stone: [10, 247, 382, 128], rock: [8, 9, 383, 366], mushroom: [5, 28, 389, 346], stump: [6, 153, 388, 221], branch: [5, 14, 688, 399], cloud: [6, 67, 588, 347], bigbubble: [32, 45, 732, 746] };
 
@@ -169,6 +170,7 @@ cv.addEventListener('pointerdown', e => {
 cv.addEventListener('pointermove', e => { if (ptr.down) { ptr.cx = e.clientX; ptr.cy = e.clientY; } });
 ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(ev => cv.addEventListener(ev, () => { ptr.down = false; }));
 cv.addEventListener('contextmenu', e => e.preventDefault());
+cv.addEventListener('pointerdown', e => { if (!fx) return; ptr.cx = e.clientX; ptr.cy = e.clientY; const w = ptrWorld(); fwBurst(w.x, Math.min(w.y, G - 160)); });      // the love party: tap anywhere for a firework
 /* parent corner: hold the sound button for 1.5 s to switch Hebrew / English */
 let langHold = null, langDone = false;
 $('snd').addEventListener('pointerdown', () => { langDone = false; clearTimeout(langHold); langHold = setTimeout(() => { langDone = true;
@@ -182,7 +184,7 @@ function glow(which){ ['bl', 'br', 'bj', 'bd'].forEach(b => $(b).classList.toggl
 function showButtons(){
   const play = mode === 'play';
   ['bl', 'br', 'bj'].forEach(b => $(b).classList.toggle('hide', !play));
-  $('bd').classList.toggle('hide', !(play && save.dance));
+  $('bd').classList.toggle('hide', !((play && save.dance) || mode === 'finale'));
   $('bs').classList.toggle('hide', !(play && save.sup));
   $('snd').classList.toggle('hide', false); $('mus').classList.toggle('hide', false);
 }
@@ -365,7 +367,7 @@ const LEVELS = [
     cues: [{ x: 0, say: ['l10_a', 'x_find_moon', 'ins_10'] }, { x: 3300, say: ['x_draft', 'ins_15'] }] },
 
   /* ---- stage 11 (round 6): the Princesses' Flower Party, the last stage. Bake the challah, make the tea, set the table, dance with everyone. The two friends she chose walk with her. ---- */
-  { name: 'party', need: 12, len: 7700, sticker: 10, collect: 'flour', ins: 'ins_10', joins: [], without: ['princess1', 'princess2'], carry: true, noIns: true, fireworks: true,
+  { name: 'party', need: 12, len: 7700, sticker: 10, collect: 'flour', ins: 'ins_10', joins: [], without: ['princess1', 'princess2'], carry: true, noIns: true, fireworks: true, finale: true,
     finSay: ['l11_c', 'l11_d', 'pr_20'],
     terrain: [{ x0: 0, x1: 1500, top: G }, { x0: 1500, x1: 1700, top: G, top1: G - 110 }, { x0: 1700, x1: 1950, top: G - 110 }, { x0: 1950, x1: 2150, top: G - 110, top1: G }, { x0: 2150, x1: 3300, top: G },
               { x0: 3560, x1: 5000, top: G }, { x0: 5000, x1: 5200, top: G, top1: G - 70 }, { x0: 5200, x1: 5450, top: G - 70 }, { x0: 5450, x1: 5650, top: G - 70, top1: G }, { x0: 5650, x1: 7700, top: G }],
@@ -395,6 +397,7 @@ function prepLevel(lv){
 LEVELS.forEach(prepLevel);
 
 /* ---------- game state ---------- */
+let fx = null;      // the love party after the last stage
 let mode = 'title', li = 0, L = null, p = null, camX = 0, camY = 0, T = 0;     // camY: how far the view has moved up (0 = ground level, negative = looking up at clouds and treetops)
 let bonus = [], bonusN = 0, meets = [];
 let terr = [], items = [], stars = [], plats = [], followers = [], parts = [], hist = [], flowers = [];
@@ -408,7 +411,7 @@ function paradeFor(i){
   return a.filter(k => !(LEVELS[i].without || []).includes(k));
 }
 function startLevel(i, party){
-  li = i; L = LEVELS[i]; T = 0; mode = 'play';
+  li = i; L = LEVELS[i]; T = 0; mode = 'play'; fx = null;
   p = { x: 140, y: G, vx: 0, vy: 0, face: 1, on: true, run: 0, dance: 0, move: 0, wings: 0, bubble: 0, squash: 1 };
   items = L.items.map(o => ({ ...o, got: false, bob: rand(0, 6) }));
   pocket = []; sts = (L.stations || []).map(o => ({ ...o, have: 0, done: false, t: 0, cd: 0, armed: 0 }));
@@ -497,7 +500,8 @@ function meetDone(m){
   const y0 = G - 150; for (let i = 0; i < 5; i++) { const k = i / 4; bonus.push({ x: Math.round(m.x - 130 + 260 * k), y: Math.round(y0 - Math.sin(k * Math.PI) * 60), got: false }); }
 }
 function meetPress(what){ const m = meets.find(o => !o.done && o.do === what && Math.abs(p.x - o.x) < (what === 'dance' ? 260 : 300)); if (m) { meetDone(m); return true; } return false; }
-function endLevel(){
+function endLevel(){ if (L.finale && !fx) { startFinale(); return; } finishLevel(); }
+function finishLevel(){
   save.done[li] = true; persist(); mode = 'end'; showButtons(); glow(null);
   $('sticker').innerHTML = '<img alt="" src="art/ui/sticker_' + L.sticker + '.png" onerror="this.onerror=null;this.src=\'art/ui/sticker_8.png\'">'; $('end').classList.remove('hide');
   $('sticker').style.animation = 'none'; void $('sticker').offsetWidth; $('sticker').style.animation = '';
@@ -896,7 +900,7 @@ function drawPlat(pl){
 /* ---------- drawing: worlds ---------- */
 function hills(par, base, amp, c, f){ ctx.fillStyle = c; ctx.beginPath(); ctx.moveTo(0, VH); for (let sx = 0; sx <= VW + 40; sx += 40) { const wx = sx + camX * par; ctx.lineTo(sx, base - Math.sin(wx * f) * amp - Math.sin(wx * f * 2.3 + 1) * amp * 0.4); } ctx.lineTo(VW, VH); ctx.fill(); }
 function drawWorld(){
-  const n = L.name, im = IMG['bg_' + n];
+  const n = L.name, im = (fx && IMG.bg_finale) || IMG['bg_' + n] || (n === 'party' ? IMG.bg_party_fallback : null);
   const sky = { garden: ['#bfe9ff', '#eafff0'], rainbow: ['#ffdff3', '#e6dcff'], forest: ['#cdeccf', '#f4ffd9'], sky: ['#ffb78a', '#f6c7ee'], farm: ['#bfe3ff', '#f1ffe0'], shabbat: ['#ffe2a6', '#fff3d6'], night: ['#1f2a5e', '#4b5fa8'], castle: ['#bfe9ff', '#ffe8f6'], party: ['#bfe9ff', '#ffe8f6'], oasis: ['#ff9f7a', '#ffe9b8'], moon: ['#150f46', '#4a3a9a'] }[n] || ['#bfe9ff', '#eafff0'];
   const gr = ctx.createLinearGradient(0, 0, 0, VH); gr.addColorStop(0, sky[0]); gr.addColorStop(1, sky[1]); ctx.fillStyle = gr; ctx.fillRect(0, 0, VW, VH);
   if (im) { const h = VH, w = h * im.width / im.height, off = -((camX * 0.4) % w), by = -camY * 0.4;
@@ -1089,10 +1093,69 @@ function draw(){
 let lastT = 0;
 function frame(now){
   const dt = Math.min(2.5, (now - lastT) / 16.67 || 1); lastT = now;
-  if (mode === 'play') { update(dt); draw(); } else if (mode === 'end' && L) draw();
+  if (mode === 'play') { update(dt); draw(); } else if (mode === 'finale' || (mode === 'end' && fx)) { finaleUpdate(dt); drawFinale(); } else if (mode === 'end' && L) draw();
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
+
+
+/* ---------- the Love Party (after stage 11): every friend she met comes, they dance together under fireworks and hearts; tap the screen for a firework, the Dance button makes her dance ---------- */
+let hearts = [];
+const HEART_COL = ['#ff5f8f', '#ff8fc7', '#ffd028', '#ff6f6f', '#c58aff'];
+function heartPath(x, y, r){ ctx.beginPath(); ctx.moveTo(x, y + r * 0.9); ctx.bezierCurveTo(x - r * 1.5, y - r * 0.1, x - r * 0.9, y - r * 1.2, x, y - r * 0.4); ctx.bezierCurveTo(x + r * 0.9, y - r * 1.2, x + r * 1.5, y - r * 0.1, x, y + r * 0.9); ctx.closePath(); }
+function guestList(){ const a = []; LEVELS.forEach(lv => lv.joins.concat([lv.friend.kind]).forEach(k => { if (k !== 'tree' && !a.includes(k)) a.push(k); })); ['shluli', 'grandpa'].forEach(k => { if (!a.includes(k)) a.push(k); }); return a; }
+function startFinale(){
+  mode = 'finale'; showButtons(); glow(null); Voice.hush(); fx = { t: 0, fw: [], say: {}, last: 0 };
+  camX = Math.max(0, L.len - VW); camY = 0; const cx = camX + VW / 2;
+  const kinds = guestList(); fx.g = kinds.map((k, i) => { const back = i % 2 === 0, row = kinds.filter((o, j) => j % 2 === i % 2), j = row.indexOf(k), f = (j + 0.5) / row.length;
+    const q = back ? 0.82 : 0.74, tx = camX + VW * (f < 0.5 ? 0.05 + 0.9 * f * q : 0.95 - 0.9 * (1 - f) * q);
+    return { kind: k, back, tx, ty: back ? G - 6 : G + 34, delay: 20 + i * 22, side: i % 2 ? 1 : -1, x: 0, vis: false, ph: i * 1.3 }; });
+  fx.arrive = 20 + kinds.length * 22 + 100;
+  p = { x: cx, y: G + 34, vx: 0, vy: 0, face: 1, on: true, run: 0, dance: 110, move: 0, wings: 0, bubble: 0, squash: 1 }; parts = []; hearts = []; hist = []; followers = [];
+  sfx.win();
+}
+function fwBurst(x, y){ if (!fx) return; const cols = [['#ff5f8f', '#ffd1e6'], ['#ffd028', '#fff3b0'], ['#5fa8ff', '#c9e4ff'], ['#7fe08f', '#dfffe5'], ['#c58aff', '#ecd9ff']][Math.floor(rand(0, 5))], im = IMG[['prop_firework_pink', 'prop_firework_gold', 'prop_firework_blue'][Math.floor(rand(0, 3))]];
+  for (let i = 0; i < 42; i++) { const a = i / 42 * 6.283, v = rand(2.5, 6); parts.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: rand(1.3, 2), c: cols[i % 2], s: rand(4, 8), shape: i % 5 === 0 ? 'star' : 'dot', g: 0.05 }); }
+  fx.fw.push({ x, y, t: 0, im }); tone(rand(110, 160), 0.35, 'sine', 0.12, 40); setTimeout(() => tone(rand(900, 1500), 0.25, 'triangle', 0.06, 300), 120); }
+function heartsUp(x, n){ for (let i = 0; i < n; i++) hearts.push({ x: x + rand(-90, 90), y: G - rand(0, 80), vy: rand(0.8, 1.9), sw: rand(0, 6), s: rand(11, 22), c: Math.floor(rand(0, 5)) }); }
+function finaleUpdate(dt){
+  T += dt; fx.t += dt; const t = fx.t, say = (k, id) => { if (!fx.say[k]) { fx.say[k] = 1; Voice.say(id); } };
+  if (t > 5) say('a', 'fin_a');
+  if (t > fx.arrive) say('pr19', 'pr_19');
+  if (t > 150) say('b', 'fin_b');
+  if (t > 380) say('c', 'fin_c');
+  if (t > 650) say('d', 'fin_d');
+  if (t - fx.last > (t < 120 ? 9999 : 50)) { fx.last = t; fwBurst(camX + VW * rand(0.12, 0.88), rand(70, 300)); }
+  if (Math.random() < 0.06) heartsUp(camX + rand(0.1, 0.9) * VW, 1);
+  fx.g.forEach(g => { if (t >= g.delay) { g.vis = true; const k = Math.min(1, (t - g.delay) / 90), e = 1 - Math.pow(1 - k, 3), sx = g.side < 0 ? camX - 260 : camX + VW + 260; g.x = sx + (g.tx - sx) * e; g.arrived = k >= 1; } });
+  if (wantDance) { wantDance = false; p.dance = 110; p.move = danceN++ % 3; sfx.dance(); heartsUp(p.x, 8); fwBurst(p.x + rand(-300, 300), rand(80, 260)); }
+  p.dance -= dt; if (p.dance <= 0) { p.dance = 110; p.move = danceN++ % 3; }
+  hearts.forEach(h => { h.y -= h.vy * dt; h.sw += 0.05 * dt; }); hearts = hearts.filter(h => h.y > -60);
+  parts.forEach(q => { q.x += q.vx * dt; q.y += q.vy * dt; q.vy += q.g * dt; q.life -= 0.02 * dt; }); parts = parts.filter(q => q.life > 0);
+  fx.fw.forEach(w => w.t += dt); fx.fw = fx.fw.filter(w => w.t < 50);
+  if (mode === 'finale' && !fx.hold && t > 1500 && (Voice.idle() || t > 2400)) { finishLevel(); Voice.say('fin_e'); }
+}
+function drawFinale(){
+  ctx.setTransform(S, 0, 0, S, 0, 0); drawWorld();
+  if (!IMG.bg_finale) { const gr = ctx.createLinearGradient(0, 0, 0, VH); gr.addColorStop(0, 'rgba(25,15,70,.8)'); gr.addColorStop(0.7, 'rgba(70,35,110,.5)'); gr.addColorStop(1, 'rgba(70,35,110,.15)'); ctx.fillStyle = gr; ctx.fillRect(0, 0, VW, VH);
+    for (let i = 0; i < 40; i++) { const sx = (i * 197 % VW), sy = (i * 83 % 330) + 10; ctx.globalAlpha = 0.5 + Math.sin(T * 0.08 + i) * 0.4; star5(sx, sy, 3 + i % 3, '#fff'); } ctx.globalAlpha = 1; }
+  ctx.save(); ctx.translate(-camX, -camY);
+  if (IMG.prop_bunting) { const w = Math.min(1200, VW * 0.7), h = w * IMG.prop_bunting.height / IMG.prop_bunting.width; ctx.drawImage(IMG.prop_bunting, camX + VW / 2 - w / 2, 10, w, h); }
+  else { ctx.strokeStyle = 'rgba(255,255,255,.4)'; ctx.lineWidth = 3; ctx.beginPath(); for (let x = 0; x <= VW; x += 20) { const y = 40 + Math.sin(x / VW * Math.PI) * 50; x ? ctx.lineTo(camX + x, y) : ctx.moveTo(camX, y); } ctx.stroke();
+    for (let x = 30; x < VW; x += 70) { const y = 40 + Math.sin(x / VW * Math.PI) * 50; circ(camX + x, y + 8, 9, ['#ffd028', '#ff8fc7', '#7fe08f', '#7fb8ff'][Math.floor(x / 70) % 4]); } }
+  if (IMG.prop_dancefloor) { const w = VW * 0.95, h = w * IMG.prop_dancefloor.height / IMG.prop_dancefloor.width; ctx.drawImage(IMG.prop_dancefloor, camX + VW * 0.025, G + 60 - h, w, h); }
+  else { const g = ctx.createRadialGradient(p.x, G + 30, 20, p.x, G + 30, VW * 0.5); g.addColorStop(0, 'rgba(255,170,230,.55)'); g.addColorStop(1, 'rgba(255,170,230,0)'); ctx.fillStyle = g; ctx.fillRect(camX, G - 120, VW, 260); }
+  const guests = fx.g.slice().sort((a, b) => a.ty - b.ty).filter(g => g.vis);
+  guests.forEach(g => { const run = !g.arrived, bob = Math.abs(Math.sin(T * 0.19 + g.ph)) * (run ? 10 : 30); ctx.save(); ctx.translate(g.x, g.ty - bob); const sc = clamp(VW / (fx.g.length / 2 * 175), 0.42, 0.95) * (g.back ? 0.86 : 1); ctx.scale(sc, sc); drawFriend(g.kind, 0, 0, true, { face: run ? (g.side < 0 ? 1 : -1) : (g.x < p.x ? 1 : -1) }); ctx.restore(); });
+  ctx.save(); ctx.translate(p.x, p.y); ctx.scale(1.35, 1.35); ctx.translate(-p.x, -p.y); drawHero(); ctx.restore();
+  hearts.forEach(h => { const im = IMG[['prop_heart_pink', 'prop_heart_red', 'prop_heart_gold'][h.c % 3]], x = h.x + Math.sin(h.sw) * 20; ctx.globalAlpha = Math.min(1, h.y / 120);
+    if (im) ctx.drawImage(im, x - h.s * 1.4, h.y - h.s * 1.4, h.s * 2.8, h.s * 2.8); else { ctx.fillStyle = HEART_COL[h.c]; heartPath(x, h.y, h.s); ctx.fill(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke(); } ctx.globalAlpha = 1; });
+  fx.fw.forEach(w => { const k = w.t / 50; if (w.im) { ctx.globalAlpha = 1 - k; const sz = 200 + 420 * Math.min(1, k * 2.2); ctx.drawImage(w.im, w.x - sz / 2, w.y - sz / 2, sz, sz); ctx.globalAlpha = 1; } else if (k < 0.25) { circ(w.x, w.y, 90 * (1 - k * 3), 'rgba(255,255,255,' + (0.5 - k * 2) + ')'); } });
+  parts.forEach(q => { ctx.globalAlpha = clamp(q.life, 0, 1); if (q.shape === 'star') star5(q.x, q.y, q.s, q.c); else circ(q.x, q.y, q.s, q.c); }); ctx.globalAlpha = 1;
+  if (IMG.prop_discoball) { const w = 120, h = w * IMG.prop_discoball.height / IMG.prop_discoball.width; ctx.drawImage(IMG.prop_discoball, camX + VW * 0.5 - w / 2, 0, w, h); }
+  ctx.restore();
+}
+
 
 /* ---------- title, map, end screens ---------- */
 const MAP10_POS = [[11, 27], [30, 27], [46, 27], [68, 27], [88, 27], [88, 69], [68, 69], [49.5, 69], [30, 69], [10.5, 69], [50, 48]];   // the ten stops on art/ui/map10.jpg (Ghost's ten-stop map), in percent
@@ -1116,7 +1179,7 @@ function showPick(i){
   $('pickgo').onclick = () => { ac(); save.party = pickSel.slice(); persist(); $('pick').classList.add('hide'); startLevel(i, pickSel.slice()); };
 }
 function showMap(){
-  mode = 'map'; showButtons(); glow(null); Voice.hush(); Song.play('title');
+  mode = 'map'; fx = null; showButtons(); glow(null); Voice.hush(); Song.play('title');
   ['title', 'end', 'pick'].forEach(s => $(s).classList.add('hide'));
   const box = $('stops'); box.innerHTML = ''; const m10 = !!IMG.map10, POS = m10 ? MAP10_POS : MAP_POS; box.style.backgroundImage = m10 ? 'url(art/ui/map10.jpg)' : '';
   const nextI = LEVELS.findIndex((lv, i) => !save.done[i]);
@@ -1140,6 +1203,6 @@ showButtons();
 /* for testing in the browser console */
 window.__g = {
   get s(){ return { mode, li, meets: meets.map(m => m.kind + (m.done ? "!" : "")), x: p && Math.round(p.x), y: p && Math.round(p.y), on: p && p.on, got, total: items.length, meter, fin: !!fin, followers: followers.map(f => f.kind), said: Voice.last, save }; },
-  keys, start: startLevel, goLevel, pickSel: () => pickSel, P: () => p, sts: () => sts, pocket: () => pocket, goalMet: () => goalMet(), LV: () => L, gnd: groundAt, bonus: () => bonus, plats: () => plats, jump(){ wantJump = true; }, dance(){ wantDance = true; }, sup(){ wantSuper = true; },
-  step(n){ for (let i = 0; i < n; i++) update(1); draw(); }, tp(x){ p.x = x; p.y = G; p.vy = 0; }, items: () => items, meets: () => meets, reset(){ localStorage.removeItem(SAVE_KEY); }
+  keys, start: startLevel, finale: () => startFinale(), fx: () => fx, goLevel, pickSel: () => pickSel, P: () => p, sts: () => sts, pocket: () => pocket, goalMet: () => goalMet(), LV: () => L, gnd: groundAt, bonus: () => bonus, plats: () => plats, jump(){ wantJump = true; }, dance(){ wantDance = true; }, sup(){ wantSuper = true; },
+  step(n){ if (mode === 'finale' || (mode === 'end' && fx)) { for (let i = 0; i < n; i++) finaleUpdate(1); drawFinale(); return; } for (let i = 0; i < n; i++) { if (mode === 'finale') { finaleUpdate(1); continue; } update(1); } if (mode === 'finale') drawFinale(); else draw(); }, tp(x){ p.x = x; p.y = G; p.vy = 0; }, items: () => items, meets: () => meets, reset(){ localStorage.removeItem(SAVE_KEY); }
 };

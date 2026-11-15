@@ -15,3 +15,10 @@ Each prompt began with "Create a music track:" and ended with "instrumental chil
 | stage8.mp3 | The Victory Lap | Joyful celebration parade, bright orchestra, snare drum, fanfare |
 
 Stage 4 and stage 3 file names were matched to prompts by download order, not by title; listen to confirm.
+
+## Round 6 (stage 11 and the love party finale) - NOT MADE YET, prompts for the owner's Gemini
+Each prompt begins "Create a music track:" and ends "instrumental children's game music, no vocals, loopable". Today `stage11` plays `stage1.mp3` as a stand-in and the finale plays the stage 11 track.
+| File | Prompt idea |
+|---|---|
+| stage11.mp3 | Excited party preparation in a castle garden, bouncy pizzicato strings, glockenspiel, soft claps, light and happy, gentle so the voice stays clear |
+| finale.mp3 | A joyful love-party dance for a little princess and all her friends, warm bells, handclaps, bouncy bass, sparkly synth, builds like fireworks, then ends warmly; about 90 seconds |

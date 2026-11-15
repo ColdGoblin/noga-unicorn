@@ -45,5 +45,5 @@ for (let pass = 0; pass < 2; pass++) { collect(); for (const st of g.sts()) doSt
 out.push('items ' + g.s.got + '/' + g.s.total + ' sts ' + g.sts().map(s => s.id + ':' + (s.done ? 1 : 0)).join(' ') + ' stars ' + g.bonus().filter(b => b.got).length + '/' + L.need + ' goalMet ' + g.goalMet());
 const fr = L.friend;
 if (!g.s.fin) { const gy = g.gnd(fr.x - 100); at(fr.x - 100, gy === null ? G : gy); step(150); g.dance(); step(3); }
-out.push('fin ' + g.s.fin); step(1400); out.push('MODE ' + g.s.mode);
+out.push('fin ' + g.s.fin); step(1400); if (g.s.mode === 'finale') { out.push('FINALE'); step(2800); } out.push('MODE ' + g.s.mode);
 return out;

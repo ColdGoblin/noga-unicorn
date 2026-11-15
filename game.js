@@ -30,9 +30,10 @@ function persist(){ try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); 
 
 /* ---------- pictures (Ghost's art; the canvas drawings below are only the fallback if a file is missing) ---------- */
 const IMG = {};
-function load(key, src){ const im = new Image(); im.onload = () => { IMG[key] = im; }; im.onerror = () => {}; im.src = src; }
+function load(key, src, onload){ const im = new Image(); im.onload = () => { IMG[key] = im; if (onload) onload(); }; im.onerror = () => {}; im.src = src; }
 load('body', 'art/standin/uni_body2.png'); load('legA', 'art/standin/uni_legA.png'); load('legB', 'art/standin/uni_legB.png');
-load('map10', 'art/ui/map10.jpg');
+load('map10', 'art/ui/map10.jpg', refreshMapArtwork);
+load('map11', 'art/ui/map11.jpg', refreshMapArtwork);
 load('heroBody', 'art/hero/hero_body.png'); load('heroBack', 'art/hero/hero_leg_back.png'); load('heroFront', 'art/hero/hero_leg_front.png');
 load('heroFull', 'art/hero/hero_full.png'); load('heroHappy', 'art/hero/hero_happy.png'); load('heroWings', 'art/hero/hero_wings.png');
 load('donkeyBody', 'art/hero/donkey_body.png'); load('donkeyBack', 'art/hero/donkey_leg_back.png'); load('donkeyFront', 'art/hero/donkey_leg_front.png');
@@ -367,7 +368,7 @@ const LEVELS = [
     cues: [{ x: 0, say: ['l10_a', 'x_find_moon', 'ins_10'] }, { x: 3300, say: ['x_draft', 'ins_15'] }] },
 
   /* ---- stage 11 (round 6): the Princesses' Flower Party, the last stage. Bake the challah, make the tea, set the table, dance with everyone. The two friends she chose walk with her. ---- */
-  { name: 'party', need: 12, len: 7700, sticker: 10, collect: 'flour', ins: 'ins_10', joins: [], without: ['princess1', 'princess2'], carry: true, noIns: true, fireworks: true, finale: true,
+  { name: 'party', need: 12, len: 7700, sticker: 11, collect: 'flour', ins: 'ins_10', joins: [], without: ['princess1', 'princess2'], carry: true, noIns: true, fireworks: true, finale: true,
     finSay: ['l11_c', 'l11_d', 'pr_20'],
     terrain: [{ x0: 0, x1: 1500, top: G }, { x0: 1500, x1: 1700, top: G, top1: G - 110 }, { x0: 1700, x1: 1950, top: G - 110 }, { x0: 1950, x1: 2150, top: G - 110, top1: G }, { x0: 2150, x1: 3300, top: G },
               { x0: 3560, x1: 5000, top: G }, { x0: 5000, x1: 5200, top: G, top1: G - 70 }, { x0: 5200, x1: 5450, top: G - 70 }, { x0: 5450, x1: 5650, top: G - 70, top1: G }, { x0: 5650, x1: 7700, top: G }],
@@ -1128,7 +1129,8 @@ function finaleUpdate(dt){
   if (t - fx.last > (t < 120 ? 9999 : 50)) { fx.last = t; fwBurst(camX + VW * rand(0.12, 0.88), rand(70, 300)); }
   if (Math.random() < 0.06) heartsUp(camX + rand(0.1, 0.9) * VW, 1);
   fx.g.forEach(g => { if (t >= g.delay) { g.vis = true; const k = Math.min(1, (t - g.delay) / 90), e = 1 - Math.pow(1 - k, 3), sx = g.side < 0 ? camX - 260 : camX + VW + 260; g.x = sx + (g.tx - sx) * e; g.arrived = k >= 1; } });
-  if (wantDance) { wantDance = false; p.dance = 110; p.move = danceN++ % 3; sfx.dance(); heartsUp(p.x, 8); fwBurst(p.x + rand(-300, 300), rand(80, 260)); }
+  if (wantDance) { wantDance = false; p.dance = 110; p.move = danceN++ % 3; sfx.dance(); heartsUp(p.x, 8); fwBurst(p.x + rand(-300, 300), rand(80, 260));
+    if (IMG.prop_confetti) fx.fw.push({ x: p.x, y: p.y - 140, t: 0, im: IMG.prop_confetti, confetti: true }); }
   p.dance -= dt; if (p.dance <= 0) { p.dance = 110; p.move = danceN++ % 3; }
   hearts.forEach(h => { h.y -= h.vy * dt; h.sw += 0.05 * dt; }); hearts = hearts.filter(h => h.y > -60);
   parts.forEach(q => { q.x += q.vx * dt; q.y += q.vy * dt; q.vy += q.g * dt; q.life -= 0.02 * dt; }); parts = parts.filter(q => q.life > 0);
@@ -1150,7 +1152,7 @@ function drawFinale(){
   ctx.save(); ctx.translate(p.x, p.y); ctx.scale(1.35, 1.35); ctx.translate(-p.x, -p.y); drawHero(); ctx.restore();
   hearts.forEach(h => { const im = IMG[['prop_heart_pink', 'prop_heart_red', 'prop_heart_gold'][h.c % 3]], x = h.x + Math.sin(h.sw) * 20; ctx.globalAlpha = Math.min(1, h.y / 120);
     if (im) ctx.drawImage(im, x - h.s * 1.4, h.y - h.s * 1.4, h.s * 2.8, h.s * 2.8); else { ctx.fillStyle = HEART_COL[h.c]; heartPath(x, h.y, h.s); ctx.fill(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke(); } ctx.globalAlpha = 1; });
-  fx.fw.forEach(w => { const k = w.t / 50; if (w.im) { ctx.globalAlpha = 1 - k; const sz = 200 + 420 * Math.min(1, k * 2.2); ctx.drawImage(w.im, w.x - sz / 2, w.y - sz / 2, sz, sz); ctx.globalAlpha = 1; } else if (k < 0.25) { circ(w.x, w.y, 90 * (1 - k * 3), 'rgba(255,255,255,' + (0.5 - k * 2) + ')'); } });
+  fx.fw.forEach(w => { const k = w.t / 50; if (w.im) { ctx.globalAlpha = 1 - k; const sz = w.confetti ? 120 + 140 * k : 200 + 420 * Math.min(1, k * 2.2); const y = w.y + (w.confetti ? 55 * k : 0); ctx.drawImage(w.im, w.x - sz / 2, y - sz / 2, sz, sz); ctx.globalAlpha = 1; } else if (k < 0.25) { circ(w.x, w.y, 90 * (1 - k * 3), 'rgba(255,255,255,' + (0.5 - k * 2) + ')'); } });
   parts.forEach(q => { ctx.globalAlpha = clamp(q.life, 0, 1); if (q.shape === 'star') star5(q.x, q.y, q.s, q.c); else circ(q.x, q.y, q.s, q.c); }); ctx.globalAlpha = 1;
   if (IMG.prop_discoball) { const w = 120, h = w * IMG.prop_discoball.height / IMG.prop_discoball.width; ctx.drawImage(IMG.prop_discoball, camX + VW * 0.5 - w / 2, 0, w, h); }
   ctx.restore();
@@ -1178,21 +1180,33 @@ function showPick(i){
   paint(); $('pick').classList.remove('hide');
   $('pickgo').onclick = () => { ac(); save.party = pickSel.slice(); persist(); $('pick').classList.add('hide'); startLevel(i, pickSel.slice()); };
 }
+function refreshMapArtwork(){
+  if (mode !== 'map') return;
+  const mapImage = IMG.map11 || IMG.map10;
+  const box = $('stops');
+  box.classList.toggle('map-eleven', !!IMG.map11);
+  box.style.backgroundImage = mapImage ? 'url("' + mapImage.src + '")' : '';
+  const stops = mapImage ? MAP10_POS : MAP_POS;
+  Array.from(box.children).forEach((button, i) => {
+    button.style.left = stops[i][0] + '%';
+    button.style.top = stops[i][1] + '%';
+  });
+}
 function showMap(){
   mode = 'map'; fx = null; showButtons(); glow(null); Voice.hush(); Song.play('title');
   ['title', 'end', 'pick'].forEach(s => $(s).classList.add('hide'));
-  const box = $('stops'); box.innerHTML = ''; const m10 = !!IMG.map10, POS = m10 ? MAP10_POS : MAP_POS; box.style.backgroundImage = m10 ? 'url(art/ui/map10.jpg)' : '';
+  const box = $('stops'); box.innerHTML = '';
   const nextI = LEVELS.findIndex((lv, i) => !save.done[i]);
-  POS.forEach((pos, i) => {
-    const lv = LEVELS[i], open = !!lv && (i === 0 || save.done[i - 1] || save.done[i]), b = document.createElement('button');
+  LEVELS.forEach((lv, i) => {
+    const open = !!lv && (i === 0 || save.done[i - 1] || save.done[i]), b = document.createElement('button');
     b.className = 'stop' + (lv && save.done[i] ? ' done' : '') + (open ? '' : ' locked') + (i === nextI ? ' next' : '');
-    b.style.left = pos[0] + '%'; b.style.top = pos[1] + '%';
     b.innerHTML = !open ? '\u{1F512}' : save.done[i] ? '<img alt="" src="art/ui/sticker_' + lv.sticker + '.png" onerror="this.onerror=null;this.src=\'art/ui/sticker_8.png\'">' : '\u25B6';
     if (open && !save.done[i]) b.classList.add('play');
     b.setAttribute('aria-label', 'level ' + (i + 1));
     if (open) b.addEventListener('click', () => { ac(); goLevel(i); });
     box.appendChild(b);
   });
+  refreshMapArtwork();
   $('map').classList.remove('hide');
 }
 $('play').addEventListener('click', () => { ac(); const first = !save.done.some(Boolean); if (first) startLevel(0); else showMap(); Voice.say(first ? 'ex_01' : 'ex_02'); });

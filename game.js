@@ -34,9 +34,13 @@ function load(key, src){ const im = new Image(); im.onload = () => { IMG[key] = 
 load('body', 'art/standin/uni_body2.png'); load('legA', 'art/standin/uni_legA.png'); load('legB', 'art/standin/uni_legB.png');
 load('heroBody', 'art/hero/hero_body.png'); load('heroBack', 'art/hero/hero_leg_back.png'); load('heroFront', 'art/hero/hero_leg_front.png');
 load('heroFull', 'art/hero/hero_full.png'); load('heroHappy', 'art/hero/hero_happy.png'); load('heroWings', 'art/hero/hero_wings.png');
-['pitzi', 'bird', 'mamabird', 'bobo', 'shluli', 'tree', 'bilam', 'koko', 'armon', 'anana', 'rhino', 'luna', 'solomon', 'riddletree', 'princess1', 'princess2', 'grandpa', 'cloudunicorn'].forEach(k => { load(k + '_sad', 'art/friends/' + k + '_sad.png'); load(k + '_happy', 'art/friends/' + k + '_happy.png'); });
+load('donkeyBody', 'art/hero/donkey_body.png'); load('donkeyBack', 'art/hero/donkey_leg_back.png'); load('donkeyFront', 'art/hero/donkey_leg_front.png');
+load('donkeyStand', 'art/standin/donkey_standin.png');      // stand-in: Bil'am (Ghost's picture) with Noga cut from the unicorn picture, until donkey_*.png arrive
+load('donkeyFull','art/hero/donkey_full.png'); load('donkeyHappy', 'art/hero/donkey_happy.png'); load('donkeyWings', 'art/hero/donkey_wings.png');      // round 3: Noga rides Bil'am (old unicorn set stays as fallback)
+['a', 'b', 'happy'].forEach(k => load('ufly_' + k, 'art/friends/unicorn_fly_' + k + '.png'));      // the unicorn is now the little flying helper above Noga
+['pitzi', 'bird', 'mamabird', 'bobo', 'dad', 'shluli', 'tree', 'bilam', 'koko', 'armon', 'anana', 'rhino', 'luna', 'solomon', 'riddletree', 'princess1', 'princess2', 'grandpa', 'cloudunicorn'].forEach(k => { load(k + '_sad', 'art/friends/' + k + '_sad.png'); load(k + '_happy', 'art/friends/' + k + '_happy.png'); });
 ['feather', 'petal', 'star', 'bigbubble', 'bubble_red', 'bubble_blue', 'bubble_green', 'bubble_yellow', 'steam', 'plank', 'carrot', 'ribbon', 'spark', 'flower_1', 'flower_2', 'flower_3', 'flower_4', 'flower_5', 'water_drop', 'flour', 'eggs', 'honey', 'teacup', 'carrot_bunch', 'gift_plate', 'challah', 'candles'].forEach(k => load('item_' + k, 'art/items/item_' + k + '.png'));
-['stone', 'rock', 'mushroom', 'stump', 'branch', 'cloud', 'oven', 'oven_lit', 'bowl', 'bowl_dough', 'candle_unlit', 'candle_lit', 'nest', 'tree_roots', 'teapot', 'mud', 'haybale', 'gate', 'plank_bridge', 'cotton_candy_platform', 'shadow_stage', 'party_firework'].forEach(k => load('prop_' + k, 'art/props/prop_' + k + '.png'));
+['stone', 'rock', 'mushroom', 'stump', 'branch', 'cloud', 'oven', 'oven_lit', 'bowl', 'bowl_dough', 'candle_unlit', 'candle_lit', 'nest', 'tree_roots', 'teapot', 'mud', 'haybale', 'gate', 'plank_bridge', 'trampoline', 'trampoline_squash', 'cotton_candy_platform', 'shadow_stage', 'party_firework'].forEach(k => load('prop_' + k, 'art/props/prop_' + k + '.png'));
 ['apple', 'ball', 'leaf'].forEach(k => load('riddle_' + k, 'art/items/riddle_' + k + '.png'));
 ['garden', 'rainbow', 'forest', 'sky', 'farm', 'shabbat', 'night', 'castle'].forEach(k => load('bg_' + k, 'art/bg/bg_' + k + '.jpg'));
 /* opaque box of each scenery picture: [x, y, w, h] inside its file (so only the drawing is placed, not the empty margin) */
@@ -90,7 +94,7 @@ try { const q = new URLSearchParams(location.search).get('lang'); const sv = loc
   LANG = (q === 'en' || q === 'he') ? q : (sv === 'en' || sv === 'he') ? sv : 'he'; } catch (e) {}
 const lineText = id => (LANG === 'he' ? window.LINES_HE : window.LINES)[id];
 const voiceDir = () => LANG === 'he' ? 'voice/he/' : 'voice/full/';
-const TITLES = { he: 'נגה והחד-קרן', en: 'Noga and the Unicorn' };
+const TITLES = { he: 'נוגה והחד-קרן', en: 'Noga and the Unicorn' };
 function applyLang(){ document.documentElement.lang = LANG; const h = document.querySelector('#title h1'); if (h) h.textContent = TITLES[LANG]; document.title = TITLES[LANG]; }
 const VOICE_ALIAS = { pr_05: 'pr_01', pr_12: 'pr_03' };   // two Hebrew clips (pr_05, pr_12) are still pending review: play a generic praise clip meanwhile
 const Voice = {
@@ -186,7 +190,7 @@ const COL = { red: ['#ff5f6e', 'col_01'], blue: ['#5fa8ff', 'col_02'], green: ['
 /* a row of bonus stars along an arc: x0..x1, base height y, bump h (0 = straight line), n stars */
 const arcRow = (x0, x1, y, h, n) => Array.from({ length: n }, (_, i) => { const k = n > 1 ? i / (n - 1) : 0; return { x: Math.round(x0 + (x1 - x0) * k), y: Math.round(y - Math.sin(k * Math.PI) * h) }; });
 const LEVELS = [
-  { name: 'garden', need: 5, len: 5600, sticker: 1, collect: 'feather', ins: 'ins_11', auto: true, joins: ['bird', 'pitzi'],
+  { name: 'garden', need: 5, len: 5600, sticker: 1, collect: 'feather', ins: 'ins_11', auto: true, joins: ['bird', 'pitzi', 'luna'],
     finSay: ['fr_01', 'l1_c', 'pr_02'],
     terrain: [{ x0: 0, x1: 700, top: G }, { x0: 700, x1: 900, top: G - 60 }, { x0: 900, x1: 1100, top: G - 120 }, { x0: 1100, x1: 1300, top: G - 60 }, { x0: 1300, x1: 1750, top: G },
               { x0: 1910, x1: 2550, top: G }, { x0: 2550, x1: 2800, top: G - 70 }, { x0: 2800, x1: 3050, top: G - 140 }, { x0: 3050, x1: 3300, top: G - 70 }, { x0: 3300, x1: 3780, top: G },
@@ -200,8 +204,8 @@ const LEVELS = [
     plats: [{ x: 1795, w: 90, kind: 'stone' }, { x: 2150, w: 100, kind: 'rock' }, { x: 2330, w: 150, kind: 'mushroom' }, { x: 3830, w: 90, kind: 'stone' }, { x: 3940, w: 90, kind: 'stone' },
             { x: 4250, w: 110, kind: 'stump' }, { x: 4500, w: 100, kind: 'rock' }, { x: 4700, w: 90, kind: 'stone' },
             { x: 2860, w: 130, top: G - 250, kind: 'cloud' }, { x: 3040, w: 130, top: G - 360, kind: 'cloud' }, { x: 3220, w: 130, top: G - 470, kind: 'cloud' }],
-    pads: [{ x: 3350, w: 170, top: G - 52 }], splash: { x: 1440, w: 150 },
-    decos: [{ kind: 'pitzi', x: 300, happy: true }, { kind: 'shluli', x: 1515, happy: true }, { kind: 'bobo', x: 3435 }, { kind: 'mamabird', x: 5510, y: G - 250, happy: true }],
+    pads: [{ x: 3350, w: 170, top: G - 58 }], splash: { x: 1440, w: 150 },
+    decos: [{ kind: 'pitzi', x: 300, happy: true }, { kind: 'shluli', x: 1515, happy: true }, { kind: 'dad', x: 470, happy: true }, { kind: 'luna', x: 600, happy: true },{ kind: 'mamabird', x: 5510, y: G - 250, happy: true }],
     cues: [{ x: 0, say: ['l1_a', 'ins_11', 'ins_10', 'num_05', 'ins_01'], glow: 'br' },{ x: 1330, say: ['ins_06'], glow: 'bd' }, { x: 1560, say: ['ins_02'], glow: 'bj' }, { x: 2100, say: ['ins_05'], glow: 'bj' },
            { x: 2650, say: ['l1_b'] }, { x: 3200, say: ['ins_15'] }] },
 
@@ -269,7 +273,7 @@ const LEVELS = [
     decos: [{ kind: 'anana', x: 5650, hap: 'horses' }, { kind: 'grandpa', x: 5780, happy: true }],
     cues: [{ x: 0, say: ['l5_a', 'fr_10', 'ins_17', 'ins_10', 'num_06'] }, { x: 700, say: ['ins_03'] }, { x: 3200, say: ['ins_15'] }] },
 
-  { name: 'shabbat', need: 8, len: 6000, sticker: 6, collect: 'flour', ins: 'ins_18', joins: ['rhino', 'solomon', 'luna'], carry: true, noIns: true,
+  { name: 'shabbat', need: 8, len: 6000, sticker: 6, collect: 'flour', ins: 'ins_18', joins: ['rhino', 'solomon', 'dad'], carry: true, noIns: true,
     finSay: ['l6_c', 'pr_17'],
     terrain: [{ x0: 0, x1: 1000, top: G }, { x0: 1000, x1: 1250, top: G - 60 }, { x0: 1250, x1: 1500, top: G - 110 }, { x0: 1500, x1: 1750, top: G - 60 }, { x0: 1750, x1: 2700, top: G },
               { x0: 2850, x1: 3900, top: G }, { x0: 4040, x1: 6000, top: G }],
@@ -460,8 +464,8 @@ function update(dt){
     if (p.vy >= 0) {
       for (const g of terr) if (p.x > g.x0 - 10 && p.x < g.x1 + 10 && py <= g.top + 1 && p.y >= g.top) { if (!landed || g.top < landed.top) landed = g; }
       for (const pl of plats) if (p.x > pl.x - 12 && p.x < pl.x + pl.w + 12 && py <= pl.top + 1 && p.y >= pl.top) { if (!landed || pl.top < landed.top) landed = pl; }
-      for (const pd of (L.pads || [])) if (p.x > pd.x && p.x < pd.x + pd.w && py <= pd.top + 60 && p.y >= pd.top) {      // walking into Bobo bounces her too, no jump needed
-        p.y = pd.top; p.vy = -19; p.squash = 0.7; sfx.boing(); if (!said.pad) { said.pad = 1; Voice.say('fr_04'); } burst(p.x, pd.top, 10, ['#fff', '#ffe14d'], 'star'); landed = 'pad'; }
+      for (const pd of (L.pads || [])) if (p.x > pd.x && p.x < pd.x + pd.w && py <= pd.top + 60 && p.y >= pd.top) {      // walking into the trampoline bounces her too, no jump needed
+        p.y = pd.top; p.vy = -19; p.squash = 0.7; pd.sq = 14; sfx.boing(); said.pad = 1; burst(p.x, pd.top, 10, ['#fff', '#ffe14d'], 'star'); landed = 'pad'; }
       if (landed && landed !== 'pad') { p.y = landed.top; p.vy = 0; p.on = true; if (landed.dx) p.x += landed.dx; }
     }
     if (p.on && !wasOn) { p.squash = 0.8; if (p.wings) { p.wings = 0; Voice.sayIfFree('pr_09'); } }
@@ -556,7 +560,7 @@ function face(x, y, s, happy, closed){
 function star5(x, y, r, c){ ctx.fillStyle = c; ctx.beginPath(); for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, q = i % 2 ? r * 0.45 : r; ctx.lineTo(x + Math.cos(a) * q, y + Math.sin(a) * q); } ctx.closePath(); ctx.fill(); }
 
 /* ---------- drawing: friends (stand-ins; x,y = feet) ---------- */
-const FH = { pitzi: 150, bird: 84, mamabird: 115, bobo: 135, shluli: 105, tree: 370, bilam: 168, koko: 170, armon: 230, anana: 230, rhino: 280, luna: 110, solomon: 260, riddletree: 330, princess1: 250, princess2: 250, grandpa: 250, cloudunicorn: 200 };   // height of the whole picture frame, feet at the bottom
+const FH = { pitzi: 150, bird: 84, mamabird: 115, bobo: 135, dad: 250, shluli: 105, tree: 370, bilam: 168, koko: 170, armon: 230, anana: 230, rhino: 280, luna: 110, solomon: 260, riddletree: 330, princess1: 250, princess2: 250, grandpa: 250, cloudunicorn: 200 };   // height of the whole picture frame, feet at the bottom
 function drawFriend(kind, x, y, happy, o){
   o = o || {};
   const im = IMG[kind + (happy ? '_happy' : '_sad')];
@@ -581,6 +585,11 @@ function drawFriend(kind, x, y, happy, o){
     ell(0, -30, 78, 32, '#b98152'); ell(-60, -24, 16, 9, '#b98152', -0.6); circ(62, -44, 30, '#c99564'); ell(46, -62, 11, 20, '#8a5a34', -0.5); ell(80, -62, 11, 20, '#8a5a34', 0.5);
     ell(70, -36, 15, 11, '#f0d5b5'); circ(76, -40, 6, '#3a2a3a'); face(60, -52, 11, true, !z);
     if (T % 200 < 90 && !z) { ctx.fillStyle = 'rgba(255,255,255,.9)'; ctx.font = 'bold 22px sans-serif'; ctx.fillText('z', 96, -80 - (T % 200) * 0.2); }
+  } else if (kind === 'dad') {          // Noga's dad, drawn in code until Ghost's dad_*.png arrive
+    rr(-24, -78, 18, 78, 7, '#4a5a7a'); rr(6, -78, 18, 78, 7, '#4a5a7a'); rr(-34, -150, 68, 82, 20, '#e0793c');
+    rr(-48, -144, 16, 60, 8, '#e0793c'); rr(32, -144, 16, 60, 8, '#e0793c'); circ(-40, -82, 9, '#f0c8a0'); circ(40, -82, 9, '#f0c8a0');
+    circ(0, -178, 32, '#f0c8a0'); ctx.fillStyle = '#3a2a2a'; ctx.beginPath(); ctx.arc(0, -184, 33, Math.PI, 0); ctx.fill(); ctx.fillStyle = 'rgba(70,50,50,.35)'; ctx.beginPath(); ctx.arc(0, -172, 30, 0.15, Math.PI - 0.15); ctx.fill();
+    face(0, -178, 14, happy);
   } else if (kind === 'shluli') {
     ell(0, -4, 80, 16, '#8fd3ff'); ell(-10, -7, 50, 8, '#c4e9ff'); face(0, -9, 12, true);
   } else if (kind === 'tree') {
@@ -622,7 +631,17 @@ function drawHero(){
   const sw = Math.sin(p.run) * 0.42 * (p.vx ? 1 : 0), back = p.on ? sw : -0.38, front = p.on ? -sw : 0.34;
   const leg = (key, q, rot) => { const im = IMG[key]; if (!im) return; ctx.save(); ctx.translate(q.hx * k - W / 2, q.hy * k - H); ctx.rotate(rot); ctx.drawImage(im, (q.bx - q.hx) * k, (q.by - q.hy) * k, q.w * k, q.h * k); ctx.restore(); };
   const painted = IMG.heroBody && IMG.heroBack && IMG.heroFront;
-  if (painted || IMG.heroFull) {
+  const dkLegs = IMG.donkeyBody && IMG.donkeyBack && IMG.donkeyFront, dk = dkLegs ? IMG.donkeyBody : (IMG.donkeyFull || IMG.donkeyStand);      // round 3: Noga rides Bil'am (Ghost's leg-split set, else one whole picture, else the unicorn set)
+  if (dk) {
+    const dh = 195, sc = dh / dk.height, dw = dk.width * sc, left = -dw / 2, top = -dh;      // all pieces share the 914 x 1000 canvas; hips (268,681) and (626,678)
+    if (p.wings && (IMG.donkeyWings || IMG.heroWings)) { const im = IMG.donkeyWings || IMG.heroWings, f = 0.72 + 0.28 * Math.sin(T * 0.5), ww = 215, wh = ww * im.height / im.width;
+      ctx.save(); ctx.translate(left + 330 * sc, top + 500 * sc); ctx.rotate(-0.12 - 0.12 * Math.sin(T * 0.5)); ctx.scale(1, f); ctx.drawImage(im, -ww / 2, -wh * 0.7, ww, wh); ctx.restore(); }
+    if (p.dance > 0 && IMG.donkeyHappy) { const hh = IMG.donkeyHappy; ctx.drawImage(hh, -dh * hh.width / hh.height / 2, -dh, dh * hh.width / hh.height, dh); }      // arms-up pose already has all four legs
+    else if (dkLegs) {
+      [[IMG.donkeyBack, 268, 681, back], [IMG.donkeyFront, 626, 678, front]].forEach(([im, hx, hy, an]) => { ctx.save(); ctx.translate(left + hx * sc, top + hy * sc); ctx.rotate(an); ctx.drawImage(im, -hx * sc, -hy * sc, dw, dh); ctx.restore(); });
+      ctx.drawImage(IMG.donkeyBody, left, top, dw, dh);
+    } else { ctx.save(); if (p.on && p.vx) ctx.rotate(Math.sin(p.run) * 0.035); ctx.drawImage(dk, left, top, dw, dh); ctx.restore(); }
+  } else if (painted || IMG.heroFull) {
     // The three layers share the full sprite canvas. Rotate each leg at its hip.
     const scale = W / 911, top = -1000 * scale, left = -W / 2;
     const swingLeg = (im, hx, hy, angle) => {
@@ -648,9 +667,9 @@ function drawHero(){
     ctx.drawImage(IMG.body, -W / 2, -H, W, 310 * k);
   } else { ell(0, -60, 60, 34, '#fff'); circ(56, -100, 26, '#fff'); rr(-40, -34, 12, 34, 5, '#fff'); rr(30, -34, 12, 34, 5, '#fff'); }
   // pencil-drawn wings for the super jump
-  if (p.wings && !(IMG.heroWings && (painted || IMG.heroFull))) { const f = Math.sin(T * 0.5) * 0.5; ctx.lineWidth = 4; ctx.lineCap = 'round';
+  if (p.wings && !dk && !(IMG.heroWings && (painted || IMG.heroFull))) { const f = Math.sin(T * 0.5) * 0.5; ctx.lineWidth = 4; ctx.lineCap = 'round';
     RB.forEach((c, i) => { ctx.strokeStyle = c; ctx.beginPath(); ctx.ellipse(-22 - i * 5, -112 - i * 4, 40 - i * 3, 13, -0.9 + f - i * 0.08, 0, 7); ctx.stroke(); }); }
-  if (!painted && !IMG.heroFull) {
+  if (!dk && !painted && !IMG.heroFull) {
   // Draw the rider only when the painted sprite is unavailable.
   ctx.save(); ctx.translate(-12, -96);
   rr(-4, 2, 13, 26, 6, '#f08fc0');                                   // leg, pink trousers
@@ -736,6 +755,14 @@ function groups(){ const g = []; items.forEach(it => { const k = it.grp || it.ki
 function drawProps(){
   (L.mud || []).forEach(m => { const im = IMG.prop_mud; if (im) pic(im, m.x + m.w / 2, G + 22, m.w * 1.08); else ell(m.x + m.w / 2, G + 4, m.w / 2, 14, '#8a6a46'); });
   (L.props || []).forEach(o => { const im = IMG['prop_' + o.k]; if (im) pic(im, o.x, G + 4, o.w); });
+  (L.pads || []).forEach(pd => { const cx = pd.x + pd.w / 2; if (pd.sq > 0) pd.sq--;     // the trampoline (it was Bobo the dog before round 3); Bobo is the fallback if the picture is missing
+    const im = pd.sq > 0 && IMG.prop_trampoline_squash || IMG.prop_trampoline;
+    if (im) pic(im, cx, G + 6, pd.w * 1.3);
+    else { const dip = pd.sq > 0 ? 12 : 0, tx = pd.w / 2 + 14, ty = pd.top + dip;      // canvas trampoline until Ghost's picture arrives: pastel frame, springs, bouncy mat
+      ctx.save(); ctx.translate(cx, 0); ctx.strokeStyle = '#8f6bd0'; ctx.lineWidth = 6; ctx.lineCap = 'round';
+      [-0.8, -0.4, 0, 0.4, 0.8].forEach(k => { ctx.beginPath(); ctx.moveTo(k * tx, ty + 6); for (let i = 1; i <= 5; i++) ctx.lineTo(k * tx + (i % 2 ? 7 : -7), ty + 6 + i * ((G + 4 - ty - 6) / 5)); ctx.stroke(); });
+      rr(-tx - 6, G - 10, 12, 14, 5, '#ff8fc7'); rr(tx - 6, G - 10, 12, 14, 5, '#ff8fc7');
+      ell(0, ty + 3, tx + 8, 13, '#ff8fc7'); ell(0, ty, tx, 10, '#ffe14d'); ell(0, ty - 1, tx - 22, 5, 'rgba(255,255,255,.55)'); ctx.restore(); } });
   if (L.lights) items.forEach(it => { if (it.got) { const g = ctx.createRadialGradient(it.x + 380, G - 40, 40, it.x + 380, G - 40, 520); g.addColorStop(0, 'rgba(255,244,170,.38)'); g.addColorStop(1, 'rgba(255,244,170,0)'); ctx.fillStyle = g; ctx.fillRect(it.x - 160, G - 560, 1080, 700); } });
 }
 function drawStations(){
@@ -801,6 +828,9 @@ function draw(){
     drawFriend(f.kind, x, y, true, { face: fc, bounce: p.dance > 0 || !!fin });
   });
   drawHero();
+  { const ua = IMG.ufly_a || IMG.cloudunicorn_happy, ub = IMG.ufly_b || ua, uh = IMG.ufly_happy || ua;     // the little unicorn flies above Noga's head (round 3: it took the bird's old place)
+    if (ua) { const im = p.dance > 0 || fin ? uh : (T % 16 < 8 ? ua : ub), h = hist[Math.max(0, hist.length - 1 - 8)] || { x: p.x - 20, f: 1 }, w = 150, ih = w * im.height / im.width;
+      ctx.save(); ctx.translate(h.x - 10 * (h.f || 1), p.y - 250 - Math.sin(T * 0.09) * 12); if ((h.f || 1) < 0) ctx.scale(-1, 1); ctx.drawImage(im, -w / 2, -ih / 2, w, ih); ctx.restore(); } }
   parts.forEach(q => { ctx.globalAlpha = clamp(q.life, 0, 1); if (q.shape === 'star') star5(q.x, q.y, q.s, q.c); else if (q.shape === 'petal') ell(q.x, q.y, q.s, q.s * 0.6, q.c, q.x * 0.05 + T * 0.05); else circ(q.x, q.y, q.s, q.c); }); ctx.globalAlpha = 1;
   ctx.restore();
   // top bar: what she is collecting, and the star meter

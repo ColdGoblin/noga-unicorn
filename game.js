@@ -22,9 +22,9 @@ const RB = ['#ff5f7e', '#ffa64d', '#ffe14d', '#6fdc8c', '#5fb8ff', '#b98cff'];
 /* ---------- save ---------- */
 const SAVE_KEY = 'nogaUnicorn2';       // new key = everybody starts from zero (progress reset, 14 Nov)
 try { localStorage.removeItem('nogaUnicorn1'); } catch (e) {}
-let save = { done: [false, false, false, false, false, false, false, false, false, false], dance: false, sup: false };
+let save = { done: [false, false, false, false, false, false, false, false, false, false, false], dance: false, sup: false };
 try { const o = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null');
-  if (o && Array.isArray(o.done)) { save.done = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(i => !!o.done[i]); save.sup = !!o.sup; if (Array.isArray(o.party)) save.party = o.party.filter(k => typeof k === 'string').slice(0, 2); } } catch (e) {}
+  if (o && Array.isArray(o.done)) { save.done = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => !!o.done[i]); save.sup = !!o.sup; if (Array.isArray(o.party)) save.party = o.party.filter(k => typeof k === 'string').slice(0, 2); } } catch (e) {}
 save.dance = true;                    // the Dance button is there from the very first level (owner request, 14 Nov)
 function persist(){ try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) {} }
 
@@ -41,9 +41,10 @@ load('donkeyFull','art/hero/donkey_full.png'); load('donkeyHappy', 'art/hero/don
 ['a', 'b', 'happy'].forEach(k => load('ufly_' + k, 'art/friends/unicorn_fly_' + k + '.png'));      // the unicorn is now the little flying helper above Noga
 ['pitzi', 'bird', 'mamabird', 'bobo', 'dad', 'shluli', 'tree', 'bilam', 'koko', 'armon', 'anana', 'rhino', 'luna', 'solomon', 'riddletree', 'princess1', 'princess2', 'grandpa', 'cloudunicorn', 'sheba', 'camel', 'moon'].forEach(k => { load(k + '_sad', 'art/friends/' + k + '_sad.png'); load(k + '_happy', 'art/friends/' + k + '_happy.png'); });
 ['feather', 'petal', 'star', 'bigbubble', 'bubble_red', 'bubble_blue', 'bubble_green', 'bubble_yellow', 'steam', 'plank', 'carrot', 'ribbon', 'spark', 'flower_1', 'flower_2', 'flower_3', 'flower_4', 'flower_5', 'water_drop', 'flour', 'eggs', 'honey', 'teacup', 'carrot_bunch', 'gift_plate', 'challah', 'candles', 'gem', 'moonstar', 'numbubble', 'chick', 'shootingstar'].forEach(k => load('item_' + k, 'art/items/item_' + k + '.png'));
-['stone', 'rock', 'mushroom', 'stump', 'branch', 'cloud', 'oven', 'oven_lit', 'bowl', 'bowl_dough', 'candle_unlit', 'candle_lit', 'nest', 'tree_roots', 'teapot', 'mud', 'haybale', 'gate', 'plank_bridge', 'trampoline', 'trampoline_squash', 'cotton_candy_platform', 'shadow_stage', 'party_firework', 'well', 'well_full', 'sandmound', 'palm', 'windswirl', 'lantern_red', 'lantern_blue', 'lantern_green', 'lantern_yellow', 'lantern_red_lit', 'lantern_blue_lit', 'lantern_green_lit', 'lantern_yellow_lit'].forEach(k => load('prop_' + k, 'art/props/prop_' + k + '.png'));
+['stone', 'rock', 'mushroom', 'stump', 'branch', 'cloud', 'oven', 'oven_lit', 'bowl', 'bowl_dough', 'candle_unlit', 'candle_lit', 'nest', 'tree_roots', 'teapot', 'mud', 'haybale', 'gate', 'plank_bridge', 'trampoline', 'trampoline_squash', 'cotton_candy_platform', 'shadow_stage', 'party_firework', 'table', 'well', 'well_full', 'sandmound', 'palm', 'windswirl', 'lantern_red', 'lantern_blue', 'lantern_green', 'lantern_yellow', 'lantern_red_lit', 'lantern_blue_lit', 'lantern_green_lit', 'lantern_yellow_lit'].forEach(k => load('prop_' + k, 'art/props/prop_' + k + '.png'));
 ['apple', 'ball', 'leaf'].forEach(k => load('riddle_' + k, 'art/items/riddle_' + k + '.png'));
 ['garden', 'rainbow', 'forest', 'sky', 'farm', 'shabbat', 'night', 'castle', 'oasis', 'moon'].forEach(k => load('bg_' + k, 'art/bg/bg_' + k + '.jpg'));
+load('bg_party', 'art/bg/bg_castle.jpg');       // stage 11 (the party) uses the castle backdrop until there is a picture of its own
 /* opaque box of each scenery picture: [x, y, w, h] inside its file (so only the drawing is placed, not the empty margin) */
 const PB = { stone: [10, 247, 382, 128], rock: [8, 9, 383, 366], mushroom: [5, 28, 389, 346], stump: [6, 153, 388, 221], branch: [5, 14, 688, 399], cloud: [6, 67, 588, 347], bigbubble: [32, 45, 732, 746] };
 
@@ -70,7 +71,7 @@ const sfx = {
 };
 /* recorded music: music/stage1.mp3 ... stage10.mp3 and title.mp3 loop quietly under the voice (the little synth tune is gone: it was the annoying beeping) */
 let musicOn = true; try { musicOn = localStorage.getItem('nogaMusic') !== '0'; } catch (e) {}
-const MUSIC_ALIAS = { stage9: 'stage6', stage10: 'stage8' };      // stand-ins until stage9.mp3 and stage10.mp3 are made
+const MUSIC_ALIAS = { stage9: 'stage6', stage10: 'stage8', stage11: 'stage1' };      // stand-ins until stage9.mp3 and stage10.mp3 are made
 const Song = {
   a: null, name: '',
   play(name){ if (this.name === name) return; this.stop(); this.name = name;
@@ -361,7 +362,26 @@ const LEVELS = [
     bonus: [].concat(arcRow(240, 1300, G - 80, 40, 8), arcRow(1480, 2350, G - 200, 40, 5), arcRow(2720, 2880, G - 100, 50, 3), arcRow(3100, 3450, G - 80, 30, 4), arcRow(3720, 4400, G - 190, 50, 6),
       arcRow(4500, 4950, G - 80, 30, 4), arcRow(5030, 5130, G - 130, 60, 2), arcRow(5300, 5780, G - 80, 30, 4), arcRow(5900, 6700, G - 80, 40, 7)),
     plats: [0, 1, 2, 3, 4].map(i => ({ x: 1500 + i * 200, w: 130, top: G - 90 * (i + 1), kind: 'cloud' })).concat([{ x: 2480, w: 130, top: G - 540, kind: 'cloud' }]),
-    cues: [{ x: 0, say: ['l10_a', 'x_find_moon', 'ins_10'] }, { x: 3300, say: ['x_draft', 'ins_15'] }] }
+    cues: [{ x: 0, say: ['l10_a', 'x_find_moon', 'ins_10'] }, { x: 3300, say: ['x_draft', 'ins_15'] }] },
+
+  /* ---- stage 11 (round 6): the Princesses' Flower Party, the last stage. Bake the challah, make the tea, set the table, dance with everyone. The two friends she chose walk with her. ---- */
+  { name: 'party', need: 12, len: 7700, sticker: 10, collect: 'flour', ins: 'ins_10', joins: [], without: ['princess1', 'princess2'], carry: true, noIns: true, fireworks: true,
+    finSay: ['l11_c', 'l11_d', 'pr_20'],
+    terrain: [{ x0: 0, x1: 1500, top: G }, { x0: 1500, x1: 1700, top: G, top1: G - 110 }, { x0: 1700, x1: 1950, top: G - 110 }, { x0: 1950, x1: 2150, top: G - 110, top1: G }, { x0: 2150, x1: 3300, top: G },
+              { x0: 3560, x1: 5000, top: G }, { x0: 5000, x1: 5200, top: G, top1: G - 70 }, { x0: 5200, x1: 5450, top: G - 70 }, { x0: 5450, x1: 5650, top: G - 70, top1: G }, { x0: 5650, x1: 7700, top: G }],
+    friend: { kind: 'princess1', x: 7250 },
+    items: [{ x: 600, y: G - 50, kind: 'flour', to: 'bowl', say: null }, { x: 1250, y: G - 50, kind: 'eggs', to: 'bowl', say: null }, { x: 1825, y: G - 215, kind: 'honey', to: 'bowl', say: null },
+            { x: 3950, y: G - 50, kind: 'flower_1', grp: 'flower', to: 'pot', say: null }, { x: 4250, y: G - 50, kind: 'flower_2', grp: 'flower', to: 'pot', say: null }, { x: 4560, y: G - 50, kind: 'water_drop', to: 'pot', say: null },
+            { x: 0, y: 0, kind: 'challah', to: 'table', hid: 'challah', hidden: true, nochip: true }, { x: 0, y: 0, kind: 'teapot', to: 'fire', hid: 'pot', hidden: true, nochip: true }, { x: 0, y: 0, kind: 'teacup', to: 'table', hid: 'cup', hidden: true, nochip: true }],
+    stations: [{ id: 'bowl', kind: 'bowl', x: 2450, need: 3, r: 150 }, { id: 'oven', kind: 'oven', x: 2720, need: 1, auto: true, spawn: 'challah', say: ['fr_13'] },
+               { id: 'pot', kind: 'pot', x: 4850, need: 3, r: 160, spawn: 'pot', hint: 'x_tea_pot', near: 420, say: ['x_tea_fire'] },
+               { id: 'fire', kind: 'fire', x: 5120, need: 1, r: 170, spawn: 'cup', say: ['x_tea_boil'] },
+               { id: 'table', kind: 'table', x: 5900, need: 2, r: 230, img: 'prop_table', show: ['challah', 'teacup'], hint: 'x_party_table', near: 560, say: ['l11_b'] },
+               { id: 'partydance', kind: 'rhythm', finish: true, x: 6700, r: 380, need: 6, hint: 'x_rhythm', near: 700 }],
+    bonus: [].concat(arcRow(240, 1400, G - 80, 40, 8), arcRow(1520, 2100, G - 215, 40, 5), arcRow(2200, 3250, G - 80, 40, 7), arcRow(3300, 3560, G - 150, 80, 3), arcRow(3600, 4800, G - 80, 40, 8), arcRow(5050, 5600, G - 150, 40, 5), arcRow(5700, 6500, G - 80, 30, 6)),
+    plats: [{ x: 3335, w: 150, top: G - 40, kind: 'cloud', move: { a: 3320, b: 3400, sp: 0.012 } }],
+    decos: [{ kind: 'princess2', x: 7420, happy: true }],
+    cues: [{ x: 0, say: ['l11_a', 'x_party_cake', 'ins_10'] }, { x: 3600, say: ['x_party_tea'] }] }
 ];
 const REST_W = 1.25;        // picture is a bit wider than the part you stand on
 function prepLevel(lv){
@@ -877,7 +897,7 @@ function drawPlat(pl){
 function hills(par, base, amp, c, f){ ctx.fillStyle = c; ctx.beginPath(); ctx.moveTo(0, VH); for (let sx = 0; sx <= VW + 40; sx += 40) { const wx = sx + camX * par; ctx.lineTo(sx, base - Math.sin(wx * f) * amp - Math.sin(wx * f * 2.3 + 1) * amp * 0.4); } ctx.lineTo(VW, VH); ctx.fill(); }
 function drawWorld(){
   const n = L.name, im = IMG['bg_' + n];
-  const sky = { garden: ['#bfe9ff', '#eafff0'], rainbow: ['#ffdff3', '#e6dcff'], forest: ['#cdeccf', '#f4ffd9'], sky: ['#ffb78a', '#f6c7ee'], farm: ['#bfe3ff', '#f1ffe0'], shabbat: ['#ffe2a6', '#fff3d6'], night: ['#1f2a5e', '#4b5fa8'], castle: ['#bfe9ff', '#ffe8f6'], oasis: ['#ff9f7a', '#ffe9b8'], moon: ['#150f46', '#4a3a9a'] }[n] || ['#bfe9ff', '#eafff0'];
+  const sky = { garden: ['#bfe9ff', '#eafff0'], rainbow: ['#ffdff3', '#e6dcff'], forest: ['#cdeccf', '#f4ffd9'], sky: ['#ffb78a', '#f6c7ee'], farm: ['#bfe3ff', '#f1ffe0'], shabbat: ['#ffe2a6', '#fff3d6'], night: ['#1f2a5e', '#4b5fa8'], castle: ['#bfe9ff', '#ffe8f6'], party: ['#bfe9ff', '#ffe8f6'], oasis: ['#ff9f7a', '#ffe9b8'], moon: ['#150f46', '#4a3a9a'] }[n] || ['#bfe9ff', '#eafff0'];
   const gr = ctx.createLinearGradient(0, 0, 0, VH); gr.addColorStop(0, sky[0]); gr.addColorStop(1, sky[1]); ctx.fillStyle = gr; ctx.fillRect(0, 0, VW, VH);
   if (im) { const h = VH, w = h * im.width / im.height, off = -((camX * 0.4) % w), by = -camY * 0.4;
     for (let x = off; x < VW; x += w) { if (by > 0) ctx.drawImage(im, 0, 0, im.width, 6, x, 0, w, by + 2); ctx.drawImage(im, x, by, w, h); } }
@@ -908,7 +928,7 @@ function drawWorld(){
   terr.forEach(sg => { const x0 = sg.x0, x1 = sg.x1, top = sg.top;
     if (n === 'rainbow') { RB.forEach((c, i) => rr(x0, top + i * 12, x1 - x0, 14, i ? 0 : 7, c)); rr(x0, top + 72, x1 - x0, VH, 0, '#fff');
       for (let x = x0 + 40; x < x1; x += 90) circ(x, top + 84, 46, '#fff'); }
-    else { const c = { garden: ['#7fd58a', '#63bd72', '#c59a6d'], sky: ['#ffd1ec', '#f6b0da', '#d58fbf'], farm: ['#8ccf6a', '#6fb556', '#7a5a3c'], shabbat: ['#e6c866', '#d1a84d', '#a8794a'], night: ['#5a78bc', '#4562a6', '#2c3f78'], castle: ['#8fdc8a', '#6fc873', '#9a7a56'], oasis: ['#f2d391', '#e3b96a', '#c99a52'], moon: ['#9d8ae0', '#7c69c8', '#4a3a9a'] }[n] || ['#5fae68', '#4c9657', '#8f6d4b'];
+    else { const c = { garden: ['#7fd58a', '#63bd72', '#c59a6d'], sky: ['#ffd1ec', '#f6b0da', '#d58fbf'], farm: ['#8ccf6a', '#6fb556', '#7a5a3c'], shabbat: ['#e6c866', '#d1a84d', '#a8794a'], night: ['#5a78bc', '#4562a6', '#2c3f78'], castle: ['#8fdc8a', '#6fc873', '#9a7a56'], party: ['#8fdc8a', '#6fc873', '#9a7a56'], oasis: ['#f2d391', '#e3b96a', '#c99a52'], moon: ['#9d8ae0', '#7c69c8', '#4a3a9a'] }[n] || ['#5fae68', '#4c9657', '#8f6d4b'];
       if (sg.top1 !== undefined) { const t1 = sg.top1, poly = (a, b, col) => { ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(x0, top + a); ctx.lineTo(x1, t1 + a); ctx.lineTo(x1, t1 + b); ctx.lineTo(x0, top + b); ctx.fill(); };
         poly(0, VH, c[2]); poly(-4, 36, c[0]); poly(22, 36, c[1]); }
       else { rr(x0, top, x1 - x0, VH, 0, c[2]); rr(x0, top - 4, x1 - x0, 40, 10, c[0]); rr(x0, top + 22, x1 - x0, 14, 0, c[1]); }
@@ -919,7 +939,7 @@ function drawWorld(){
 
 /* ---------- drawing: stations, props, pocket ---------- */
 function pic(im, cx, bottom, w, sq){ const h = w * im.height / im.width * (sq || 1); ctx.drawImage(im, cx - w / 2, bottom - h, w, h); return h; }
-function groups(){ const g = []; items.forEach(it => { const k = it.grp || it.kind || L.collect; let e = g.find(x => x.k === k); if (!e) { e = { k, kind: it.kind || L.collect, col: it.col, n: 0, got: 0 }; g.push(e); } e.n++; if (it.got) e.got++; }); return g; }
+function groups(){ const g = []; items.forEach(it => { if (it.nochip) return; const k = it.grp || it.kind || L.collect; let e = g.find(x => x.k === k); if (!e) { e = { k, kind: it.kind || L.collect, col: it.col, n: 0, got: 0 }; g.push(e); } e.n++; if (it.got) e.got++; }); return g; }
 function drawProps(){
   (L.mud || []).forEach(m => { const im = IMG.prop_mud; if (im) pic(im, m.x + m.w / 2, G + 22, m.w * 1.08); else ell(m.x + m.w / 2, G + 4, m.w / 2, 14, '#8a6a46'); });
   (L.props || []).forEach(o => { const im = IMG['prop_' + o.k]; if (im) pic(im, o.x, G + 4, o.w); });
@@ -954,7 +974,7 @@ function drawStations(){
     else if (k === 'oven') { const im = IMG[st.done ? 'prop_oven_lit' : 'prop_oven']; if (im) pic(im, x, G + 4, 270); if (st.armed > 0) for (let i = 0; i < 3; i++) circ(x - 20 + i * 20, G - 250 - ((T * 1.5 + i * 25) % 70), 10, 'rgba(255,255,255,.7)'); }
     else if (k === 'candles') { const im = IMG[st.done ? 'prop_candle_lit' : 'prop_candle_unlit']; if (im) pic(im, x, G + 2, 150);
       for (let i = 0; i < 2; i++) { const sx = st.done ? x - 26 + i * 52 : x + Math.cos(T * 0.03 + i * 3.1) * 180, sy = st.done ? G - 140 : G - 200 + Math.sin(T * 0.05 + i * 2) * 60; drawItem('spark', sx, sy, null, T * 0.1 + i); } }
-    else if (k === 'table') { const im = IMG.prop_plank_bridge; if (im) pic(im, x, G + 6, 420); else rr(x - 200, G - 110, 400, 40, 8, '#c58a4a'); if (st.done) drawItem(st.show || 'challah', x, G - 160, null, T * 0.04); }
+    else if (k === 'table') { const im = IMG[st.img || 'prop_plank_bridge']; if (im) pic(im, x, G + 6, st.img ? 380 : 420); else rr(x - 200, G - 110, 400, 40, 8, '#c58a4a'); const sh = [].concat(st.show || 'challah'); if (st.done) sh.forEach((k2, i) => drawItem(k2, x + (i - (sh.length - 1) / 2) * 110, G - 170, null, T * 0.04 + i)); else for (let i = 0; i < st.need; i++) circ(x - (st.need - 1) * 15 + i * 30, G - 240, 9, i < st.have ? '#ffd028' : 'rgba(255,255,255,.7)'); }
     else if (k === 'bilam') { drawFriend('bilam', x, G, st.done, { face: -1, bounce: st.done }); for (let i = 0; i < st.need; i++) circ(x - 45 + i * 30, G - 210, 9, i < st.have ? '#ff9f43' : 'rgba(255,255,255,.7)'); }
     else if (k === 'plate') { const im = IMG.item_gift_plate; if (im) pic(im, x, G - 8, 82); else ell(x, G - 30, 40, 14, '#fff'); const ic = IMG['item_' + st.icon]; ctx.globalAlpha = st.done ? 1 : 0.32; if (ic) ctx.drawImage(ic, x - 24, G - 66, 48, 48); ctx.globalAlpha = 1; if (st.done) circ(x, G - 80, 6 + Math.sin(T * 0.2 + x) * 2, '#ffe14d'); }
     else if (k === 'count') st.pts.forEach((q, i) => { if (i < st.n) return; const im = IMG.item_numbubble, nx = i === st.n, wb = st.wob[i] > 0 ? Math.sin(st.wob[i] * 0.8) * 8 : 0, sz = nx ? 112 + Math.sin(T * 0.15) * 6 : 96;
@@ -1075,8 +1095,8 @@ function frame(now){
 requestAnimationFrame(frame);
 
 /* ---------- title, map, end screens ---------- */
-const MAP10_POS = [[11, 27], [30, 27], [46, 27], [68, 27], [88, 27], [88, 69], [68, 69], [49.5, 69], [30, 69], [10.5, 69]];   // the ten stops on art/ui/map10.jpg (Ghost's ten-stop map), in percent
-const MAP_POS = [[13, 25], [37.5, 24], [62, 25], [86, 27], [86, 70], [60.5, 69], [36.5, 70], [12, 72], [30, 47], [60, 47]];   // the ten stops on art/ui/map.jpg, in percent (9 and 10 sit in the empty middle band until Ghost's map10.jpg arrives)
+const MAP10_POS = [[11, 27], [30, 27], [46, 27], [68, 27], [88, 27], [88, 69], [68, 69], [49.5, 69], [30, 69], [10.5, 69], [50, 48]];   // the ten stops on art/ui/map10.jpg (Ghost's ten-stop map), in percent
+const MAP_POS = [[13, 25], [37.5, 24], [62, 25], [86, 27], [86, 70], [60.5, 69], [36.5, 70], [12, 72], [30, 47], [60, 47], [46, 47]];   // the ten stops on art/ui/map.jpg, in percent (9 and 10 sit in the empty middle band until Ghost's map10.jpg arrives)
 /* choose who comes along: pictures only, at most two; with two or fewer friends to pick from she just goes */
 function goLevel(i){ if (paradeFor(i).length > MAXPARTY) showPick(i); else startLevel(i, paradeFor(i)); }
 let pickSel = [];

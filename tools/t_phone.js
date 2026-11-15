@@ -5,7 +5,7 @@ out.push('viewport ' + innerWidth + 'x' + innerHeight);
 const ptrEv = (el, type, x, y) => el.dispatchEvent(new PointerEvent(type, { bubbles: true, cancelable: true, pointerId: 7, pointerType: 'touch', clientX: x, clientY: y, isPrimary: true }));
 const press = (id, n = 1) => { const r = $(id).getBoundingClientRect(); const x = r.left + r.width / 2, y = r.top + r.height / 2; ptrEv($(id), 'pointerdown', x, y); g.step(n); ptrEv($(id), 'pointerup', x, y); };
 const hold = (id, n) => { const r = $(id).getBoundingClientRect(); const x = r.left + r.width / 2, y = r.top + r.height / 2; ptrEv($(id), 'pointerdown', x, y); g.step(n); ptrEv($(id), 'pointerup', x, y); };
-for (const lv of [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]) {
+for (const lv of [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) {
   g.reset(); g.start(lv); g.step(3);
   const sv = JSON.parse(localStorage.getItem('nogaUnicorn2') || '{}');
   // show every button the game can show, to test the worst case overlap

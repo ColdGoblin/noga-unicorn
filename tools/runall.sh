@@ -1,0 +1,8 @@
+#!/bin/bash
+# usage: runall.sh [levels...]   runs the generic bot (t_bot.js) on levels 1-10 (or the ones given); each must end in MODE end with no ERRS
+cd "$(dirname "$0")"
+for n in ${@:-1 2 3 4 5 6 7 8 9 10}; do
+  { echo "const LVL = $((n-1));"; cat t_bot.js; } > _b.js
+  echo "== level $n"; bash runtest.sh _b.js
+done
+rm -f _b.js

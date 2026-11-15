@@ -22,9 +22,9 @@ const RB = ['#ff5f7e', '#ffa64d', '#ffe14d', '#6fdc8c', '#5fb8ff', '#b98cff'];
 /* ---------- save ---------- */
 const SAVE_KEY = 'nogaUnicorn2';       // new key = everybody starts from zero (progress reset, 14 Nov)
 try { localStorage.removeItem('nogaUnicorn1'); } catch (e) {}
-let save = { done: [false, false, false, false, false, false, false, false], dance: false, sup: false };
+let save = { done: [false, false, false, false, false, false, false, false, false, false], dance: false, sup: false };
 try { const o = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null');
-  if (o && Array.isArray(o.done)) { save.done = [0, 1, 2, 3, 4, 5, 6, 7].map(i => !!o.done[i]); save.sup = !!o.sup; } } catch (e) {}
+  if (o && Array.isArray(o.done)) { save.done = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(i => !!o.done[i]); save.sup = !!o.sup; } } catch (e) {}
 save.dance = true;                    // the Dance button is there from the very first level (owner request, 14 Nov)
 function persist(){ try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) {} }
 
@@ -32,17 +32,18 @@ function persist(){ try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); 
 const IMG = {};
 function load(key, src){ const im = new Image(); im.onload = () => { IMG[key] = im; }; im.onerror = () => {}; im.src = src; }
 load('body', 'art/standin/uni_body2.png'); load('legA', 'art/standin/uni_legA.png'); load('legB', 'art/standin/uni_legB.png');
+load('map10', 'art/ui/map10.jpg');
 load('heroBody', 'art/hero/hero_body.png'); load('heroBack', 'art/hero/hero_leg_back.png'); load('heroFront', 'art/hero/hero_leg_front.png');
 load('heroFull', 'art/hero/hero_full.png'); load('heroHappy', 'art/hero/hero_happy.png'); load('heroWings', 'art/hero/hero_wings.png');
 load('donkeyBody', 'art/hero/donkey_body.png'); load('donkeyBack', 'art/hero/donkey_leg_back.png'); load('donkeyFront', 'art/hero/donkey_leg_front.png');
 load('donkeyStand', 'art/standin/donkey_standin.png');      // stand-in: Bil'am (Ghost's picture) with Noga cut from the unicorn picture, until donkey_*.png arrive
 load('donkeyFull','art/hero/donkey_full.png'); load('donkeyHappy', 'art/hero/donkey_happy.png'); load('donkeyWings', 'art/hero/donkey_wings.png');      // round 3: Noga rides Bil'am (old unicorn set stays as fallback)
 ['a', 'b', 'happy'].forEach(k => load('ufly_' + k, 'art/friends/unicorn_fly_' + k + '.png'));      // the unicorn is now the little flying helper above Noga
-['pitzi', 'bird', 'mamabird', 'bobo', 'dad', 'shluli', 'tree', 'bilam', 'koko', 'armon', 'anana', 'rhino', 'luna', 'solomon', 'riddletree', 'princess1', 'princess2', 'grandpa', 'cloudunicorn'].forEach(k => { load(k + '_sad', 'art/friends/' + k + '_sad.png'); load(k + '_happy', 'art/friends/' + k + '_happy.png'); });
-['feather', 'petal', 'star', 'bigbubble', 'bubble_red', 'bubble_blue', 'bubble_green', 'bubble_yellow', 'steam', 'plank', 'carrot', 'ribbon', 'spark', 'flower_1', 'flower_2', 'flower_3', 'flower_4', 'flower_5', 'water_drop', 'flour', 'eggs', 'honey', 'teacup', 'carrot_bunch', 'gift_plate', 'challah', 'candles'].forEach(k => load('item_' + k, 'art/items/item_' + k + '.png'));
-['stone', 'rock', 'mushroom', 'stump', 'branch', 'cloud', 'oven', 'oven_lit', 'bowl', 'bowl_dough', 'candle_unlit', 'candle_lit', 'nest', 'tree_roots', 'teapot', 'mud', 'haybale', 'gate', 'plank_bridge', 'trampoline', 'trampoline_squash', 'cotton_candy_platform', 'shadow_stage', 'party_firework'].forEach(k => load('prop_' + k, 'art/props/prop_' + k + '.png'));
+['pitzi', 'bird', 'mamabird', 'bobo', 'dad', 'shluli', 'tree', 'bilam', 'koko', 'armon', 'anana', 'rhino', 'luna', 'solomon', 'riddletree', 'princess1', 'princess2', 'grandpa', 'cloudunicorn', 'sheba', 'camel', 'moon'].forEach(k => { load(k + '_sad', 'art/friends/' + k + '_sad.png'); load(k + '_happy', 'art/friends/' + k + '_happy.png'); });
+['feather', 'petal', 'star', 'bigbubble', 'bubble_red', 'bubble_blue', 'bubble_green', 'bubble_yellow', 'steam', 'plank', 'carrot', 'ribbon', 'spark', 'flower_1', 'flower_2', 'flower_3', 'flower_4', 'flower_5', 'water_drop', 'flour', 'eggs', 'honey', 'teacup', 'carrot_bunch', 'gift_plate', 'challah', 'candles', 'gem', 'moonstar', 'numbubble', 'chick', 'shootingstar'].forEach(k => load('item_' + k, 'art/items/item_' + k + '.png'));
+['stone', 'rock', 'mushroom', 'stump', 'branch', 'cloud', 'oven', 'oven_lit', 'bowl', 'bowl_dough', 'candle_unlit', 'candle_lit', 'nest', 'tree_roots', 'teapot', 'mud', 'haybale', 'gate', 'plank_bridge', 'trampoline', 'trampoline_squash', 'cotton_candy_platform', 'shadow_stage', 'party_firework', 'well', 'well_full', 'sandmound', 'palm', 'windswirl', 'lantern_red', 'lantern_blue', 'lantern_green', 'lantern_yellow', 'lantern_red_lit', 'lantern_blue_lit', 'lantern_green_lit', 'lantern_yellow_lit'].forEach(k => load('prop_' + k, 'art/props/prop_' + k + '.png'));
 ['apple', 'ball', 'leaf'].forEach(k => load('riddle_' + k, 'art/items/riddle_' + k + '.png'));
-['garden', 'rainbow', 'forest', 'sky', 'farm', 'shabbat', 'night', 'castle'].forEach(k => load('bg_' + k, 'art/bg/bg_' + k + '.jpg'));
+['garden', 'rainbow', 'forest', 'sky', 'farm', 'shabbat', 'night', 'castle', 'oasis', 'moon'].forEach(k => load('bg_' + k, 'art/bg/bg_' + k + '.jpg'));
 /* opaque box of each scenery picture: [x, y, w, h] inside its file (so only the drawing is placed, not the empty margin) */
 const PB = { stone: [10, 247, 382, 128], rock: [8, 9, 383, 366], mushroom: [5, 28, 389, 346], stump: [6, 153, 388, 221], branch: [5, 14, 688, 399], cloud: [6, 67, 588, 347], bigbubble: [32, 45, 732, 746] };
 
@@ -226,6 +227,7 @@ const LEVELS = [
             { x: 4060, w: 130, top: G - 75, kind: 'cloud' },
             { x: 3500, w: 120, top: G - 100, kind: 'cloud' }, { x: 3690, w: 120, top: G - 190, kind: 'cloud' }, { x: 3860, w: 120, top: G - 110, kind: 'cloud' },
             { x: 5420, w: 130, top: G - 90, kind: 'cloud' }, { x: 5600, w: 130, top: G - 180, kind: 'cloud' }],
+    stations: [{ id: 'bubbles', kind: 'count', x: 3700, pts: [[3420, G - 100], [3540, G - 210], [3740, G - 290], [3900, G - 190], [3980, G - 110]], hint: 'x_count', near: 650, say: ['pr_13'] }],
     danceZone: { a: 1450, b: 2000 },
     cues: [{ x: 0, say: ['fr_02', 'l2_a', 'ins_12', 'ins_10', 'num_07'] }, { x: 940, say: ['ins_13'], glow: 'bj' }, { x: 1500, say: ['ins_06'], glow: 'bd', show: 'dance' }, { x: 2250, say: ['l2_b'] }, { x: 2900, say: ['ins_13'] }] },
 
@@ -243,21 +245,22 @@ const LEVELS = [
     plats: [{ x: 1900, w: 230, top: G - 320, kind: 'branch' }, { x: 2600, w: 116, kind: 'rock' }, { x: 2900, w: 110, kind: 'stump' },
             { x: 3650, w: 230, top: G - 320, kind: 'branch' },
             { x: 2180, w: 200, top: G - 430, kind: 'branch' }, { x: 2420, w: 200, top: G - 540, kind: 'branch' }, { x: 3930, w: 200, top: G - 430, kind: 'branch' }, { x: 4170, w: 200, top: G - 540, kind: 'branch' },{ x: 4020, w: 110, kind: 'stump' }, { x: 5600, w: 116, kind: 'rock' }, { x: 5800, w: 110, kind: 'stump' }],
+    stations: [{ id: 'rain', kind: 'rain', x: 5725, zone: [5500, 5950], need: 6, hint: 'x_rain', near: 700, say: ['pr_13'] }],
     cues: [{ x: 0, say: ['l3_a', 'ins_14', 'ins_10', 'num_10'] }, { x: 1400, say: ['ins_15'] }, { x: 3150, say: ['ins_15'] }] },
 
   /* ---- levels 4-8 (15 Nov 2026): things she picks up are USED. `to` = the station an item goes to, `stations` = the places that use them (design/STAGES-V2.md) ---- */
-  { name: 'sky', need: 5, len: 5600, sticker: 4, collect: 'steam', ins: 'ins_16', joins: ['cloudunicorn'], carry: true, floaty: true,
+  { name: 'sky', need: 5, len: 5600, sticker: 4, collect: 'steam', ins: 'ins_16', joins: ['cloudunicorn'], carry: true, floaty: true, drafts: [{ x: 2050, w: 180, h: 480 }],
     finSay: ['fr_08', 'l4_c', 'pr_02'],
     terrain: [{ x0: 0, x1: 900, top: G }, { x0: 900, x1: 1150, top: G - 60 }, { x0: 1150, x1: 1400, top: G - 120 }, { x0: 1400, x1: 1650, top: G - 60 }, { x0: 1650, x1: 2500, top: G },
               { x0: 2650, x1: 3700, top: G }, { x0: 3700, x1: 3950, top: G - 70 }, { x0: 3950, x1: 4200, top: G - 130 }, { x0: 4200, x1: 4450, top: G - 70 }, { x0: 4450, x1: 5600, top: G }],
     friend: { kind: 'koko', x: 5350 },
-    items: [{ x: 1275, y: G - 215, to: 'cloud' }, { x: 2965, y: G - 255, to: 'cloud' }, { x: 4075, y: G - 225, to: 'cloud' }],
+    items: [{ x: 1275, y: G - 215, to: 'cloud' }, { x: 2262, y: G - 560, to: 'cloud' }, { x: 4075, y: G - 225, to: 'cloud' }],
     stations: [{ id: 'cloud', kind: 'cloud', x: 4850, need: 3, r: 230, say: ['l4_b'] }],
     bonus: [].concat(arcRow(260, 700, G - 90, 40, 5), arcRow(1700, 2400, G - 80, 60, 7), arcRow(3000, 3600, G - 100, 40, 6), arcRow(4500, 4800, G - 80, 30, 4), arcRow(1900, 2000, G - 250, 0, 2), arcRow(2900, 3000, G - 330, 0, 2)),
-    plats: [{ x: 2520, w: 110, top: G - 70, kind: 'cloud' }, { x: 2900, w: 130, top: G - 150, kind: 'cloud' }, { x: 1900, w: 130, top: G - 130, kind: 'cloud' }],
+    plats: [{ x: 2520, w: 110, top: G - 70, kind: 'cloud' }, { x: 2900, w: 130, top: G - 150, kind: 'cloud' }, { x: 1900, w: 130, top: G - 130, kind: 'cloud' }, { x: 2200, w: 130, top: G - 470, kind: 'cloud' }],
     props: [{ k: 'teapot', x: 640, w: 150 }],
     decos: [{ kind: 'grandpa', x: 500, happy: true }],
-    cues: [{ x: 0, say: ['fr_07', 'l4_a', 'ins_16', 'ins_10', 'num_05'] }, { x: 2300, say: ['ins_15'] }] },
+    cues: [{ x: 0, say: ['fr_07', 'l4_a', 'ins_16', 'ins_10', 'num_05'] }, { x: 1950, say: ['x_draft', 'ins_15'] }] },
 
   { name: 'farm', need: 6, len: 5800, sticker: 5, collect: 'plank', ins: 'ins_17', joins: ['armon', 'anana'], carry: true,
     finSay: ['fr_11', 'l5_c', 'pr_15'],
@@ -266,7 +269,8 @@ const LEVELS = [
     friend: { kind: 'armon', x: 5500 },
     items: [{ x: 600, y: G - 50, to: 'bridge' }, { x: 1500, y: G - 190, to: 'bridge' }, { x: 2075, y: G - 225, to: 'bridge' }, { x: 3600, y: G - 190, to: 'bridge' }, { x: 4425, y: G - 160, to: 'bridge' },
             { x: 3000, y: G - 50, kind: 'carrot_bunch', to: 'horses' }, { x: 4050, y: G - 50, kind: 'carrot_bunch', to: 'horses' }],
-    stations: [{ id: 'bridge', kind: 'bridge', x: 5000, need: 5, r: 230, say: ['l5_b', 'pr_12'] }, { id: 'horses', kind: 'horses', x: 5400, need: 2, r: 230, say: ['pr_16'] }],
+    stations: [{ id: 'chicks', kind: 'seek', what: 'chick', mound: 'haybale', x: 1500, pts: [1500, 2550, 3050, 4050], hint: 'x_seek_a', near: 600, say: ['pr_13'] },
+               { id: 'bridge', kind: 'bridge', x: 5000, need: 5, r: 230, say: ['l5_b', 'pr_12'] }, { id: 'horses', kind: 'horses', x: 5400, need: 2, r: 230, say: ['pr_16'] }],
     mud: [{ x: 1000, w: 300 }, { x: 3400, w: 300 }, { x: 4700, w: 420 }],
     bonus: [].concat(arcRow(200, 700, G - 80, 30, 6), arcRow(1000, 1600, G - 80, 50, 6), arcRow(2500, 3100, G - 80, 40, 6), arcRow(3400, 4200, G - 90, 50, 7), arcRow(4600, 4900, G - 160, 30, 3)),
     plats: [{ x: 805, w: 110, kind: 'stone' }, { x: 3210, w: 110, kind: 'stone' }, { x: 1300, w: 110, kind: 'stump' }, { x: 3800, w: 110, kind: 'rock' }],
@@ -297,7 +301,7 @@ const LEVELS = [
               { x0: 2960, x1: 4200, top: G }, { x0: 4340, x1: 6400, top: G }],
     friend: { kind: 'riddletree', x: 6050 },
     items: [{ x: 800, y: G - 50 }, { x: 1475, y: G - 220 }, { x: 3500, y: G - 190 }, { x: 4800, y: G - 50 }],
-    stations: [{ id: 'riddle', kind: 'riddle', x: 5350, need: 1, say: ['pr_08'] }],
+    stations: [{ id: 'lanterns', kind: 'simon', x: 3750, hint: 'x_simon', say: ['pr_13'] }, { id: 'riddle', kind: 'riddle', x: 5350, need: 1, say: ['pr_08'] }],
     bonus: [].concat(arcRow(240, 1000, G - 80, 40, 7), arcRow(1900, 2700, G - 80, 60, 7), arcRow(3000, 4100, G - 90, 50, 8), arcRow(4400, 5200, G - 80, 30, 6), arcRow(5500, 5900, G - 80, 20, 4)),
     plats: [{ x: 2830, w: 110, kind: 'stone' }, { x: 4210, w: 110, kind: 'stone' }, { x: 3300, w: 110, kind: 'stump' }],
     cues: [{ x: 0, say: ['l7_a', 'ins_20', 'ins_10', 'num_08'] }, { x: 2800, say: ['ins_15'] }] },
@@ -312,11 +316,42 @@ const LEVELS = [
             { x: 5800, y: G - 60, kind: 'feather', grp: 'gift', to: 'g0' }, { x: 5960, y: G - 60, kind: 'bubble', col: 'red', grp: 'gift', to: 'g1' }, { x: 6120, y: G - 60, kind: 'petal', grp: 'gift', to: 'g2' },
             { x: 6280, y: G - 60, kind: 'steam', grp: 'gift', to: 'g3' }, { x: 6440, y: G - 60, kind: 'plank', grp: 'gift', to: 'g4' }, { x: 6600, y: G - 60, kind: 'challah', grp: 'gift', to: 'g5' },
             { x: 6760, y: G - 60, kind: 'ribbon', grp: 'gift', to: 'g6' }, { x: 6920, y: G - 60, kind: 'flower', col: '1', grp: 'gift', to: 'g7' }],
-    stations: [0, 1, 2, 3, 4, 5, 6, 7].map(i => ({ id: 'g' + i, kind: 'plate', x: 7160 + i * 90, need: 1, r: 46, icon: ['feather', 'bubble_red', 'petal', 'steam', 'plank', 'challah', 'ribbon', 'flower_1'][i] })),
+    stations: [0, 1, 2, 3, 4, 5, 6, 7].map(i => ({ id: 'g' + i, kind: 'plate', x: 7160 + i * 90, need: 1, r: 46, icon: ['feather', 'bubble_red', 'petal', 'steam', 'plank', 'challah', 'ribbon', 'flower_1'][i] })).concat([{ id: 'beat', kind: 'rhythm', x: 4700, r: 330, need: 6, hint: 'x_rhythm', near: 520, say: ['pr_14'] }]),
     bonus: [].concat(arcRow(250, 1400, G - 80, 40, 9), arcRow(2300, 3400, G - 80, 50, 9), arcRow(4300, 5600, G - 80, 40, 12)),
     plats: [],
     decos: [{ kind: 'princess2', x: 8050, happy: true }],
-    cues: [{ x: 0, say: ['l8_a', 'ins_23', 'ins_10', 'num_10'] }, { x: 5600, say: ['fr_16'] }] }
+    cues: [{ x: 0, say: ['l8_a', 'ins_23', 'ins_10', 'num_10'] }, { x: 5600, say: ['fr_16'] }] },
+  /* ---- stage 9 (round 4): the Queen of Sheba's oasis. Water drops to the well, gems in the sand, a wind draft up to a high drop ---- */
+  { name: 'oasis', need: 13, len: 7000, sticker: 9, collect: 'water_drop', ins: 'x_find_water', joins: ['sheba', 'camel'], carry: true, drafts: [{ x: 3100, w: 180, h: 590 }],
+    finSay: ['l9_c', 'l9_d', 'pr_17'],
+    terrain: [{ x0: 0, x1: 900, top: G }, { x0: 900, x1: 1150, top: G - 60 }, { x0: 1150, x1: 1400, top: G - 110 }, { x0: 1400, x1: 1650, top: G - 60 }, { x0: 1650, x1: 2500, top: G },
+              { x0: 2660, x1: 3600, top: G }, { x0: 3600, x1: 3850, top: G - 70 }, { x0: 3850, x1: 4100, top: G - 130 }, { x0: 4100, x1: 4350, top: G - 70 }, { x0: 4350, x1: 5300, top: G },
+              { x0: 5580, x1: 7000, top: G }],
+    friend: { kind: 'sheba', x: 6500 },
+    items: [{ x: 600, y: G - 50, to: 'well' }, { x: 1275, y: G - 200, to: 'well' }, { x: 3200, y: G - 560, to: 'well' }],
+    stations: [{ id: 'gems', kind: 'seek', what: 'gem', mound: 'sandmound', x: 1700, pts: [1700, 2150, 2950, 5000], hint: 'x_seek_b', near: 600, say: ['pr_13'] },
+               { id: 'well', kind: 'well', x: 4600, need: 3, r: 220, hint: 'x_well', say: ['l9_b'] }],
+    bonus: [].concat(arcRow(240, 820, G - 80, 40, 6), arcRow(930, 1370, G - 190, 50, 6), arcRow(1450, 1900, G - 80, 40, 5), arcRow(2000, 2450, G - 90, 70, 5), arcRow(2760, 3050, G - 80, 30, 4),
+      arcRow(3140, 3240, G - 300, 0, 3), arcRow(3140, 3240, G - 440, 0, 2), arcRow(3620, 4300, G - 200, 40, 7), arcRow(4400, 5200, G - 80, 40, 7), arcRow(5340, 5540, G - 120, 60, 3), arcRow(5700, 6300, G - 80, 30, 6)),
+    plats: [{ x: 3270, w: 130, top: G - 470, kind: 'cloud' }, { x: 5320, w: 150, top: G - 50, kind: 'cloud', move: { a: 5310, b: 5420, sp: 0.012 } }],
+    props: [300, 1950, 3000, 4950, 6100, 6800].map(x => ({ k: 'palm', x, w: 300 })),
+    decos: [{ kind: 'camel', x: 6680, hap: 'well' }],
+    cues: [{ x: 0, say: ['l9_a', 'x_find_water', 'ins_10'] }, { x: 2950, say: ['x_draft', 'ins_15'] }] },
+
+  /* ---- stage 10 (round 4): the Moon Mountain, the last stage. Count the cloud stairs, wind up to a star, light the lanterns, dance in rhythm with the Moon ---- */
+  { name: 'moon', need: 15, len: 8200, sticker: 10, collect: 'moonstar', ins: 'x_find_moon', joins: ['moon'], drafts: [{ x: 3500, w: 180, h: 590 }],
+    finSay: ['l10_c', 'l10_d', 'pr_20'],
+    terrain: [{ x0: 0, x1: 2900, top: G }, { x0: 3050, x1: 3700, top: G }, { x0: 3700, x1: 3950, top: G - 70 }, { x0: 3950, x1: 4200, top: G - 130 }, { x0: 4200, x1: 4450, top: G - 70 },
+              { x0: 4450, x1: 5000, top: G }, { x0: 5160, x1: 5800, top: G }, { x0: 5800, x1: 8200, top: G }],
+    friend: { kind: 'moon', x: 7500 },
+    items: [{ x: 700, y: G - 60 }, { x: 2545, y: G - 640 }, { x: 3590, y: G - 560 }, { x: 4075, y: G - 220 }, { x: 5260, y: G - 60 }],
+    stations: [{ id: 'steps', kind: 'count', x: 1930, pts: [[1565, G - 190], [1765, G - 280], [1965, G - 370], [2165, G - 460], [2365, G - 550]], hint: 'x_count', near: 700, say: ['pr_13'] },
+               { id: 'lanterns', kind: 'simon', x: 4720, hint: 'x_simon', say: ['pr_13'] },
+               { id: 'moondance', kind: 'rhythm', finish: true, x: 6900, r: 380, need: 6, hint: 'x_rhythm', near: 700 }],
+    bonus: [].concat(arcRow(240, 1300, G - 80, 40, 8), arcRow(1480, 2350, G - 200, 40, 5), arcRow(2720, 2880, G - 100, 50, 3), arcRow(3100, 3450, G - 80, 30, 4), arcRow(3720, 4400, G - 190, 50, 6),
+      arcRow(4500, 4950, G - 80, 30, 4), arcRow(5030, 5130, G - 130, 60, 2), arcRow(5300, 5780, G - 80, 30, 4), arcRow(5900, 6700, G - 80, 40, 7)),
+    plats: [0, 1, 2, 3, 4].map(i => ({ x: 1500 + i * 200, w: 130, top: G - 90 * (i + 1), kind: 'cloud' })).concat([{ x: 2480, w: 130, top: G - 540, kind: 'cloud' }]),
+    cues: [{ x: 0, say: ['l10_a', 'x_find_moon', 'ins_10'] }, { x: 3300, say: ['x_draft', 'ins_15'] }] }
 ];
 const REST_W = 1.25;        // picture is a bit wider than the part you stand on
 function prepLevel(lv){
@@ -347,6 +382,12 @@ function startLevel(i){
   items = L.items.map(o => ({ ...o, got: false, bob: rand(0, 6) }));
   pocket = []; sts = (L.stations || []).map(o => ({ ...o, have: 0, done: false, t: 0, cd: 0, armed: 0 }));
   sts.forEach(st => { if (st.kind === 'riddle') { st.want = Math.random() < 0.5 ? 'red' : 'blue'; st.objs = [['apple', 'red'], ['ball', 'blue'], ['leaf', 'green']].sort(() => Math.random() - 0.5).map((o, i) => ({ k: o[0], col: o[1], x: st.x + (i - 1) * 250, wob: 0 })); } });
+  sts.forEach(st => { const k = st.kind;
+    if (k === 'count') { st.n = 0; st.need = st.pts.length; st.wob = st.pts.map(() => 0); }
+    else if (k === 'rain') { st.n = 0; st.drops = []; st.sp = 40; }
+    else if (k === 'seek') { st.n = 0; st.need = st.pts.length; st.rev = st.pts.map(() => 0); }
+    else if (k === 'simon') { st.seq = [0, 1, 2, 3].sort(() => Math.random() - 0.5).slice(0, 3); st.phase = 'wait'; st.k = 0; st.t2 = 0; st.lit = [0, 0, 0, 0]; st.on = [false, false, false, false]; st.stand = 0; st.ign = -2; st.prev = -1; st.idle = 0; st.shake = 0; }
+    else if (k === 'rhythm') { st.active = false; st.clock = 0; st.hits = 0; st.fb = 0; st.r = st.r || 300; } });
   stars = (L.stars || []).map(o => ({ ...o, y: G - 70, got: false, back: 0 }));
   bonus = (L.bonus || []).map(o => ({ ...o, got: false })); bonusN = 0;
   plats = L.plats.map(o => ({ ...o, dx: 0 })); terr = L.terrain;
@@ -364,17 +405,25 @@ function inGap(x){ return (L.gaps || []).find(g => x > g.x && x < g.x + g.w); }
 function burst(x, y, n, cols, shape){ for (let i = 0; i < n; i++) parts.push({ x, y, vx: rand(-3, 3), vy: rand(-4.5, -0.5), life: 1, c: cols[i % cols.length], s: rand(5, 11), shape: shape || 'dot', g: 0.12 }); }
 const starsOK = () => bonusN >= (L.need || 0);
 const stationsOK = () => sts.every(s => s.done);
+const MINI = { count: 1, rain: 1, seek: 1, simon: 1, rhythm: 1 };       // round 4: the new little games
+const restOK = st => got === items.length && starsOK() && sts.every(s => s === st || s.done);      // everything else is finished (the last rhythm game ends the level)
+function stPos(st){        // where the sparkle trail and the hints should point for a station
+  if (st.kind === 'count') { const q = st.pts[Math.min(st.n, st.pts.length - 1)]; return { x: q[0], y: q[1] }; }
+  if (st.kind === 'seek') { const o = st.pts.filter((x, i) => !st.rev[i]).sort((a, b) => Math.abs(a - p.x) - Math.abs(b - p.x))[0]; return { x: o === undefined ? st.x : o, y: G - 60 }; }
+  if (st.kind === 'rain') return { x: clamp(p.x, st.zone[0], st.zone[1]), y: G - 100 };
+  return { x: st.kind === 'riddle' ? st.x - 300 : st.x, y: G - 60 };
+}
 const goalMet = () => got === items.length && starsOK() && stationsOK();       // to finish a level: all the things (and each one put to use) AND enough gold stars
 function target(){ const it = items.find(o => !o.got && !o.hidden);
   if (pocket.length) { const st = sts.find(s => s.id === pocket[0].to); if (st) return { x: st.x, y: G - 60 }; }
   if (it) return { x: it.x, y: it.y };
-  { const st = sts.find(s => !s.done && !s.auto && !s.dance); if (st && got >= items.length - items.filter(o => o.hidden).length) return { x: st.kind === 'riddle' ? st.x - 300 : st.x, y: G - 60 }; }
+  { const st = sts.find(s => !s.done && !s.auto && !s.dance); if (st && got >= items.length - items.filter(o => o.hidden).length) return stPos(st); }
   if (!starsOK()) { const b = bonus.filter(o => !o.got).sort((a, c) => Math.abs(a.x - p.x) - Math.abs(c.x - p.x))[0]; if (b) return { x: b.x, y: b.y }; }
   return { x: L.friend.x, y: G - 60 }; }
 function curIns(){
   if (got < items.length) return items.some(o => !o.got && !o.hidden) ? (L.noIns ? null : L.ins) : null;
   if (!starsOK()) return 'ins_10';
-  if (!stationsOK()) return null;
+  if (!stationsOK()) { const s = sts.find(o => !o.done && o.hint && (o.kind !== 'rhythm' || !o.finish || restOK(o))); return s ? s.hint : null; }
   if (Math.abs(p.x - L.friend.x) > 190) return 'ins_24';
   return L.auto ? null : 'ins_06';
 }
@@ -394,11 +443,12 @@ function pickup(it){
 /* a station has everything it needs */
 function complete(st){
   st.done = true; st.t = 0; progress(); sfx.win && st.kind !== 'plate' ? sfx.star() : sfx.pick(); burst(st.x, G - 120, st.kind === 'plate' ? 10 : 26, RB, 'star');
-  (st.say || []).forEach(id => Voice.say(id));
+  if (!st.finish) (st.say || []).forEach(id => Voice.say(id));
   if (st.spawn) { const it = items.find(o => o.hid === st.spawn); if (it) { it.hidden = false; it.x = st.x + 10; it.y = G - 90; burst(it.x, it.y, 20, ['#ffe14d', '#fff'], 'star'); } }
   if (st.kind === 'bowl') { const ov = sts.find(s => s.id === 'oven'); if (ov) ov.armed = 110; }
   if (st.kind === 'riddle') st.objs.forEach(o => burst(o.x, G - 70, 8, RB, 'star'));
-  if (got === items.length && starsOK() && stationsOK()) Voice.say('ins_24');
+  if (st.finish) { finish(); return; }
+  if (got === items.length && starsOK() && stationsOK() && !sts.some(o => o.finish)) Voice.say('ins_24');
 }
 function finish(){
   fin = { t: 0 }; L.friend.happy = true; progress(); glow(null); sfx.win();
@@ -408,9 +458,57 @@ function finish(){
 }
 function endLevel(){
   save.done[li] = true; persist(); mode = 'end'; showButtons(); glow(null);
-  $('sticker').innerHTML = '<img alt="" src="art/ui/sticker_' + L.sticker + '.png">'; $('end').classList.remove('hide');
+  $('sticker').innerHTML = '<img alt="" src="art/ui/sticker_' + L.sticker + '.png" onerror="this.onerror=null;this.src=\'art/ui/sticker_8.png\'">'; $('end').classList.remove('hide');
   $('sticker').style.animation = 'none'; void $('sticker').offsetWidth; $('sticker').style.animation = '';
   if (followers.length + 1 >= 4) Voice.sayIfFree('pr_19');
+}
+
+/* ---------- the little games (round 4): count, rain, seek, simon, rhythm ---------- */
+const NUMV = n => 'num_' + (n < 10 ? '0' : '') + n;
+const SIMON_TONE = [392, 523, 659, 784];
+const lanternX = (st, i) => st.x + (i - 1.5) * 150;
+function miniUpdate(st, dt){
+  const cx = p.x, cy = p.y - 62, k = st.kind;
+  if (k === 'count') {       // numbered bubbles, pop them 1, 2, 3 ...
+    st.wob = st.wob.map(w => Math.max(0, w - dt));
+    st.pts.forEach((q, i) => { if (i < st.n || Math.hypot(q[0] - cx, q[1] - cy) > 66) return;
+      if (i === st.n) { st.n++; sfx.pop(); burst(q[0], q[1], 14, RB, 'star'); progress(); Voice.say(NUMV(st.n)); if (st.n >= st.pts.length) complete(st); }
+      else if (st.wob[i] <= 0) { st.wob[i] = 50; sfx.boing(); if (st.cd <= 0) { st.cd = 420; Voice.say('x_count'); } } }); }
+  else if (k === 'rain') {      // falling stars: stand under them
+    const z = st.zone;
+    if (p.x > z[0] && p.x < z[1]) { st.sp += dt; if (st.sp >= 55) { st.sp = 0; st.drops.push({ x: clamp(p.x + rand(-200, 420), z[0], z[1]), y: camY - 40, vy: rand(2.8, 3.6), w: rand(0, 6) }); } }
+    st.drops.forEach(d => { d.y += d.vy * dt; d.x += Math.sin(T * 0.05 + d.w) * 0.4 * dt;
+      if (!d.dead && Math.hypot(d.x - cx, d.y - cy) < 66) { d.dead = true; st.n++; sfx.star(); burst(d.x, d.y, 10, ['#ffe14d', '#fff'], 'star'); progress(); if (st.n <= 10) Voice.say(NUMV(st.n)); if (st.n >= st.need) complete(st); } });
+    st.drops = st.drops.filter(d => !d.dead && d.y < G + 40); }
+  else if (k === 'seek') {      // touch the hay (or the sand) to see what hides in it
+    st.pts.forEach((x, i) => { if (st.rev[i] || !p.on || p.y < G - 40 || Math.abs(p.x - x) > 70) return;
+      st.rev[i] = 1; st.n++; sfx.pick(); burst(x, G - 80, 14, st.what === 'gem' ? ['#7fd8ff', '#ff9fd0', '#fff'] : ['#ffe14d', '#fff'], 'star'); progress();
+      Voice.say(st.n === 1 ? (st.what === 'gem' ? 'x_gem' : 'x_chick') : NUMV(st.n)); if (st.n >= st.need) complete(st); }); }
+  else if (k === 'simon') {     // four lanterns light up in a pattern of three; stand on them in the same order
+    const cur = p.on && p.y >= G - 8 ? [0, 1, 2, 3].find(i => Math.abs(p.x - lanternX(st, i)) < 55) : undefined, c = cur === undefined ? -1 : cur;
+    st.lit = st.lit.map(v => Math.max(0, v - dt)); st.shake = Math.max(0, st.shake - dt);
+    if (st.phase === 'wait') { if (Math.abs(p.x - st.x) < 560) { st.phase = 'show'; st.t2 = 0; Voice.say('x_simon'); } return; }
+    if (st.phase === 'show') { st.t2 += dt;
+      for (let j = 0; j < 3; j++) { const t0 = 170 + j * 85; if (st.t2 >= t0 && st.t2 - dt < t0) { st.lit[st.seq[j]] = 55; tone(SIMON_TONE[st.seq[j]], 0.4, 'triangle', 0.14); } }
+      if (st.t2 > 170 + 3 * 85 + 30) { st.phase = 'input'; st.k = 0; st.stand = 0; st.idle = 0; st.ign = c; st.prev = c; st.on = [false, false, false, false]; Voice.say('x_now'); }
+      return; }
+    st.idle += dt;
+    if (c !== st.prev) { st.prev = c; st.stand = 0; if (c !== st.ign) st.ign = -2; }
+    if (c >= 0 && c !== st.ign && Math.abs(p.vx) < 0.5) st.stand += dt; else st.stand = 0;
+    if (st.idle > 1500) { st.phase = 'show'; st.t2 = 0; st.on = [false, false, false, false]; Voice.say('x_simon'); return; }       // nobody tried for a long time: show it again
+    if (st.stand >= 12) { st.stand = 0; st.ign = c; st.idle = 0;
+      if (c === st.seq[st.k]) { st.on[c] = true; st.lit[c] = 40; tone(SIMON_TONE[c], 0.4, 'triangle', 0.14); burst(lanternX(st, c), G - 130, 10, RB, 'star'); st.k++; progress();
+        if (st.k >= 3) { st.on = [true, true, true, true]; st.phase = 'done'; complete(st); } else if (st.k === 2) Voice.say('pr_04'); }
+      else { st.shake = 40; sfx.boing(); Voice.say('pr_11'); st.phase = 'show'; st.t2 = 0; st.k = 0; st.on = [false, false, false, false]; } } }
+  else if (k === 'rhythm') {     // dance on the beat: a ring shrinks to the target, press Dance when it closes
+    st.fb = Math.max(0, st.fb - dt);
+    if (st.active && Math.abs(p.x - st.x) < st.r) { const c0 = st.clock; st.clock += dt; if (Math.floor(c0 / 64) !== Math.floor(st.clock / 64)) tone(440, 0.07, 'sine', 0.07); } }
+}
+function rhythmPress(st){
+  if (!st.active) { st.active = true; st.clock = 1; return; }
+  const ph = st.clock % 64, d = Math.min(ph, 64 - ph);
+  if (d <= 16) { st.hits++; st.fb = 24; sfx.pick(); burst(st.x, G - 220, 12, RB, 'star'); progress(); if (st.hits >= st.need) complete(st); else if (st.hits === 3) Voice.sayIfFree('pr_13'); }
+  else { st.fb = -14; tone(300, 0.08, 'sine', 0.05); }
 }
 
 /* ---------- update ---------- */
@@ -440,13 +538,15 @@ function update(dt){
   if (wantJump && p.on && !locked && !dancing) { p.vy = L.floaty ? -11.6 : -13.2; p.on = false; p.squash = 1.25; sfx.jump(); if ($('bj').classList.contains('glow')) glow(null); }
   // super jump
   if (wantSuper && !locked && p.on && meter >= 3) { p.vy = -21.5; p.on = false; p.wings = 1; meter = 0; p.dance = 0; sfx.sup(); Voice.say('ex_04'); $('bs').classList.remove('ready', 'glow'); }
-  // dance
+  // dance (a rhythm game nearby takes the press first; the dance picture is shorter then so she can press again on the next beat)
+  if (wantDance && save.dance && p.on && !locked) { const rh = sts.find(s => s.kind === 'rhythm' && !s.done && Math.abs(p.x - s.x) < s.r && (!s.finish || restOK(s)));
+    if (rh) { wantDance = false; if ($('bd').classList.contains('glow')) glow(null); const was = rh.active; rhythmPress(rh); p.dance = was ? 40 : 110; p.move = danceN++ % Math.max(1, save.done.filter(Boolean).length); sfx.dance(); } }
   if (wantDance && save.dance && p.on && !locked && !dancing) {
     p.dance = 110; p.move = danceN++ % Math.max(1, save.done.filter(Boolean).length); sfx.dance(); if ($('bd').classList.contains('glow')) glow(null);
     const near = Math.abs(p.x - L.friend.x) < 200 && goalMet();
     const cd = sts.find(s => s.dance && !s.done && Math.abs(p.x - s.x) < 280);
     if (cd) { complete(cd); }
-    else if (near && !L.auto) finish();
+    else if (near && !L.auto && !sts.some(o => o.finish)) finish();
     else if (L.danceZone && p.x > L.danceZone.a && p.x < L.danceZone.b) { for (let i = 0; i < 9; i++) flowers.push({ x: p.x + rand(-260, 260), c: RB[i % 6], t: 0 }); if (!said.dz) { said.dz = 1; Voice.say('pr_07'); } progress(); }
     else Voice.sayIfFree(Math.random() < 0.5 ? 'pr_07' : 'pr_08');
   }
@@ -457,6 +557,7 @@ function update(dt){
   if (p.bubble > 0) { p.bubble -= dt; const ty = groundAt(p.x); const gy = ty === null ? G : ty; p.y += (gy - p.y) * 0.06 * dt; p.vy = 0; if (p.bubble <= 0 || Math.abs(gy - p.y) < 3) { p.bubble = 0; p.y = gy; p.on = true; sfx.pop(); } }
   else {
     const py = p.y;
+    (L.drafts || []).forEach(d => { if (p.x > d.x && p.x < d.x + d.w && p.y > G - d.h) { p.vy = Math.max(p.vy - 0.95 * dt, -9); if (Math.random() < 0.25) parts.push({ x: p.x + rand(-40, 40), y: p.y - rand(0, 80), vx: 0, vy: 1.5, life: 0.7, c: '#fff', s: rand(3, 6), shape: 'dot', g: 0 }); } });     // the wind lifts her
     p.vy += (p.wings && p.vy > 0 ? 0.22 : L.floaty ? 0.44 : 0.62) * dt; if (p.vy > 16) p.vy = 16;
     const px0 = p.x; p.x = clamp(p.x + p.vx * dt, 60, L.len - 60); p.y += p.vy * dt;
     for (const g of terr) if (p.y > g.top + 12 && p.x + 34 > g.x0 && p.x - 34 < g.x1) {        // the side of a raised block or the wall of a gap
@@ -501,8 +602,10 @@ function update(dt){
   // stations: what she carries drops in when she walks up to the right place
   sts.forEach(st => { st.cd -= dt; st.t += dt;
     if (st.done) return;
+    if (st.hint && !st.intro && Math.abs(p.x - stPos(st).x) < (st.near || 520)) { st.intro = 1; Voice.say(st.hint); if (st.kind === 'rhythm') glow('bd'); }
     if (st.auto) { if (st.armed > 0) { st.armed -= dt; if (st.armed <= 0) complete(st); } return; }
     if (st.dance) return;
+    if (MINI[st.kind]) { miniUpdate(st, dt); return; }
     if (st.kind === 'riddle') {
       if (!st.asked && Math.abs(p.x - st.x) < 800 && got >= items.length) { st.asked = 1; Voice.say('l7_b'); Voice.say('fr_15'); Voice.say(st.want === 'red' ? 'ins_21' : 'ins_22'); }
       if (st.asked) st.objs.forEach(o => { o.wob = Math.max(0, o.wob - dt);
@@ -514,7 +617,7 @@ function update(dt){
 
   // friend
   const near = Math.abs(p.x - L.friend.x) < 170;
-  if (!fin && goalMet() && near) {
+  if (!fin && goalMet() && near && !sts.some(o => o.finish)) {
     if (L.auto) finish();
     else if (!arrived) { arrived = true; if (L.arriveSay) Voice.say(L.arriveSay); Voice.say('ins_06'); glow('bd'); }
   }
@@ -532,7 +635,7 @@ function update(dt){
     const ins = curIns();
     if (ins && hintT >= nextHint && Voice.idle()) {
       nextHint = hintT + 840; Voice.say(ins); const tg = target();
-      glow(ins === 'ins_06' ? 'bd' : (tg.y < p.y - 150 && Math.abs(tg.x - p.x) < 160) ? 'bj' : tg.x < p.x ? 'bl' : 'br'); }
+      glow(ins === 'ins_06' || ins === 'x_rhythm' ? 'bd' : (tg.y < p.y - 150 && Math.abs(tg.x - p.x) < 160) ? 'bj' : tg.x < p.x ? 'bl' : 'br'); }
     if (hintT > 1200) trail = true;
   }
 
@@ -561,7 +664,7 @@ function face(x, y, s, happy, closed){
 function star5(x, y, r, c){ ctx.fillStyle = c; ctx.beginPath(); for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, q = i % 2 ? r * 0.45 : r; ctx.lineTo(x + Math.cos(a) * q, y + Math.sin(a) * q); } ctx.closePath(); ctx.fill(); }
 
 /* ---------- drawing: friends (stand-ins; x,y = feet) ---------- */
-const FH = { pitzi: 150, bird: 84, mamabird: 115, bobo: 135, dad: 250, shluli: 105, tree: 370, bilam: 168, koko: 170, armon: 230, anana: 230, rhino: 280, luna: 110, solomon: 260, riddletree: 330, princess1: 250, princess2: 250, grandpa: 250, cloudunicorn: 200 };   // height of the whole picture frame, feet at the bottom
+const FH = { pitzi: 150, bird: 84, mamabird: 115, bobo: 135, dad: 250, shluli: 105, tree: 370, bilam: 168, koko: 170, armon: 230, anana: 230, rhino: 280, luna: 110, solomon: 260, riddletree: 330, princess1: 250, princess2: 250, grandpa: 250, cloudunicorn: 200, sheba: 250, camel: 230, moon: 330 };   // height of the whole picture frame, feet at the bottom
 function drawFriend(kind, x, y, happy, o){
   o = o || {};
   const im = IMG[kind + (happy ? '_happy' : '_sad')];
@@ -605,6 +708,21 @@ function drawFriend(kind, x, y, happy, o){
       const r = (15 + (i * 7) % 9) * k, c = ['#ff9fd0', '#ffb7dc', '#ff86c2'][i % 3];
       for (let a = 0; a < 5; a++) circ(q[0] + Math.cos(a * 1.257 + i) * r * 0.6, q[1] + Math.sin(a * 1.257 + i) * r * 0.6, r * 0.55, c);
       circ(q[0], q[1], r * 0.32, '#ffe14d'); });
+  } else if (kind === 'sheba') {          // the Queen of Sheba, drawn in code until Ghost's sheba_*.png arrive
+    rr(-30, -250 + 170, 60, 80, 8, '#d9a441'); ctx.fillStyle = happy ? '#b04fa0' : '#8a6a9a'; ctx.beginPath(); ctx.moveTo(-24, -170); ctx.lineTo(24, -170); ctx.lineTo(happy ? 62 : 50, 0); ctx.lineTo(happy ? -62 : -50, 0); ctx.closePath(); ctx.fill();
+    rr(-30, -170, 60, 16, 6, '#ffd84d'); ctx.strokeStyle = '#b04fa0'; ctx.lineWidth = 14; ctx.lineCap = 'round'; ctx.beginPath();
+    if (happy) { ctx.moveTo(-24, -160); ctx.lineTo(-62, -200); ctx.moveTo(24, -160); ctx.lineTo(62, -200); } else { ctx.moveTo(-24, -160); ctx.lineTo(-30, -110); ctx.moveTo(24, -160); ctx.lineTo(30, -110); } ctx.stroke();
+    circ(0, -205, 28, '#a0673d'); ctx.fillStyle = '#2a1a1a'; ctx.beginPath(); ctx.arc(0, -210, 29, Math.PI, 0); ctx.fill(); face(0, -204, 12, happy);
+    ctx.fillStyle = '#ffd028'; ctx.beginPath(); ctx.moveTo(-24, -228); ctx.lineTo(-24, -258); ctx.lineTo(-12, -242); ctx.lineTo(0, -264); ctx.lineTo(12, -242); ctx.lineTo(24, -258); ctx.lineTo(24, -228); ctx.fill();
+  } else if (kind === 'camel') {
+    const sw = Math.sin(T * 0.25) * 4;
+    rr(-62 + sw * 0.4, -80, 14, 80, 6, '#c99a58'); rr(48 - sw * 0.4, -80, 14, 80, 6, '#c99a58'); rr(-36 - sw * 0.4, -80, 14, 80, 6, '#d8ac68'); rr(22 + sw * 0.4, -80, 14, 80, 6, '#d8ac68');
+    ell(0, -110, 80, 40, '#e0b46e'); circ(-22, -156, 30, '#e0b46e'); circ(26, -150, 26, '#e0b46e'); rr(62, -190, 22, 100, 11, '#e0b46e'); ell(92, -202, 30, 22, '#e8c284', 0.1);
+    face(90, -206, 8, true); ctx.fillStyle = '#ff7fb5'; rr(-50, -140, 100, 12, 6, happy ? '#ff7fb5' : '#9aa'); ctx.fillStyle = '#c99a58';
+  } else if (kind === 'moon') {
+    const g = ctx.createRadialGradient(0, -160, 20, 0, -160, 200); g.addColorStop(0, happy ? 'rgba(255,248,190,.9)' : 'rgba(200,205,255,.5)'); g.addColorStop(1, 'rgba(255,248,190,0)'); ctx.fillStyle = g; ctx.fillRect(-210, -360, 420, 400);
+    circ(0, -160, 118, happy ? '#fff4b8' : '#d4d8f2'); circ(-50, -190, 18, happy ? '#f6e594' : '#bcc2e6'); circ(46, -120, 24, happy ? '#f6e594' : '#bcc2e6'); circ(60, -200, 12, happy ? '#f6e594' : '#bcc2e6');
+    face(0, -160, 30, happy, !happy); if (happy) { circ(-60, -128, 14, 'rgba(255,150,170,.5)'); circ(60, -128, 14, 'rgba(255,150,170,.5)'); }
   } else if (kind === 'bilam') {
     const sw = Math.sin(T * 0.3) * 6;
     rr(-44 + sw * 0.3, -44, 12, 44, 5, '#8a8078'); rr(30 - sw * 0.3, -44, 12, 44, 5, '#8a8078');
@@ -688,13 +806,21 @@ function drawHero(){
 }
 
 /* ---------- drawing: things ---------- */
+/* draw a picture centred at (cx, cy) inside a box of size `box`, keeping its shape (the new pictures are not all square) */
+function fit(im, cx, cy, box){ const a = im.width / im.height, w = a >= 1 ? box : box * a, h = a >= 1 ? box / a : box; ctx.drawImage(im, cx - w / 2, cy - h / 2, w, h); }
 function drawItem(kind, x, y, col, t){
   const im = IMG['item_' + kind + (col ? '_' + col : '')];
   ctx.save(); ctx.translate(x, y + Math.sin(t) * 7);
   circ(0, 0, 40, 'rgba(255,255,255,.28)');
-  if (im) { if (kind === 'feather') ctx.rotate(Math.sin(t * 0.6) * 0.18); ctx.drawImage(im, -44, -44, 88, 88); ctx.restore(); return; }
+  if (im) { if (kind === 'feather') ctx.rotate(Math.sin(t * 0.6) * 0.18); fit(im, 0, 0, 88); ctx.restore(); return; }
   if (kind === 'feather') { ctx.rotate(-0.6); RB.forEach((c, i) => ell(0, -24 + i * 9, 13 - Math.abs(i - 2.5) * 2.4, 8, c)); ctx.strokeStyle = '#fff'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(0, -34); ctx.lineTo(0, 40); ctx.stroke(); }
   else if (kind === 'bubble') { circ(0, 0, 30, COL[col][0]); circ(0, 0, 30, 'rgba(255,255,255,.25)'); ell(-11, -12, 9, 5, 'rgba(255,255,255,.85)', -0.6); ctx.strokeStyle = '#fff'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, 0, 30, 0, 7); ctx.stroke(); }
+  else if (kind === 'gem') { ctx.fillStyle = '#7fd8ff'; ctx.beginPath(); ctx.moveTo(-26, -8); ctx.lineTo(-14, -26); ctx.lineTo(14, -26); ctx.lineTo(26, -8); ctx.lineTo(0, 28); ctx.closePath(); ctx.fill(); ctx.fillStyle = '#ff9fd0'; ctx.beginPath(); ctx.moveTo(-26, -8); ctx.lineTo(0, -8); ctx.lineTo(0, 28); ctx.closePath(); ctx.fill(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(-26, -8); ctx.lineTo(26, -8); ctx.moveTo(-14, -26); ctx.lineTo(0, -8); ctx.lineTo(14, -26); ctx.stroke(); }
+  else if (kind === 'moonstar') { star5(0, 0, 32, '#dfe6ff'); star5(-3, -3, 16, '#fff'); }
+  else if (kind === 'shootingstar') { ctx.strokeStyle = 'rgba(255,230,130,.7)'; ctx.lineWidth = 10; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(-8, -8); ctx.lineTo(-40, -44); ctx.stroke(); star5(0, 0, 26, '#ffd028'); star5(-3, -3, 10, '#fff6b8'); }
+  else if (kind === 'chick') { circ(0, 4, 24, '#ffe14d'); circ(0, -14, 15, '#ffe14d'); ctx.fillStyle = '#ff9f43'; ctx.beginPath(); ctx.moveTo(12, -14); ctx.lineTo(24, -10); ctx.lineTo(12, -6); ctx.fill(); circ(5, -18, 3, '#3a2a3a'); }
+  else if (kind === 'numbubble') { circ(0, 0, 36, 'rgba(160,220,255,.5)'); ctx.strokeStyle = '#fff'; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(0, 0, 36, 0, 7); ctx.stroke(); ell(-13, -14, 10, 5, 'rgba(255,255,255,.85)', -0.6); }
+  else if (kind === 'water_drop') { ctx.fillStyle = '#5fb8ff'; ctx.beginPath(); ctx.moveTo(0, -30); ctx.bezierCurveTo(26, -2, 24, 26, 0, 28); ctx.bezierCurveTo(-24, 26, -26, -2, 0, -30); ctx.fill(); ell(-8, 6, 5, 9, 'rgba(255,255,255,.7)', 0.2); }
   else if (kind === 'petal') { ctx.rotate(Math.sin(t * 0.7) * 0.4); ctx.fillStyle = '#ff8fc7'; ctx.beginPath(); ctx.moveTo(0, -30); ctx.bezierCurveTo(30, -12, 22, 26, 0, 30); ctx.bezierCurveTo(-22, 26, -30, -12, 0, -30); ctx.fill(); ell(-5, -4, 5, 12, '#ffc4e2', 0.2); }
   ctx.restore();
 }
@@ -720,7 +846,7 @@ function drawPlat(pl){
 function hills(par, base, amp, c, f){ ctx.fillStyle = c; ctx.beginPath(); ctx.moveTo(0, VH); for (let sx = 0; sx <= VW + 40; sx += 40) { const wx = sx + camX * par; ctx.lineTo(sx, base - Math.sin(wx * f) * amp - Math.sin(wx * f * 2.3 + 1) * amp * 0.4); } ctx.lineTo(VW, VH); ctx.fill(); }
 function drawWorld(){
   const n = L.name, im = IMG['bg_' + n];
-  const sky = { garden: ['#bfe9ff', '#eafff0'], rainbow: ['#ffdff3', '#e6dcff'], forest: ['#cdeccf', '#f4ffd9'], sky: ['#ffb78a', '#f6c7ee'], farm: ['#bfe3ff', '#f1ffe0'], shabbat: ['#ffe2a6', '#fff3d6'], night: ['#1f2a5e', '#4b5fa8'], castle: ['#bfe9ff', '#ffe8f6'] }[n] || ['#bfe9ff', '#eafff0'];
+  const sky = { garden: ['#bfe9ff', '#eafff0'], rainbow: ['#ffdff3', '#e6dcff'], forest: ['#cdeccf', '#f4ffd9'], sky: ['#ffb78a', '#f6c7ee'], farm: ['#bfe3ff', '#f1ffe0'], shabbat: ['#ffe2a6', '#fff3d6'], night: ['#1f2a5e', '#4b5fa8'], castle: ['#bfe9ff', '#ffe8f6'], oasis: ['#ff9f7a', '#ffe9b8'], moon: ['#150f46', '#4a3a9a'] }[n] || ['#bfe9ff', '#eafff0'];
   const gr = ctx.createLinearGradient(0, 0, 0, VH); gr.addColorStop(0, sky[0]); gr.addColorStop(1, sky[1]); ctx.fillStyle = gr; ctx.fillRect(0, 0, VW, VH);
   if (im) { const h = VH, w = h * im.width / im.height, off = -((camX * 0.4) % w), by = -camY * 0.4;
     for (let x = off; x < VW; x += w) { if (by > 0) ctx.drawImage(im, 0, 0, im.width, 6, x, 0, w, by + 2); ctx.drawImage(im, x, by, w, h); } }
@@ -731,6 +857,14 @@ function drawWorld(){
   } else if (n === 'rainbow') {
     for (let i = 0; i < 12; i++) { const x = ((i * 310 - camX * (0.15 + (i % 3) * 0.08)) % (VW + 300) + VW + 300) % (VW + 300) - 150; for (let j = 0; j < 4; j++) circ(x + j * 46, 150 + (i % 4) * 90 - (j % 2) * 14, 40, 'rgba(255,255,255,.8)'); }
     for (let i = 0; i < 14; i++) star5(((i * 263 - camX * 0.1) % VW + VW) % VW, 60 + (i * 97) % 300, 7 + Math.sin(T * 0.06 + i) * 3, '#fff8c4');
+  } else if (n === 'oasis') {
+    circ(VW * 0.72 - camX * 0.02, 150 - camY * 0.2, 90, '#fff1b0'); circ(VW * 0.72 - camX * 0.02, 150 - camY * 0.2, 130, 'rgba(255,241,176,.3)');
+    hills(0.1, 430, 50, '#f5c987', 0.004); hills(0.25, 490, 40, '#eab96b', 0.006);
+    for (let i = 0; i < 5; i++) { const x = ((i * 520 - camX * 0.3) % (VW + 400) + VW + 400) % (VW + 400) - 200; ctx.strokeStyle = '#7a5a3a'; ctx.lineWidth = 8; ctx.beginPath(); ctx.moveTo(x, 520); ctx.quadraticCurveTo(x + 12, 440, x + 4, 380); ctx.stroke(); for (let a = 0; a < 5; a++) { ctx.strokeStyle = '#4c9657'; ctx.lineWidth = 10; ctx.beginPath(); ctx.moveTo(x + 4, 380); ctx.quadraticCurveTo(x + 4 + Math.cos(a * 1.26 - 0.3) * 40, 350 + Math.sin(a) * 10, x + 4 + Math.cos(a * 1.26 - 0.3) * 70, 390 + Math.abs(Math.sin(a)) * 24); ctx.stroke(); } }
+  } else if (n === 'moon') {
+    for (let i = 0; i < 40; i++) star5(((i * 197 - camX * 0.08) % VW + VW) % VW, 30 + (i * 83) % 420 - camY * 0.2, 3 + (i % 3) + Math.sin(T * 0.07 + i) * 1.4, '#fff8c4');
+    circ(VW * 0.78 - camX * 0.03, 140 - camY * 0.2, 80, '#fff4b8'); circ(VW * 0.78 - camX * 0.03, 140 - camY * 0.2, 118, 'rgba(255,244,184,.25)');
+    hills(0.12, 420, 70, '#5b4aa8', 0.004); hills(0.28, 490, 50, '#7b68c8', 0.006);
   } else {
     hills(0.15, 400, 40, '#a8d9a0', 0.005);
     for (let i = 0; i < 16; i++) { const par = 0.25 + (i % 3) * 0.12, x = ((i * 260 - camX * par) % (VW + 300) + VW + 300) % (VW + 300) - 150, w = 44 + (i % 3) * 22; rr(x, -20, w, G + 20, 0, ['#7fae78', '#6f9f6c', '#8bbd82'][i % 3]); circ(x + w / 2, 40 + (i % 4) * 30, 120, 'rgba(120,190,110,.5)'); }
@@ -738,14 +872,14 @@ function drawWorld(){
   }
   // ground: one block per terrain segment; the space between segments is a gap
   ctx.save(); ctx.translate(-camX, -camY);
-  if (n !== 'rainbow') (L.gaps || []).forEach(g => { const wg = ctx.createLinearGradient(0, G + 20, 0, VH); wg.addColorStop(0, '#7fd0ff'); wg.addColorStop(1, '#3d9be0'); ctx.fillStyle = wg; ctx.fillRect(g.x - 2, G + 28, g.w + 4, VH);
+  if (n !== 'rainbow') (L.gaps || []).forEach(g => { const wg = ctx.createLinearGradient(0, G + 20, 0, VH); const gc = { oasis: ['#d9a35c', '#a8743a'], moon: ['#8b7ad8', '#4a3a9a'] }[n] || ['#7fd0ff', '#3d9be0']; wg.addColorStop(0, gc[0]); wg.addColorStop(1, gc[1]); ctx.fillStyle = wg; ctx.fillRect(g.x - 2, G + 28, g.w + 4, VH);
     ctx.strokeStyle = 'rgba(255,255,255,.7)'; ctx.lineWidth = 3; for (let k = 0; k < 3; k++) { ctx.beginPath(); for (let x = g.x + 6; x < g.x + g.w - 6; x += 10) ctx.lineTo(x, G + 40 + k * 22 + Math.sin(T * 0.07 + x * 0.1 + k) * 3); ctx.stroke(); } });
   terr.forEach(sg => { const x0 = sg.x0, x1 = sg.x1, top = sg.top;
     if (n === 'rainbow') { RB.forEach((c, i) => rr(x0, top + i * 12, x1 - x0, 14, i ? 0 : 7, c)); rr(x0, top + 72, x1 - x0, VH, 0, '#fff');
       for (let x = x0 + 40; x < x1; x += 90) circ(x, top + 84, 46, '#fff'); }
-    else { const c = { garden: ['#7fd58a', '#63bd72', '#c59a6d'], sky: ['#ffd1ec', '#f6b0da', '#d58fbf'], farm: ['#8ccf6a', '#6fb556', '#7a5a3c'], shabbat: ['#e6c866', '#d1a84d', '#a8794a'], night: ['#5a78bc', '#4562a6', '#2c3f78'], castle: ['#8fdc8a', '#6fc873', '#9a7a56'] }[n] || ['#5fae68', '#4c9657', '#8f6d4b'];
+    else { const c = { garden: ['#7fd58a', '#63bd72', '#c59a6d'], sky: ['#ffd1ec', '#f6b0da', '#d58fbf'], farm: ['#8ccf6a', '#6fb556', '#7a5a3c'], shabbat: ['#e6c866', '#d1a84d', '#a8794a'], night: ['#5a78bc', '#4562a6', '#2c3f78'], castle: ['#8fdc8a', '#6fc873', '#9a7a56'], oasis: ['#f2d391', '#e3b96a', '#c99a52'], moon: ['#9d8ae0', '#7c69c8', '#4a3a9a'] }[n] || ['#5fae68', '#4c9657', '#8f6d4b'];
       rr(x0, top, x1 - x0, VH, 0, c[2]); rr(x0, top - 4, x1 - x0, 40, 10, c[0]); rr(x0, top + 22, x1 - x0, 14, 0, c[1]);
-      for (let x = Math.ceil(x0 / 130) * 130 + 40; x < x1 - 20; x += 130) { const k = (x * 7) % 5; ctx.fillStyle = '#4c9657'; ctx.fillRect(x - 1, top - 22, 3, 20); circ(x, top - 26, 8, RB[k]); circ(x, top - 26, 3.5, '#fff7c4'); } }
+      if (n !== 'oasis' && n !== 'moon') for (let x = Math.ceil(x0 / 130) * 130 + 40; x < x1 - 20; x += 130) { const k = (x * 7) % 5; ctx.fillStyle = '#4c9657'; ctx.fillRect(x - 1, top - 22, 3, 20); circ(x, top - 26, 8, RB[k]); circ(x, top - 26, 3.5, '#fff7c4'); } }
   });
   ctx.restore();
 }
@@ -764,6 +898,9 @@ function drawProps(){
       [-0.8, -0.4, 0, 0.4, 0.8].forEach(k => { ctx.beginPath(); ctx.moveTo(k * tx, ty + 6); for (let i = 1; i <= 5; i++) ctx.lineTo(k * tx + (i % 2 ? 7 : -7), ty + 6 + i * ((G + 4 - ty - 6) / 5)); ctx.stroke(); });
       rr(-tx - 6, G - 10, 12, 14, 5, '#ff8fc7'); rr(tx - 6, G - 10, 12, 14, 5, '#ff8fc7');
       ell(0, ty + 3, tx + 8, 13, '#ff8fc7'); ell(0, ty, tx, 10, '#ffe14d'); ell(0, ty - 1, tx - 22, 5, 'rgba(255,255,255,.55)'); ctx.restore(); } });
+  (L.drafts || []).forEach(d => { const im = IMG.prop_windswirl, g = ctx.createLinearGradient(0, G, 0, G - d.h); g.addColorStop(0, 'rgba(200,240,255,.38)'); g.addColorStop(1, 'rgba(200,240,255,0)'); ctx.fillStyle = g; ctx.fillRect(d.x, G - d.h, d.w, d.h);
+    for (let i = 0; i < 6; i++) { const y = G - ((T * 2.2 + i * d.h / 6) % d.h), a = 1 - (G - y) / d.h, x = d.x + d.w / 2 + Math.sin(T * 0.06 + i * 2) * d.w * 0.3;
+      ctx.globalAlpha = a * 0.9; if (im) pic(im, x, y + 60, 120); else { ctx.strokeStyle = '#fff'; ctx.lineWidth = 5; ctx.lineCap = 'round'; ctx.beginPath(); ctx.arc(x, y, 22, 0.3, 4.6); ctx.stroke(); star5(x + 26, y - 14, 5, '#fff'); } ctx.globalAlpha = 1; } });
   if (L.lights) items.forEach(it => { if (it.got) { const g = ctx.createRadialGradient(it.x + 380, G - 40, 40, it.x + 380, G - 40, 520); g.addColorStop(0, 'rgba(255,244,170,.38)'); g.addColorStop(1, 'rgba(255,244,170,0)'); ctx.fillStyle = g; ctx.fillRect(it.x - 160, G - 560, 1080, 700); } });
 }
 function drawStations(){
@@ -781,6 +918,31 @@ function drawStations(){
     else if (k === 'table') { const im = IMG.prop_plank_bridge; if (im) pic(im, x, G + 6, 420); else rr(x - 200, G - 110, 400, 40, 8, '#c58a4a'); if (st.done) drawItem('challah', x, G - 160, null, T * 0.04); }
     else if (k === 'bilam') { drawFriend('bilam', x, G, st.done, { face: -1, bounce: st.done }); for (let i = 0; i < st.need; i++) circ(x - 45 + i * 30, G - 210, 9, i < st.have ? '#ff9f43' : 'rgba(255,255,255,.7)'); }
     else if (k === 'plate') { const im = IMG.item_gift_plate; if (im) pic(im, x, G - 8, 82); else ell(x, G - 30, 40, 14, '#fff'); const ic = IMG['item_' + st.icon]; ctx.globalAlpha = st.done ? 1 : 0.32; if (ic) ctx.drawImage(ic, x - 24, G - 66, 48, 48); ctx.globalAlpha = 1; if (st.done) circ(x, G - 80, 6 + Math.sin(T * 0.2 + x) * 2, '#ffe14d'); }
+    else if (k === 'count') st.pts.forEach((q, i) => { if (i < st.n) return; const im = IMG.item_numbubble, nx = i === st.n, wb = st.wob[i] > 0 ? Math.sin(st.wob[i] * 0.8) * 8 : 0, sz = nx ? 112 + Math.sin(T * 0.15) * 6 : 96;
+      ctx.save(); ctx.translate(q[0] + wb, q[1] + Math.sin(T * 0.06 + i) * 6); if (nx) circ(0, 0, 66, 'rgba(255,255,160,.35)'); if (im) fit(im, 0, 0, sz); else drawItem('numbubble', 0, 0, null, 0);
+      ctx.fillStyle = '#b0409a'; ctx.font = 'bold 52px "Comic Sans MS", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(String(i + 1), 0, 4); ctx.restore(); });
+    else if (k === 'rain') st.drops.forEach(d => { const im = IMG.item_shootingstar; ctx.save(); ctx.translate(d.x, d.y); circ(0, 0, 40, 'rgba(255,240,150,.3)'); if (im) fit(im, 0, 0, 100); else drawItem('shootingstar', 0, 0, null, 0); ctx.restore(); });
+    else if (k === 'seek') st.pts.forEach((x, i) => { const mi = IMG['prop_' + st.mound]; if (mi) pic(mi, x, G + 6, st.mound === 'haybale' ? 140 : 190); else if (st.mound === 'haybale') { ell(x, G - 34, 66, 38, '#e6c35a'); ctx.strokeStyle = '#c9a23c'; ctx.lineWidth = 3; for (let j = -2; j <= 2; j++) { ctx.beginPath(); ctx.moveTo(x + j * 22, G - 62); ctx.lineTo(x + j * 26, G - 6); ctx.stroke(); } } else ell(x, G - 22, 84, 30, '#e8c27a');
+      if (st.rev[i]) { st.rev[i] += 1; const up = Math.min(1, st.rev[i] / 18); drawItem(st.what, x + 30 + Math.sin(st.rev[i] * 0.1) * 4, G - 36 - 60 * up - Math.abs(Math.sin(st.rev[i] * 0.12)) * 10, null, T * 0.05); }
+      else if (Math.abs(p.x - x) < 700) { const tw = (Math.sin(T * 0.12 + i) + 1) / 2; star5(x + 44, G - 60 - tw * 6, 7 + tw * 4, 'rgba(255,255,255,.9)'); } });
+    else if (k === 'simon') { for (let i = 0; i < 4; i++) { const lx = lanternX(st, i), col = ['red', 'blue', 'green', 'yellow'][i], lit = st.lit[i] > 0 || st.on[i], im = IMG['prop_lantern_' + col + (lit ? '_lit' : '')], sh = st.shake > 0 ? Math.sin(st.shake * 1.2) * 5 : 0;
+        ctx.save(); ctx.translate(lx + sh, 0);
+        if (lit) { const g = ctx.createRadialGradient(0, G - 130, 10, 0, G - 130, 130); g.addColorStop(0, 'rgba(255,244,170,.7)'); g.addColorStop(1, 'rgba(255,244,170,0)'); ctx.fillStyle = g; ctx.fillRect(-140, G - 270, 280, 280); }
+        if (im) { const lh = 170; ctx.drawImage(im, -lh * im.width / im.height / 2, G + 4 - lh, lh * im.width / im.height, lh); } else { ctx.fillStyle = '#7a5a3a'; ctx.fillRect(-3, G - 100, 6, 104); const c = COL[col][0]; ell(0, G - 150, 36, 46, lit ? c : 'rgba(80,80,110,.8)'); ell(0, G - 150, 36, 46, lit ? 'rgba(255,255,255,.35)' : 'rgba(0,0,0,.15)'); rr(-22, G - 200, 44, 10, 5, '#7a5a3a'); rr(-22, G - 106, 44, 10, 5, '#7a5a3a'); }
+        if (st.phase === 'input' && st.ign !== i && st.stand > 0 && st.prev === i) { ctx.strokeStyle = '#fff'; ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(0, G - 150, 62, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * Math.min(1, st.stand / 12)); ctx.stroke(); }
+        ctx.restore(); } }
+    else if (k === 'rhythm') { const near = Math.abs(p.x - st.x) < 900, fy = G - 230; if (near) {
+        const ph = st.clock % 64, until = st.active ? (64 - ph) % 64 : 0, rad = st.active ? 46 + until * 1.5 : 46 + Math.sin(T * 0.1) * 5;
+        ell(st.x, G - 4, 90, 14, st.active ? 'rgba(255,143,199,.55)' : 'rgba(255,143,199,.3)');
+        ctx.lineWidth = 8; ctx.strokeStyle = st.fb > 0 ? '#6fdc8c' : st.fb < 0 ? '#ff8a8a' : '#ffd028'; ctx.beginPath(); ctx.arc(st.x, fy, 46, 0, 7); ctx.stroke();
+        if (st.active) { ctx.strokeStyle = 'rgba(255,255,255,.95)'; ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(st.x, fy, rad, 0, 7); ctx.stroke(); }
+        circ(st.x, fy, 30 + (st.fb > 0 ? st.fb * 0.5 : 0), st.fb > 0 ? 'rgba(111,220,140,.55)' : 'rgba(255,143,199,.35)');
+        ctx.fillStyle = '#b0409a'; ctx.font = 'bold 34px "Comic Sans MS", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('\u266B', st.x, fy + 2);
+        for (let i = 0; i < st.need; i++) circ(st.x - (st.need - 1) * 17 + i * 34, fy - 74, 10, i < st.hits ? '#ffd028' : 'rgba(255,255,255,.7)'); } }
+    else if (k === 'well') { const im = IMG[st.done ? 'prop_well_full' : 'prop_well'];
+      if (im) pic(im, x, G + 6, 300); else { rr(x - 90, G - 110, 180, 114, 20, '#b9b3c4'); rr(x - 70, G - 112, 140, 30, 14, st.done ? '#7fd0ff' : '#5a5560'); rr(x - 100, G - 190, 12, 84, 4, '#8f623f'); rr(x + 88, G - 190, 12, 84, 4, '#8f623f'); rr(x - 112, G - 204, 224, 18, 8, '#c58a4a'); if (!st.done) rr(x - 12, G - 160, 24, 24, 6, '#8a6a46'); }
+      for (let i = 0; i < st.need; i++) circ(x - 30 + i * 30, G - 230, 9, i < st.have ? '#5fb8ff' : 'rgba(255,255,255,.7)');
+      if (st.done) for (let i = 0; i < 3; i++) circ(x - 20 + i * 20, G - 120 - ((T * 1.2 + i * 20) % 60), 6, 'rgba(160,225,255,.8)'); }
     else if (k === 'riddle' && st.asked && !st.done) st.objs.forEach(o => { const im = IMG['riddle_' + o.k]; ctx.save(); ctx.translate(o.x, G); ctx.rotate(o.wob > 0 ? Math.sin(o.wob * 0.5) * 0.25 : 0); if (im) pic(im, 0, 4, 130); else circ(0, -50, 50, COL[o.col] ? COL[o.col][0] : '#6fdc8c'); ctx.restore(); });
   });
 }
@@ -792,6 +954,16 @@ function drawPocket(){
   pocket.forEach((it, i) => { ctx.save(); ctx.translate(x0 + 78 + i * 56, y0 + 27 + Math.sin(T * 0.1 + i) * 2); ctx.scale(0.44, 0.44); drawItem(it.kind || L.collect, 0, 0, it.col, 0); ctx.restore(); });
 }
 
+/* small counters for the little games (what she has done / has to do) */
+function drawChips(){
+  let cx = 18; const cy = 162;
+  sts.forEach(st => { if (st.done || !(st.kind === 'count' || st.kind === 'rain' || st.kind === 'seek' || st.kind === 'rhythm')) return;
+    const n = st.kind === 'rhythm' ? st.hits : st.n; if (st.kind === 'rhythm' && !st.active) return;
+    rr(cx, cy, 150, 54, 27, 'rgba(255,255,255,.78)'); ctx.save(); ctx.translate(cx + 34, cy + 27); ctx.scale(0.5, 0.5);
+    if (st.kind === 'seek') drawItem(st.what, 0, 0, null, 0); else if (st.kind === 'rain') drawItem('shootingstar', 0, 0, null, 0); else if (st.kind === 'count') drawItem('numbubble', 0, 0, null, 0); else { ctx.fillStyle = '#b0409a'; ctx.font = 'bold 60px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('\u266B', 0, 0); }
+    ctx.restore(); ctx.fillStyle = '#b0409a'; ctx.font = 'bold 30px "Comic Sans MS", sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText(n + ' / ' + st.need, cx + 66, cy + 29); cx += 160; });
+}
+
 /* ---------- draw everything ---------- */
 function draw(){
   ctx.setTransform(S, 0, 0, S, 0, 0);
@@ -800,7 +972,7 @@ function draw(){
   drawProps();
   flowers.forEach(f => { const k = Math.min(1, f.t / 20); ctx.fillStyle = '#4c9657'; ctx.fillRect(f.x - 2, G - 34 * k, 4, 34 * k); for (let a = 0; a < 5; a++) circ(f.x + Math.cos(a * 1.257) * 11 * k, G - 36 * k + Math.sin(a * 1.257) * 11 * k, 8 * k, f.c); circ(f.x, G - 36 * k, 6 * k, '#fff7c4'); });
   (L.decos || []).forEach(d => { if (d.kind === 'mamabird') { rr(d.x - 16, d.y, 32, G - d.y, 12, '#9a6a45'); circ(d.x - 30, d.y - 30, 70, '#7fcf7a'); circ(d.x + 40, d.y - 10, 60, '#63bd69'); rr(d.x - 90, d.y, 110, 14, 7, '#9a6a45'); drawFriend(d.kind, d.x - 50, d.y + 2, true); }
-    else if (!(d.kind === 'pitzi' && followers.find(f => f.kind === 'pitzi'))) { const hp = d.hap ? !!(sts.find(s => s.id === d.hap) || {}).done : d.happy; drawFriend(d.kind, d.x, d.y || G, hp, { bounce: d.kind === 'pitzi' || (d.hap && hp) }); } });
+    else if (!((d.kind === 'pitzi' || d.kind === 'camel') && followers.find(f => f.kind === d.kind))) { const hp = d.hap ? !!(sts.find(s => s.id === d.hap) || {}).done : d.happy; drawFriend(d.kind, d.x, d.y || G, hp, { bounce: d.kind === 'pitzi' || (d.hap && hp), face: d.kind === 'camel' ? -1 : 1 }); } });
   plats.forEach(drawPlat);
   drawStations();
   // the friend she is helping
@@ -839,7 +1011,7 @@ function draw(){
     items.forEach((it, i) => { ctx.save(); ctx.translate(66 + i * 62, 52); ctx.scale(0.72, 0.72); ctx.globalAlpha = i < got ? 1 : 0.28; drawItem(it.kind || L.collect, 0, 0, it.col, 0); ctx.restore(); }); }
   else { let gx = 18; groups().forEach(g => { rr(gx, 14, 150, 76, 38, g.got === g.n ? 'rgba(200,255,210,.85)' : 'rgba(255,255,255,.75)'); ctx.save(); ctx.translate(gx + 44, 52); ctx.scale(0.72, 0.72); drawItem(g.kind, 0, 0, g.col, 0); ctx.restore();
       ctx.fillStyle = '#b0409a'; ctx.font = 'bold 30px "Comic Sans MS", sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText(g.got + '/' + g.n, gx + 82, 54); gx += 160; }); }
-  drawPocket();
+  drawPocket(); drawChips();
   if (bonus.length) { const ok = starsOK(); rr(18, 98, 170, 54, 27, ok ? 'rgba(200,255,210,.85)' : 'rgba(255,255,255,.75)'); star5(50, 125, 19, '#ffd028'); ctx.fillStyle = '#b0409a'; ctx.font = 'bold 30px "Comic Sans MS", sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText(bonusN + ' / ' + (L.need || '?'), 78, 127); }
   // the goal of the level, big on the screen for the first seconds
   if (T < 420 && !fin) { const a = T < 360 ? 1 : 1 - (T - 360) / 60, cx = VW / 2, cy = 215, gs = groups(), w = 140 + gs.length * 190 + 170; ctx.globalAlpha = a;
@@ -862,17 +1034,18 @@ function frame(now){
 requestAnimationFrame(frame);
 
 /* ---------- title, map, end screens ---------- */
-const MAP_POS = [[13, 25], [37.5, 24], [62, 25], [86, 27], [86, 70], [60.5, 69], [36.5, 70], [12, 72]];   // the eight stops on art/ui/map.jpg, in percent
+const MAP10_POS = [[11, 27], [30, 27], [46, 27], [68, 27], [88, 27], [88, 69], [68, 69], [49.5, 69], [30, 69], [10.5, 69]];   // the ten stops on art/ui/map10.jpg (Ghost's ten-stop map), in percent
+const MAP_POS = [[13, 25], [37.5, 24], [62, 25], [86, 27], [86, 70], [60.5, 69], [36.5, 70], [12, 72], [30, 47], [60, 47]];   // the ten stops on art/ui/map.jpg, in percent (9 and 10 sit in the empty middle band until Ghost's map10.jpg arrives)
 function showMap(){
   mode = 'map'; showButtons(); glow(null); Voice.hush(); Song.play('title');
   ['title', 'end'].forEach(s => $(s).classList.add('hide'));
-  const box = $('stops'); box.innerHTML = '';
+  const box = $('stops'); box.innerHTML = ''; const m10 = !!IMG.map10, POS = m10 ? MAP10_POS : MAP_POS; box.style.backgroundImage = m10 ? 'url(art/ui/map10.jpg)' : '';
   const nextI = LEVELS.findIndex((lv, i) => !save.done[i]);
-  MAP_POS.forEach((pos, i) => {
+  POS.forEach((pos, i) => {
     const lv = LEVELS[i], open = !!lv && (i === 0 || save.done[i - 1] || save.done[i]), b = document.createElement('button');
     b.className = 'stop' + (lv && save.done[i] ? ' done' : '') + (open ? '' : ' locked') + (i === nextI ? ' next' : '');
     b.style.left = pos[0] + '%'; b.style.top = pos[1] + '%';
-    b.innerHTML = !open ? '\u{1F512}' : save.done[i] ? '<img alt="" src="art/ui/sticker_' + lv.sticker + '.png">' : '\u25B6';
+    b.innerHTML = !open ? '\u{1F512}' : save.done[i] ? '<img alt="" src="art/ui/sticker_' + lv.sticker + '.png" onerror="this.onerror=null;this.src=\'art/ui/sticker_8.png\'">' : '\u25B6';
     if (open && !save.done[i]) b.classList.add('play');
     b.setAttribute('aria-label', 'level ' + (i + 1));
     if (open) b.addEventListener('click', () => { ac(); startLevel(i); });

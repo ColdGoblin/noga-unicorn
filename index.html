@@ -51,7 +51,9 @@
   .stop{border-radius:50%;border:.8vh solid #fff;cursor:pointer;padding:0;background:rgba(255,209,234,.55);box-shadow:0 6px 0 rgba(0,0,0,.15)}
   .stop.locked{background:rgba(120,120,120,.45);opacity:.85;cursor:default;font-size:4vh}
   .stop.done{background:rgba(185,242,200,.7)}
-  .stop.next{animation:glow .9s ease-in-out infinite alternate}
+  @keyframes glowstop{from{box-shadow:0 0 0 0 rgba(255,255,255,.95),0 6px 0 rgba(0,0,0,.18);transform:translate(-50%,-50%) scale(1)}
+                      to{box-shadow:0 0 0 3vh rgba(255,255,255,0),0 6px 0 rgba(0,0,0,.18);transform:translate(-50%,-50%) scale(1.14)}}
+  .stop.next{animation:glowstop .9s ease-in-out infinite alternate}
   #sticker{animation:pop .8s cubic-bezier(.2,1.6,.4,1) both}
   #sticker img{height:46vh;width:46vh;object-fit:contain;filter:drop-shadow(0 1vh 1.5vh rgba(0,0,0,.25))}
   @keyframes pop{from{transform:scale(0) rotate(-40deg)}to{transform:scale(1) rotate(0)}}

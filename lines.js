@@ -33,6 +33,13 @@ window.LINES = {
   fr_09:"Thank you, Noga!", fr_10:"Slowly, slowly.", fr_11:"Well done, my Noga!", fr_12:"Hee-haw! Carrots!",
   fr_13:"The challah is ready!", fr_14:"Tea time!", fr_15:"Here is my riddle!", fr_16:"Welcome, Princess Noga!",
 
+  x_count:"Pop the bubbles in order: one, two, three!", x_rain:"Catch the falling stars!", x_draft:"The wind will lift you up!",
+  x_seek_a:"The chicks are hiding in the hay! Touch the hay!", x_seek_b:"Something is hiding under the sand! Touch the sand!", x_chick:"Peep peep! You found me!", x_gem:"Wow! A shiny gem!",
+  x_simon:"Watch the lanterns!", x_now:"Now you! Stand on the lanterns in the same order.", x_rhythm:"Dance when the circle is small!", x_well:"Bring the water to the well!",
+  x_find_water:"Find three drops of water!", x_find_moon:"Find five moon stars!",
+  l9_a:"We are in the desert. The Queen of Sheba is thirsty!", l9_b:"The well is full of water!", l9_c:"Everybody has water! Thank you, Noga!", l9_d:"Thank you, Noga! You are a true friend.",
+  l10_a:"We climbed the Moon Mountain! The moon is sleepy and sad.", l10_b:"The moon is waking up!", l10_c:"The moon is smiling! What a night!", l10_d:"Good night, Noga. Sweet dreams.",
+
   ex_01:"Noga and the Unicorn!", ex_02:"Welcome back, Noga!", ex_03:"Super jump is ready!", ex_04:"Wheee!", ex_05:"See you soon, Noga!"
 };
 
@@ -70,6 +77,13 @@ window.LINES_HE = {
   fr_05:"שפלוש! בוקר טוב!", fr_06:"תודה, נוגה. הפרחים האלה שלי!", fr_07:"שלום! קוראים לי קוקו!", fr_08:"נתראה על הירח!",
   fr_09:"תודה, נוגה!", fr_10:"לאט... לאט...", fr_11:"כל הכבוד, נוגה שלי!", fr_12:"היי-הו! גזרים!",
   fr_13:"החלה מוכנה!", fr_14:"זמן תה!", fr_15:"הנה החידה שלי!", fr_16:"ברוכה הבאה, הנסיכה נוגה!",
+
+  x_count:"פוצצי את הבועות לפי הסדר: אחת, שתיים, שלוש!", x_rain:"תפסי את הכוכבים הנופלים!", x_draft:"הרוח תרים אותך למעלה!",
+  x_seek_a:"האפרוחים מתחבאים בקש! געי בקש!", x_seek_b:"משהו מתחבא מתחת לחול! געי בחול!", x_chick:"ציף ציף! מצאת אותי!", x_gem:"וואו! אבן יקרה נוצצת!",
+  x_simon:"תסתכלי על הפנסים!", x_now:"עכשיו את! עמדי על הפנסים באותו סדר.", x_rhythm:"רקדי כשהעיגול קטן!", x_well:"הביאי את המים אל הבאר!",
+  x_find_water:"מצאי שלוש טיפות מים!", x_find_moon:"מצאי חמישה כוכבי ירח!",
+  l9_a:"אנחנו במדבר. מלכת שבא צמאה!", l9_b:"הבאר מלאה במים!", l9_c:"לכולם יש מים! תודה, נוגה!", l9_d:"תודה, נוגה! את חברה אמיתית.",
+  l10_a:"טיפסנו על הר הירח! הירח ישנוני ועצוב.", l10_b:"הירח מתעורר!", l10_c:"הירח מחייך! איזה לילה!", l10_d:"לילה טוב, נוגה. חלומות מתוקים.",
 
   ex_01:"נוגה והחד-קרן!", ex_02:"ברוכה השבה, נוגה!", ex_03:"קפיצת העל מוכנה!", ex_04:"וויייי!", ex_05:"להתראות, נוגה!"
 };

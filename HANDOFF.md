@@ -1,5 +1,7 @@
 # Handoff: Noga and the Unicorn
 
+## MUSIC (15 Nov, late): Ghost made `music/stage11.mp3` (Petals in the Courtyard) and `music/finale.mp3` (Where the Sunlit Bells Ring) with Gemini; stage 11 and the finale (`Song.play("finale")` in `startFinale`) use them. `stage9` and `stage10` still alias stage6 and stage8 (not delivered). Nobody has listened.
+
 ## ROUND 5 UPDATE (15 Nov 2026, evening, Hexweaver): WHISPER'S 42 CLIPS AND GHOST'S ROUND 6 ART ARE IN AND LIVE
 - **Voice:** Whisper delivered a private package (`noga-he-voice-additions-20261115-private/`, NOT committed; zip + QA.csv + manifest). The 42 new Hebrew clips (`x_*`, `l9_*`, `l10_*`, `l11_*`, `fin_a-e`) are copied to `voice/he/` (sha256 checked against QA.csv, text identical to `LINES_HE`). `pr_05` / `pr_12` retakes are NOT used (still `VOICE_ALIAS` stand-ins; Whisper marks them unresolved). Whisper's QA is automatic transcription only: 21 of the 42 carry a FLAG (feminine endings, `מצאי`, `בואי`...), nobody has listened. If the owner hears a bad one, tell Whisper the id; the clip is just a file in `voice/he/`.
 - **Art:** Ghost delivered all 14 round 6 pictures (`art/ASSETS-V6-NOTES.md`) and wired `sticker_11`, `map11.jpg` (stop 11 centre 50/48, transparent stop button, `map-eleven` CSS), and the confetti burst when she dances at the finale directly in `game.js` / `index.html`. Seen in headless Chrome at 844x390: stage 11 backdrop, finale (dance floor, bunting, disco ball, fireworks, hearts), map with the pavilion (small). `tools/runall.sh` passes all 11 stages.

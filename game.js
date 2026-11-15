@@ -73,7 +73,7 @@ const sfx = {
 };
 /* recorded music: music/stage1.mp3 ... stage10.mp3 and title.mp3 loop quietly under the voice (the little synth tune is gone: it was the annoying beeping) */
 let musicOn = true; try { musicOn = localStorage.getItem('nogaMusic') !== '0'; } catch (e) {}
-const MUSIC_ALIAS = { stage9: 'stage6', stage10: 'stage8', stage11: 'stage1' };      // stand-ins until stage9.mp3 and stage10.mp3 are made
+const MUSIC_ALIAS = { stage9: 'stage6', stage10: 'stage8' };      // stand-ins until stage9.mp3 and stage10.mp3 are made
 const Song = {
   a: null, name: '',
   play(name){ if (this.name === name) return; this.stop(); this.name = name;
@@ -1106,7 +1106,7 @@ const HEART_COL = ['#ff5f8f', '#ff8fc7', '#ffd028', '#ff6f6f', '#c58aff'];
 function heartPath(x, y, r){ ctx.beginPath(); ctx.moveTo(x, y + r * 0.9); ctx.bezierCurveTo(x - r * 1.5, y - r * 0.1, x - r * 0.9, y - r * 1.2, x, y - r * 0.4); ctx.bezierCurveTo(x + r * 0.9, y - r * 1.2, x + r * 1.5, y - r * 0.1, x, y + r * 0.9); ctx.closePath(); }
 function guestList(){ const a = []; LEVELS.forEach(lv => lv.joins.concat([lv.friend.kind]).forEach(k => { if (k !== 'tree' && !a.includes(k)) a.push(k); })); ['shluli', 'grandpa'].forEach(k => { if (!a.includes(k)) a.push(k); }); return a; }
 function startFinale(){
-  mode = 'finale'; showButtons(); glow(null); Voice.hush(); fx = { t: 0, fw: [], say: {}, last: 0 };
+  mode = 'finale'; showButtons(); glow(null); Voice.hush(); Song.play('finale'); fx = { t: 0, fw: [], say: {}, last: 0 };
   camX = Math.max(0, L.len - VW); camY = 0; const cx = camX + VW / 2;
   const kinds = guestList(); fx.g = kinds.map((k, i) => { const back = i % 2 === 0, row = kinds.filter((o, j) => j % 2 === i % 2), j = row.indexOf(k), f = (j + 0.5) / row.length;
     const q = back ? 0.82 : 0.74, tx = camX + VW * (f < 0.5 ? 0.05 + 0.9 * f * q : 0.95 - 0.9 * (1 - f) * q);

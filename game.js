@@ -196,7 +196,7 @@ const arcRow = (x0, x1, y, h, n) => Array.from({ length: n }, (_, i) => { const 
 const LEVELS = [
   { name: 'garden', need: 5, len: 5600, sticker: 1, collect: 'feather', ins: 'ins_11', joins: ['bird', 'pitzi', 'luna'],
     finSay: ['fr_01', 'l1_c', 'pr_02'], meets: [{ kind: 'pitzi', x: 4400, do: 'dance' }],
-    terrain: [{ x0: 0, x1: 700, top: G }, { x0: 700, x1: 900, top: G - 60 }, { x0: 900, x1: 1100, top: G - 120 }, { x0: 1100, x1: 1300, top: G - 60 }, { x0: 1300, x1: 1750, top: G },
+    terrain: [{ x0: 0, x1: 700, top: G }, { x0: 700, x1: 900, top: G, top1: G - 120 }, { x0: 900, x1: 1100, top: G - 120 }, { x0: 1100, x1: 1300, top: G - 120, top1: G }, { x0: 1300, x1: 1750, top: G },
               { x0: 1910, x1: 2550, top: G }, { x0: 2550, x1: 2800, top: G - 70 }, { x0: 2800, x1: 3050, top: G - 140 }, { x0: 3050, x1: 3300, top: G - 70 }, { x0: 3300, x1: 3780, top: G },
               { x0: 4060, x1: 4950, top: G }, { x0: 4950, x1: 5150, top: G - 60 }, { x0: 5150, x1: 5420, top: G - 80 }, { x0: 5420, x1: 5600, top: G }],
     friend: { kind: 'bird', x: 5290, on: 80 },
@@ -235,7 +235,7 @@ const LEVELS = [
 
   { name: 'forest', need: 10, len: 6600, sticker: 3, collect: 'petal', ins: 'ins_14', joins: ['bilam'], arriveSay: 'l3_b',
     finSay: ['fr_06', 'l3_c', 'pr_17'], meets: [{ kind: 'luna', x: 4200, do: 'dance' }],
-    terrain: [{ x0: 0, x1: 700, top: G }, { x0: 700, x1: 950, top: G - 60 }, { x0: 950, x1: 1200, top: G - 120 }, { x0: 1200, x1: 1450, top: G - 60 }, { x0: 1450, x1: 2300, top: G },
+    terrain: [{ x0: 0, x1: 700, top: G }, { x0: 700, x1: 950, top: G, top1: G - 120 }, { x0: 950, x1: 1200, top: G - 120 }, { x0: 1200, x1: 1450, top: G - 120, top1: G }, { x0: 1450, x1: 2300, top: G },
               { x0: 2460, x1: 4300, top: G }, { x0: 4300, x1: 4600, top: G - 70 }, { x0: 4600, x1: 4850, top: G - 130 }, { x0: 4850, x1: 5100, top: G - 70 }, { x0: 5100, x1: 5300, top: G },
               { x0: 5460, x1: 6600, top: G }],
     friend: { kind: 'tree', x: 6200 },
@@ -254,7 +254,7 @@ const LEVELS = [
   { name: 'sky', need: 5, len: 5600, sticker: 4, collect: 'steam', ins: 'ins_16', joins: ['cloudunicorn'], carry: true, floaty: true, recover: true, drafts: [{ x: 2050, w: 180, h: 480 }],
     finSay: ['fr_08', 'l4_c', 'pr_02'],
     terrain: [{ x0: 0, x1: 900, top: G }, { x0: 900, x1: 1150, top: G - 60 }, { x0: 1150, x1: 1400, top: G - 120 }, { x0: 1400, x1: 1650, top: G - 60 }, { x0: 1650, x1: 2500, top: G },
-              { x0: 2650, x1: 3700, top: G }, { x0: 3700, x1: 3950, top: G - 70 }, { x0: 3950, x1: 4200, top: G - 130 }, { x0: 4200, x1: 4450, top: G - 70 }, { x0: 4450, x1: 5600, top: G }],
+              { x0: 2650, x1: 3700, top: G }, { x0: 3700, x1: 3950, top: G, top1: G - 130 }, { x0: 3950, x1: 4200, top: G - 130 }, { x0: 4200, x1: 4450, top: G - 130, top1: G }, { x0: 4450, x1: 5600, top: G }],
     friend: { kind: 'koko', x: 5350 },
     items: [{ x: 1275, y: G - 215, to: 'cloud' }, { x: 2262, y: G - 560, to: 'cloud' }, { x: 4075, y: G - 225, to: 'cloud' }],
     stations: [{ id: 'cloud', kind: 'cloud', x: 4850, need: 3, r: 230, say: ['l4_b'] }],
@@ -266,7 +266,7 @@ const LEVELS = [
 
   { name: 'farm', need: 6, len: 5800, sticker: 5, collect: 'plank', ins: 'ins_17', joins: ['armon', 'anana'], carry: true,
     finSay: ['fr_11', 'l5_c', 'pr_15'],
-    terrain: [{ x0: 0, x1: 800, top: G }, { x0: 940, x1: 1700, top: G }, { x0: 1700, x1: 1950, top: G - 70 }, { x0: 1950, x1: 2200, top: G - 130 }, { x0: 2200, x1: 2450, top: G - 70 }, { x0: 2450, x1: 3200, top: G },
+    terrain: [{ x0: 0, x1: 800, top: G }, { x0: 940, x1: 1700, top: G }, { x0: 1700, x1: 1950, top: G, top1: G - 130 }, { x0: 1950, x1: 2200, top: G - 130 }, { x0: 2200, x1: 2450, top: G - 130, top1: G }, { x0: 2450, x1: 3200, top: G },
               { x0: 3360, x1: 4300, top: G }, { x0: 4300, x1: 4550, top: G - 60 }, { x0: 4550, x1: 5800, top: G }],
     friend: { kind: 'armon', x: 5500 },
     items: [{ x: 600, y: G - 50, to: 'bridge' }, { x: 1500, y: G - 190, to: 'bridge' }, { x: 2075, y: G - 225, to: 'bridge' }, { x: 3600, y: G - 190, to: 'bridge' }, { x: 4425, y: G - 160, to: 'bridge' },
@@ -299,7 +299,7 @@ const LEVELS = [
 
   { name: 'night', need: 8, len: 6400, sticker: 7, collect: 'ribbon', ins: 'ins_20', joins: ['riddletree'], carry: true, lights: true,
     finSay: ['l7_c', 'pr_08'],
-    terrain: [{ x0: 0, x1: 1100, top: G }, { x0: 1100, x1: 1350, top: G - 70 }, { x0: 1350, x1: 1600, top: G - 130 }, { x0: 1600, x1: 1850, top: G - 70 }, { x0: 1850, x1: 2800, top: G },
+    terrain: [{ x0: 0, x1: 1100, top: G }, { x0: 1100, x1: 1350, top: G, top1: G - 130 }, { x0: 1350, x1: 1600, top: G - 130 }, { x0: 1600, x1: 1850, top: G - 130, top1: G }, { x0: 1850, x1: 2800, top: G },
               { x0: 2960, x1: 4200, top: G }, { x0: 4340, x1: 6400, top: G }],
     friend: { kind: 'riddletree', x: 6050 },
     items: [{ x: 800, y: G - 50 }, { x: 1475, y: G - 220 }, { x: 3500, y: G - 190 }, { x: 4800, y: G - 50 }],
@@ -403,7 +403,9 @@ function startLevel(i){
 }
 
 /* ---------- helpers ---------- */
-function groundAt(x){ let t = null; for (const g of terr) if (x > g.x0 - 8 && x < g.x1 + 8 && (t === null || g.top < t)) t = g.top; return t; }
+/* a terrain segment is flat (top) or a ramp (top at x0 = top, top at x1 = top1) */
+const tAt = (g, x) => g.top1 === undefined ? g.top : g.top + (g.top1 - g.top) * clamp((x - g.x0) / (g.x1 - g.x0), 0, 1);
+function groundAt(x){ let t = null; for (const g of terr) if (x > g.x0 - 8 && x < g.x1 + 8) { const h = tAt(g, x); if (t === null || h < t) t = h; } return t; }
 function inGap(x){ return (L.gaps || []).find(g => x > g.x && x < g.x + g.w); }
 function burst(x, y, n, cols, shape){ for (let i = 0; i < n; i++) parts.push({ x, y, vx: rand(-3, 3), vy: rand(-4.5, -0.5), life: 1, c: cols[i % cols.length], s: rand(5, 11), shape: shape || 'dot', g: 0.12 }); }
 const starsOK = () => bonusN >= (L.need || 0);
@@ -539,7 +541,7 @@ function update(dt){
     if (Math.abs(dx) > 34) ax = Math.sign(dx);
     if (p.on && Math.abs(dx) < 300 && w.y < p.y - 70) wantJump = true;                    // pointing above her: jump up there
     if (p.on && ax && groundAt(p.x + ax * 50) === null && Math.abs(dx) > 120) wantJump = true;   // a gap ahead: hop over it
-    if (p.on && ax && terr.some(g => g.top < p.y - 10 && ((ax > 0 && g.x0 > p.x && g.x0 - p.x < 100) || (ax < 0 && g.x1 < p.x && p.x - g.x1 < 100)))) wantJump = true;   // a step ahead
+    if (p.on && ax && terr.some(g => g.top1 === undefined && g.top < p.y - 10 && ((ax > 0 && g.x0 > p.x && g.x0 - p.x < 100) || (ax < 0 && g.x1 < p.x && p.x - g.x1 < 100)))) wantJump = true;   // a step ahead
   }
   const muddy = p.on && (L.mud || []).some(m => p.x > m.x && p.x < m.x + m.w && p.y >= G - 4);
   p.vx = ax * 5.2 * (muddy ? 0.45 : 1); if (ax) p.face = ax;
@@ -571,11 +573,13 @@ function update(dt){
     (L.drafts || []).forEach(d => { if (p.x > d.x && p.x < d.x + d.w && p.y > G - d.h) { p.vy = Math.max(p.vy - 0.95 * dt, -9); if (Math.random() < 0.25) parts.push({ x: p.x + rand(-40, 40), y: p.y - rand(0, 80), vx: 0, vy: 1.5, life: 0.7, c: '#fff', s: rand(3, 6), shape: 'dot', g: 0 }); } });     // the wind lifts her
     p.vy += (p.wings && p.vy > 0 ? 0.22 : L.floaty ? 0.44 : 0.62) * dt; if (p.vy > 16) p.vy = 16;
     const px0 = p.x; p.x = clamp(p.x + p.vx * dt, 60, L.len - 60); p.y += p.vy * dt;
-    for (const g of terr) if (p.y > g.top + 12 && p.x + 34 > g.x0 && p.x - 34 < g.x1) {        // the side of a raised block or the wall of a gap
-      if (px0 + 34 <= g.x0 + 2) p.x = g.x0 - 34; else if (px0 - 34 >= g.x1 - 2) p.x = g.x1 + 34; }
+    for (const g of terr) if (p.x + 34 > g.x0 && p.x - 34 < g.x1) {        // the side of a raised block or the wall of a gap (next to a ramp the wall starts 40 px higher: her body reaches over the seam while her feet are still on the slope)
+      const tol = terr.some(o => o.top1 !== undefined && (o.x1 === g.x0 || o.x0 === g.x1)) ? 40 : 12;
+      if (px0 + 34 <= g.x0 + 2 && p.y > tAt(g, g.x0) + tol) p.x = g.x0 - 34; else if (px0 - 34 >= g.x1 - 2 && p.y > tAt(g, g.x1) + tol) p.x = g.x1 + 34; }
     let landed = null, wasOn = p.on; p.on = false;
     if (p.vy >= 0) {
-      for (const g of terr) if (p.x > g.x0 - 10 && p.x < g.x1 + 10 && py <= g.top + 1 && p.y >= g.top) { if (!landed || g.top < landed.top) landed = g; }
+      for (const g of terr) if (p.x > g.x0 - 10 && p.x < g.x1 + 10) { const gt = tAt(g, p.x), ramp = g.top1 !== undefined;
+        if (py <= gt + (ramp ? 14 : 1) && (p.y >= gt || (ramp && wasOn && gt - p.y < 10))) { if (!landed || gt < landed.top) landed = { top: gt, dx: 0 }; } }
       for (const pl of plats) if (p.x > pl.x - 12 && p.x < pl.x + pl.w + 12 && py <= pl.top + 1 && p.y >= pl.top) { if (!landed || pl.top < landed.top) landed = pl; }
       for (const pd of (L.pads || [])) if (p.x > pd.x && p.x < pd.x + pd.w && py <= pd.top + 60 && p.y >= pd.top) {      // walking into the trampoline bounces her too, no jump needed
         p.y = pd.top; p.vy = -19; p.squash = 0.7; pd.sq = 14; sfx.boing(); said.pad = 1; burst(p.x, pd.top, 10, ['#fff', '#ffe14d'], 'star'); landed = 'pad'; }
@@ -896,8 +900,10 @@ function drawWorld(){
     if (n === 'rainbow') { RB.forEach((c, i) => rr(x0, top + i * 12, x1 - x0, 14, i ? 0 : 7, c)); rr(x0, top + 72, x1 - x0, VH, 0, '#fff');
       for (let x = x0 + 40; x < x1; x += 90) circ(x, top + 84, 46, '#fff'); }
     else { const c = { garden: ['#7fd58a', '#63bd72', '#c59a6d'], sky: ['#ffd1ec', '#f6b0da', '#d58fbf'], farm: ['#8ccf6a', '#6fb556', '#7a5a3c'], shabbat: ['#e6c866', '#d1a84d', '#a8794a'], night: ['#5a78bc', '#4562a6', '#2c3f78'], castle: ['#8fdc8a', '#6fc873', '#9a7a56'], oasis: ['#f2d391', '#e3b96a', '#c99a52'], moon: ['#9d8ae0', '#7c69c8', '#4a3a9a'] }[n] || ['#5fae68', '#4c9657', '#8f6d4b'];
-      rr(x0, top, x1 - x0, VH, 0, c[2]); rr(x0, top - 4, x1 - x0, 40, 10, c[0]); rr(x0, top + 22, x1 - x0, 14, 0, c[1]);
-      if (n !== 'oasis' && n !== 'moon') for (let x = Math.ceil(x0 / 130) * 130 + 40; x < x1 - 20; x += 130) { const k = (x * 7) % 5; ctx.fillStyle = '#4c9657'; ctx.fillRect(x - 1, top - 22, 3, 20); circ(x, top - 26, 8, RB[k]); circ(x, top - 26, 3.5, '#fff7c4'); } }
+      if (sg.top1 !== undefined) { const t1 = sg.top1, poly = (a, b, col) => { ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(x0, top + a); ctx.lineTo(x1, t1 + a); ctx.lineTo(x1, t1 + b); ctx.lineTo(x0, top + b); ctx.fill(); };
+        poly(0, VH, c[2]); poly(-4, 36, c[0]); poly(22, 36, c[1]); }
+      else { rr(x0, top, x1 - x0, VH, 0, c[2]); rr(x0, top - 4, x1 - x0, 40, 10, c[0]); rr(x0, top + 22, x1 - x0, 14, 0, c[1]); }
+      if (n !== 'oasis' && n !== 'moon') for (let x = Math.ceil(x0 / 130) * 130 + 40; x < x1 - 20; x += 130) { const k = (x * 7) % 5; ctx.fillStyle = '#4c9657'; { const fy = tAt(sg, x); ctx.fillRect(x - 1, fy - 22, 3, 20); circ(x, fy - 26, 8, RB[k]); circ(x, fy - 26, 3.5, '#fff7c4'); } } }
   });
   ctx.restore();
 }

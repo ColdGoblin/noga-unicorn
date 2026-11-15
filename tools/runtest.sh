@@ -12,5 +12,5 @@ open(proj+'/_t.html','w',encoding='utf-8').write(s.replace('</body>',t))
 PY
 CH="/c/Program Files/Google/Chrome/Application/chrome.exe"
 SHOT=${2:-$SP/shot.png}
-"$CH" --headless=new --disable-gpu --allow-file-access-from-files --window-size=1024,768 --virtual-time-budget=20000 --screenshot="$SHOT" --dump-dom "file:///G:/My%20Drive/Projects/%D7%90%D7%99%D7%99%D7%9C/noga-unicorn/_t.html" 2>/dev/null | grep -o "<title>[^<]*" | cut -c1-1500
+"$CH" --headless=new --disable-gpu --allow-file-access-from-files --window-size=${WS:-1024,768} --virtual-time-budget=20000 --screenshot="$SHOT" --dump-dom "file:///G:/My%20Drive/Projects/%D7%90%D7%99%D7%99%D7%9C/noga-unicorn/_t.html" 2>/dev/null | grep -o "<title>[^<]*" | cut -c1-1500
 rm -f "$PROJ/_t.html"

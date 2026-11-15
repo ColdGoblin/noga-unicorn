@@ -1,5 +1,39 @@
 # Handoff: Noga and the Unicorn
 
+## UPDATE 15 Nov 2026 (fourth session, Hexweaver): playable link + music + 8-stage plan v2
+- **Playable link (private Artifact, owner's account only):** https://claude.ai/artifact/B227wcyViAHnUVTJT4s81D . The page is `index.html` with the html/head/body tags stripped, kept in the session scratchpad (re-make it the same way). Published in small batches: `game.js`, `lines.js`, art for levels 1-3 plus the other friends/items/props/ui, all `voice\he\*.mp3`, all `music\*.mp3`. To update: republish the page with `url` and a `files` map for only the changed files, `root` = project folder. Title screen, level 1 and goal panel were seen working in Chrome; audio could not be confirmed from the Artifact frame (cross-origin), nobody has heard it.
+- **Music:** `music\title.mp3`, `stage1..8.mp3` made with the owner's Gemini (prompts in `music\PROMPTS.md`). `game.js` has `Song` (loops `music/stageN.mp3` quieter under the voice; synth tune is the fallback if a file is missing). Not listened to by a person. Stage 3 and 4 file names were matched by download order.
+- **Owner asked (15 Nov):** all 8 stages with rising difficulty and goals, pick-up-then-use chains (Shabbat: ingredients to the oven, candles). Plan: `design\STAGES-V2.md`; pictures needed: `design\ASSETS-V2.md` (task to Ghostwire `t1115094701nclc9e`); music brief `design\MUSIC-BRIEF.md`. **Built later the same day:** pocket (up to 4 things, shown top left under the star counter) and stations in `game.js`: an item with `to: '<id>'` goes into the pocket and drops into the station with that `id` when she walks up (`stations` in the level data; kinds cloud, bridge, horses, bowl, oven (auto), bilam, candles (needs a dance), table, riddle, plate). Levels 4-8 use it: 4 steam to the pink cloud frees three unicorns (floaty jumps); 5 planks build the bridge over mud (mud slows her) then carrots to the horses; 6 flour+eggs+honey to the bowl, oven bakes the challah, carry it to the table, carrots to Bil'am, dance to light the candles; 7 ribbons light the path then a red/blue riddle (random each play); 8 flowers then eight gifts onto eight plates. Scripted run finished stages 4-8 (all stations done, friend dance, finale). Levels 1-3 are unchanged (no "use" step yet; water drops for stage 3 not added). Sound button moved to bottom centre. Level 4-8 voice only uses existing clips; no clips say "bring it to ...", the pictures show it. Not played by hand; not committed.
+- Uncommitted: `music\`, `design\STAGES-V2.md`, `ASSETS-V2.md`, `MUSIC-BRIEF.md`, the `Song` edit in `game.js`.
+
+## CURRENT STATE (14 Nov 2026, end of third session). Read this first; older sections below are history.
+
+**Where:** folder `G:\My Drive\Projects\אייל
+oga-unicorn`, branch `noga-unicorn-game`, last game commit `fcf737a` (earlier: `9abbcae` voices, `5dec7fa` first commit). Not pushed. Oasis rite `noga-unicorn`. Run: double-click `index.html`, or serve the folder (`.claude\launch.json` entry `noga-unicorn`, port 8765, may land on another port). Browser pane caches `game.js`: run `fetch('game.js',{cache:'reload'})` then reload. Test handle `__g` in the console.
+
+**Done and working (tested by script only, never played by hand, on a phone, or heard):**
+- Levels 1-3 are long (5600 / 6200 / 6600 px), with hills, gaps, cloud stairs and treetop branches; the camera follows her up (`camY`).
+- Dance button from level 1. Mouse/touch steering. Bobo's pad bounces on walk-in.
+- Each level shows and says its goal at the start. To finish a level she needs all things, `need` gold stars (5 / 7 / 10) and then the friend. Progress was reset (save key `nogaUnicorn2`).
+- Hebrew voice: Whisper's 108 clips are in `voice\he\` and play; `pr_05` and `pr_12` are pending review (stand-ins `pr_01` / `pr_03` via `VOICE_ALIAS`). Hebrew is the default language; English has no recordings (browser speech).
+
+**Open, in order:**
+1. The owner plays levels 1-3 (phone and computer) and says what to change. Nothing has been judged by a person yet.
+2. The owner listens to the Hebrew clips (Whisper's QA was automatic transcription only). Bad ones go back to Whisper by ID.
+3. Optional: ask Whisper for clips that say "find N stars" (now a separate number word follows `ins_10`), and for `pr_05` / `pr_12` approval.
+4. Old English sample task `t1114104526ncl2d2` is still open on the board and superseded (deleting it was blocked); the Hebrew sample task is `t1114141355ncl227`. Ghost's style-sheet task `t1114104520nclc6a` is still open too.
+5. A full play-through of levels 2 and 3 to the end screen (the scripted run cannot finish them because the voice queue blocks the end screen), then touch screen, phone rotation, file:// play-through.
+6. Ghost's art against the story plates (title picture's Noga has brown eyes; canon is blue); clean the flagged sprite cutouts; leg seams in motion.
+7. Levels 4 to 8 after the owner approves 1-3.
+
+**Not committed / left out on purpose:** `art-orig\` (Ghost's uncleaned originals, 24 MB, still on disk), and the old-game files in the project root (`uni_*.png`, `ASSETS-חד-קרן.md`, `חד-קרן-הקסם.html`). This HANDOFF change is also uncommitted. Ask the owner before committing.
+
+**Owner style:** wants things done, not asked about; answers in short Hebrew or English; devices are phone and computer; the commit decision has always been "yes" when asked.
+
+**Decisions (do not reopen):** Noga is the princess riding the unicorn; she can never lose (rescue bubble, no lives or timer); Dance from level 1 (changed by the owner 14 Nov); Super Jump from level 3 with pencil-drawn wings; free tools only; the voice must not be whispery; new game code, not the old game.
+
+---
+
 Written 14 Nov 2026 by Hexweaver (neon/claude). Read this first, then continue.
 
 ## What this is

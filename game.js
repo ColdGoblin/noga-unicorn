@@ -22,9 +22,9 @@ const RB = ['#ff5f7e', '#ffa64d', '#ffe14d', '#6fdc8c', '#5fb8ff', '#b98cff'];
 /* ---------- save ---------- */
 const SAVE_KEY = 'nogaUnicorn2';       // new key = everybody starts from zero (progress reset, 14 Nov)
 try { localStorage.removeItem('nogaUnicorn1'); } catch (e) {}
-let save = { done: [false, false, false], dance: false, sup: false };
+let save = { done: [false, false, false, false, false, false, false, false], dance: false, sup: false };
 try { const o = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null');
-  if (o && Array.isArray(o.done)) { save.done = [0, 1, 2].map(i => !!o.done[i]); save.sup = !!o.sup; } } catch (e) {}
+  if (o && Array.isArray(o.done)) { save.done = [0, 1, 2, 3, 4, 5, 6, 7].map(i => !!o.done[i]); save.sup = !!o.sup; } } catch (e) {}
 save.dance = true;                    // the Dance button is there from the very first level (owner request, 14 Nov)
 function persist(){ try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) {} }
 
@@ -34,10 +34,11 @@ function load(key, src){ const im = new Image(); im.onload = () => { IMG[key] = 
 load('body', 'art/standin/uni_body2.png'); load('legA', 'art/standin/uni_legA.png'); load('legB', 'art/standin/uni_legB.png');
 load('heroBody', 'art/hero/hero_body.png'); load('heroBack', 'art/hero/hero_leg_back.png'); load('heroFront', 'art/hero/hero_leg_front.png');
 load('heroFull', 'art/hero/hero_full.png'); load('heroHappy', 'art/hero/hero_happy.png'); load('heroWings', 'art/hero/hero_wings.png');
-['pitzi', 'bird', 'mamabird', 'bobo', 'shluli', 'tree', 'bilam'].forEach(k => { load(k + '_sad', 'art/friends/' + k + '_sad.png'); load(k + '_happy', 'art/friends/' + k + '_happy.png'); });
-['feather', 'petal', 'star', 'bigbubble', 'bubble_red', 'bubble_blue', 'bubble_green', 'bubble_yellow'].forEach(k => load('item_' + k, 'art/items/item_' + k + '.png'));
-['stone', 'rock', 'mushroom', 'stump', 'branch', 'cloud'].forEach(k => load('prop_' + k, 'art/props/prop_' + k + '.png'));
-['garden', 'rainbow', 'forest'].forEach(k => load('bg_' + k, 'art/bg/bg_' + k + '.jpg'));
+['pitzi', 'bird', 'mamabird', 'bobo', 'shluli', 'tree', 'bilam', 'koko', 'armon', 'anana', 'rhino', 'luna', 'solomon', 'riddletree', 'princess1', 'princess2', 'grandpa', 'cloudunicorn'].forEach(k => { load(k + '_sad', 'art/friends/' + k + '_sad.png'); load(k + '_happy', 'art/friends/' + k + '_happy.png'); });
+['feather', 'petal', 'star', 'bigbubble', 'bubble_red', 'bubble_blue', 'bubble_green', 'bubble_yellow', 'steam', 'plank', 'carrot', 'ribbon', 'spark', 'flower_1', 'flower_2', 'flower_3', 'flower_4', 'flower_5', 'water_drop', 'flour', 'eggs', 'honey', 'teacup', 'carrot_bunch', 'gift_plate', 'challah', 'candles'].forEach(k => load('item_' + k, 'art/items/item_' + k + '.png'));
+['stone', 'rock', 'mushroom', 'stump', 'branch', 'cloud', 'oven', 'oven_lit', 'bowl', 'bowl_dough', 'candle_unlit', 'candle_lit', 'nest', 'tree_roots', 'teapot', 'mud', 'haybale', 'gate', 'plank_bridge', 'cotton_candy_platform', 'shadow_stage', 'party_firework'].forEach(k => load('prop_' + k, 'art/props/prop_' + k + '.png'));
+['apple', 'ball', 'leaf'].forEach(k => load('riddle_' + k, 'art/items/riddle_' + k + '.png'));
+['garden', 'rainbow', 'forest', 'sky', 'farm', 'shabbat', 'night', 'castle'].forEach(k => load('bg_' + k, 'art/bg/bg_' + k + '.jpg'));
 /* opaque box of each scenery picture: [x, y, w, h] inside its file (so only the drawing is placed, not the empty margin) */
 const PB = { stone: [10, 247, 382, 128], rock: [8, 9, 383, 366], mushroom: [5, 28, 389, 346], stump: [6, 153, 388, 221], branch: [5, 14, 688, 399], cloud: [6, 67, 588, 347], bigbubble: [32, 45, 732, 746] };
 
@@ -65,8 +66,21 @@ const sfx = {
 /* a soft looping tune, quieter while the voice speaks */
 const TUNES = [[523, 659, 784, 659, 698, 784, 880, 784], [587, 740, 880, 740, 659, 784, 988, 784], [440, 523, 659, 523, 494, 587, 698, 587]];
 let tuneI = 0, tuneN = 0, tuneTimer = null;
-function startMusic(i){ tuneI = i % TUNES.length; tuneN = 0; if (tuneTimer) return;
-  tuneTimer = setInterval(() => { if (!soundOn || mode !== 'play') return;
+/* recorded music: music/stage1.mp3 ... stage8.mp3 and title.mp3 loop under the voice; if a file is missing the little synth tune above plays instead */
+const Song = {
+  a: null, name: '', ok: {},
+  play(name){ if (this.name === name) return; this.stop(); this.name = name;
+    const a = new Audio('music/' + name + '.mp3'); a.loop = true; a.volume = 0; this.a = a;
+    a.onerror = () => { Song.ok[name] = false; };
+    const p = a.play(); if (p && p.then) p.then(() => { Song.ok[name] = true; }).catch(() => { if (Song.ok[name] !== true) Song.ok[name] = false; }); },
+  stop(){ if (this.a) { try { this.a.pause(); } catch (e) {} this.a = null; } this.name = ''; },
+  live(){ return !!this.name && Song.ok[this.name] === true; },
+  tick(){ const a = this.a; if (!a) return; const want = !soundOn ? 0 : Voice.busy ? 0.1 : 0.34;
+    a.volume = Math.max(0, Math.min(1, a.volume + (want - a.volume) * 0.2)); if (a.paused && soundOn && Song.ok[this.name] !== false) a.play().catch(() => {}); }
+};
+setInterval(() => Song.tick(), 100);
+function startMusic(i){ tuneI = i % TUNES.length; tuneN = 0; Song.play('stage' + (i + 1)); if (tuneTimer) return;
+  tuneTimer = setInterval(() => { if (!soundOn || mode !== 'play' || Song.live()) return;
     const f = TUNES[tuneI][tuneN++ % 8]; tone(f, 0.34, 'sine', Voice.busy ? 0.012 : 0.035); if (tuneN % 2 === 0) tone(f / 2, 0.5, 'triangle', Voice.busy ? 0.008 : 0.022); }, 380);
 }
 
@@ -224,7 +238,80 @@ const LEVELS = [
     plats: [{ x: 1900, w: 230, top: G - 320, kind: 'branch' }, { x: 2600, w: 116, kind: 'rock' }, { x: 2900, w: 110, kind: 'stump' },
             { x: 3650, w: 230, top: G - 320, kind: 'branch' },
             { x: 2180, w: 200, top: G - 430, kind: 'branch' }, { x: 2420, w: 200, top: G - 540, kind: 'branch' }, { x: 3930, w: 200, top: G - 430, kind: 'branch' }, { x: 4170, w: 200, top: G - 540, kind: 'branch' },{ x: 4020, w: 110, kind: 'stump' }, { x: 5600, w: 116, kind: 'rock' }, { x: 5800, w: 110, kind: 'stump' }],
-    cues: [{ x: 0, say: ['l3_a', 'ins_14', 'ins_10', 'num_10'] }, { x: 1400, say: ['ins_15'] }, { x: 3150, say: ['ins_15'] }] }
+    cues: [{ x: 0, say: ['l3_a', 'ins_14', 'ins_10', 'num_10'] }, { x: 1400, say: ['ins_15'] }, { x: 3150, say: ['ins_15'] }] },
+
+  /* ---- levels 4-8 (15 Nov 2026): things she picks up are USED. `to` = the station an item goes to, `stations` = the places that use them (design/STAGES-V2.md) ---- */
+  { name: 'sky', need: 5, len: 5600, sticker: 4, collect: 'steam', ins: 'ins_16', joins: ['cloudunicorn'], carry: true, floaty: true,
+    finSay: ['fr_08', 'l4_c', 'pr_02'],
+    terrain: [{ x0: 0, x1: 900, top: G }, { x0: 900, x1: 1150, top: G - 60 }, { x0: 1150, x1: 1400, top: G - 120 }, { x0: 1400, x1: 1650, top: G - 60 }, { x0: 1650, x1: 2500, top: G },
+              { x0: 2650, x1: 3700, top: G }, { x0: 3700, x1: 3950, top: G - 70 }, { x0: 3950, x1: 4200, top: G - 130 }, { x0: 4200, x1: 4450, top: G - 70 }, { x0: 4450, x1: 5600, top: G }],
+    friend: { kind: 'koko', x: 5350 },
+    items: [{ x: 1275, y: G - 215, to: 'cloud' }, { x: 2965, y: G - 255, to: 'cloud' }, { x: 4075, y: G - 225, to: 'cloud' }],
+    stations: [{ id: 'cloud', kind: 'cloud', x: 4850, need: 3, r: 230, say: ['l4_b'] }],
+    bonus: [].concat(arcRow(260, 700, G - 90, 40, 5), arcRow(1700, 2400, G - 80, 60, 7), arcRow(3000, 3600, G - 100, 40, 6), arcRow(4500, 4800, G - 80, 30, 4), arcRow(1900, 2000, G - 250, 0, 2), arcRow(2900, 3000, G - 330, 0, 2)),
+    plats: [{ x: 2520, w: 110, top: G - 70, kind: 'cloud' }, { x: 2900, w: 130, top: G - 150, kind: 'cloud' }, { x: 1900, w: 130, top: G - 130, kind: 'cloud' }],
+    props: [{ k: 'teapot', x: 640, w: 150 }],
+    decos: [{ kind: 'grandpa', x: 500, happy: true }],
+    cues: [{ x: 0, say: ['fr_07', 'l4_a', 'ins_16', 'ins_10', 'num_05'] }, { x: 2300, say: ['ins_15'] }] },
+
+  { name: 'farm', need: 6, len: 5800, sticker: 5, collect: 'plank', ins: 'ins_17', joins: ['armon', 'anana'], carry: true,
+    finSay: ['fr_11', 'l5_c', 'pr_15'],
+    terrain: [{ x0: 0, x1: 800, top: G }, { x0: 940, x1: 1700, top: G }, { x0: 1700, x1: 1950, top: G - 70 }, { x0: 1950, x1: 2200, top: G - 130 }, { x0: 2200, x1: 2450, top: G - 70 }, { x0: 2450, x1: 3200, top: G },
+              { x0: 3360, x1: 4300, top: G }, { x0: 4300, x1: 4550, top: G - 60 }, { x0: 4550, x1: 5800, top: G }],
+    friend: { kind: 'armon', x: 5500 },
+    items: [{ x: 600, y: G - 50, to: 'bridge' }, { x: 1500, y: G - 190, to: 'bridge' }, { x: 2075, y: G - 225, to: 'bridge' }, { x: 3600, y: G - 190, to: 'bridge' }, { x: 4425, y: G - 160, to: 'bridge' },
+            { x: 3000, y: G - 50, kind: 'carrot_bunch', to: 'horses' }, { x: 4050, y: G - 50, kind: 'carrot_bunch', to: 'horses' }],
+    stations: [{ id: 'bridge', kind: 'bridge', x: 5000, need: 5, r: 230, say: ['l5_b', 'pr_12'] }, { id: 'horses', kind: 'horses', x: 5400, need: 2, r: 230, say: ['pr_16'] }],
+    mud: [{ x: 1000, w: 300 }, { x: 3400, w: 300 }, { x: 4700, w: 420 }],
+    bonus: [].concat(arcRow(200, 700, G - 80, 30, 6), arcRow(1000, 1600, G - 80, 50, 6), arcRow(2500, 3100, G - 80, 40, 6), arcRow(3400, 4200, G - 90, 50, 7), arcRow(4600, 4900, G - 160, 30, 3)),
+    plats: [{ x: 805, w: 110, kind: 'stone' }, { x: 3210, w: 110, kind: 'stone' }, { x: 1300, w: 110, kind: 'stump' }, { x: 3800, w: 110, kind: 'rock' }],
+    props: [{ k: 'haybale', x: 2800, w: 130 }, { k: 'gate', x: 5750, w: 200 }],
+    decos: [{ kind: 'anana', x: 5650, hap: 'horses' }, { kind: 'grandpa', x: 5780, happy: true }],
+    cues: [{ x: 0, say: ['l5_a', 'fr_10', 'ins_17', 'ins_10', 'num_06'] }, { x: 700, say: ['ins_03'] }, { x: 3200, say: ['ins_15'] }] },
+
+  { name: 'shabbat', need: 8, len: 6000, sticker: 6, collect: 'flour', ins: 'ins_18', joins: ['rhino', 'solomon', 'luna'], carry: true, noIns: true,
+    finSay: ['l6_c', 'pr_17'],
+    terrain: [{ x0: 0, x1: 1000, top: G }, { x0: 1000, x1: 1250, top: G - 60 }, { x0: 1250, x1: 1500, top: G - 110 }, { x0: 1500, x1: 1750, top: G - 60 }, { x0: 1750, x1: 2700, top: G },
+              { x0: 2850, x1: 3900, top: G }, { x0: 4040, x1: 6000, top: G }],
+    friend: { kind: 'rhino', x: 5800 },
+    items: [{ x: 600, y: G - 50, kind: 'flour', to: 'bowl' }, { x: 1375, y: G - 205, kind: 'eggs', to: 'bowl' }, { x: 3150, y: G - 185, kind: 'honey', to: 'bowl' },
+            { x: 1900, y: G - 50, kind: 'carrot', to: 'bilam' }, { x: 2260, y: G - 190, kind: 'carrot', to: 'bilam' }, { x: 4300, y: G - 50, kind: 'carrot', to: 'bilam' }, { x: 4560, y: G - 170, kind: 'carrot', to: 'bilam' },
+            { x: 0, y: 0, kind: 'challah', to: 'table', hid: 'challah', hidden: true }],
+    stations: [{ id: 'bowl', kind: 'bowl', x: 3550, need: 3, r: 150 },
+               { id: 'oven', kind: 'oven', x: 3800, need: 1, auto: true, spawn: 'challah', say: ['fr_13'] },
+               { id: 'bilam', kind: 'bilam', x: 4800, need: 4, r: 200, say: ['fr_12', 'pr_16'] },
+               { id: 'candles', kind: 'candles', x: 5150, need: 1, dance: true, say: ['l6_c'] },
+               { id: 'table', kind: 'table', x: 5450, need: 1, r: 220, say: ['fr_14'] }],
+    bonus: [].concat(arcRow(240, 900, G - 80, 40, 6), arcRow(1800, 2600, G - 80, 60, 7), arcRow(2900, 3800, G - 90, 40, 7), arcRow(4100, 5000, G - 80, 30, 7), arcRow(1500, 1750, G - 160, 0, 3)),
+    plats: [{ x: 2720, w: 110, kind: 'stone' }, { x: 3910, w: 110, kind: 'stone' }, { x: 2200, w: 120, kind: 'rock' }],
+    cues: [{ x: 0, say: ['l6_a', 'ins_10', 'num_08'] }, { x: 1700, say: ['ins_18'] }, { x: 4950, say: ['l6_b', 'ins_06'], glow: 'bd' }] },
+
+  { name: 'night', need: 8, len: 6400, sticker: 7, collect: 'ribbon', ins: 'ins_20', joins: ['riddletree'], carry: true, lights: true,
+    finSay: ['l7_c', 'pr_08'],
+    terrain: [{ x0: 0, x1: 1100, top: G }, { x0: 1100, x1: 1350, top: G - 70 }, { x0: 1350, x1: 1600, top: G - 130 }, { x0: 1600, x1: 1850, top: G - 70 }, { x0: 1850, x1: 2800, top: G },
+              { x0: 2960, x1: 4200, top: G }, { x0: 4340, x1: 6400, top: G }],
+    friend: { kind: 'riddletree', x: 6050 },
+    items: [{ x: 800, y: G - 50 }, { x: 1475, y: G - 220 }, { x: 3500, y: G - 190 }, { x: 4800, y: G - 50 }],
+    stations: [{ id: 'riddle', kind: 'riddle', x: 5350, need: 1, say: ['pr_08'] }],
+    bonus: [].concat(arcRow(240, 1000, G - 80, 40, 7), arcRow(1900, 2700, G - 80, 60, 7), arcRow(3000, 4100, G - 90, 50, 8), arcRow(4400, 5200, G - 80, 30, 6), arcRow(5500, 5900, G - 80, 20, 4)),
+    plats: [{ x: 2830, w: 110, kind: 'stone' }, { x: 4210, w: 110, kind: 'stone' }, { x: 3300, w: 110, kind: 'stump' }],
+    cues: [{ x: 0, say: ['l7_a', 'ins_20', 'ins_10', 'num_08'] }, { x: 2800, say: ['ins_15'] }] },
+
+  { name: 'castle', need: 12, len: 8300, sticker: 8, collect: 'flower', ins: 'ins_23', joins: ['princess1', 'princess2'], arriveSay: 'l8_b', carry: true, fireworks: true,
+    finSay: ['fr_16', 'l8_c', 'pr_20'],
+    terrain: [{ x0: 0, x1: 1500, top: G }, { x0: 1500, x1: 1750, top: G - 60 }, { x0: 1750, x1: 2000, top: G - 110 }, { x0: 2000, x1: 2250, top: G - 60 }, { x0: 2250, x1: 3500, top: G },
+              { x0: 3500, x1: 3750, top: G - 70 }, { x0: 3750, x1: 4000, top: G - 130 }, { x0: 4000, x1: 4250, top: G - 70 }, { x0: 4250, x1: 8300, top: G }],
+    friend: { kind: 'princess1', x: 7900 },
+    items: [{ x: 500, y: G - 60, col: '1' }, { x: 1000, y: G - 60, col: '2' }, { x: 1625, y: G - 140, col: '3' }, { x: 1875, y: G - 190, col: '4' }, { x: 2600, y: G - 60, col: '5' },
+            { x: 3100, y: G - 60, col: '1' }, { x: 3875, y: G - 210, col: '2' }, { x: 4600, y: G - 60, col: '3' }, { x: 5000, y: G - 60, col: '4' }, { x: 5400, y: G - 60, col: '5' },
+            { x: 5800, y: G - 60, kind: 'feather', grp: 'gift', to: 'g0' }, { x: 5960, y: G - 60, kind: 'bubble', col: 'red', grp: 'gift', to: 'g1' }, { x: 6120, y: G - 60, kind: 'petal', grp: 'gift', to: 'g2' },
+            { x: 6280, y: G - 60, kind: 'steam', grp: 'gift', to: 'g3' }, { x: 6440, y: G - 60, kind: 'plank', grp: 'gift', to: 'g4' }, { x: 6600, y: G - 60, kind: 'challah', grp: 'gift', to: 'g5' },
+            { x: 6760, y: G - 60, kind: 'ribbon', grp: 'gift', to: 'g6' }, { x: 6920, y: G - 60, kind: 'flower', col: '1', grp: 'gift', to: 'g7' }],
+    stations: [0, 1, 2, 3, 4, 5, 6, 7].map(i => ({ id: 'g' + i, kind: 'plate', x: 7160 + i * 90, need: 1, r: 46, icon: ['feather', 'bubble_red', 'petal', 'steam', 'plank', 'challah', 'ribbon', 'flower_1'][i] })),
+    bonus: [].concat(arcRow(250, 1400, G - 80, 40, 9), arcRow(2300, 3400, G - 80, 50, 9), arcRow(4300, 5600, G - 80, 40, 12)),
+    plats: [],
+    decos: [{ kind: 'princess2', x: 8050, happy: true }],
+    cues: [{ x: 0, say: ['l8_a', 'ins_23', 'ins_10', 'num_10'] }, { x: 5600, say: ['fr_16'] }] }
 ];
 const REST_W = 1.25;        // picture is a bit wider than the part you stand on
 function prepLevel(lv){
@@ -241,6 +328,7 @@ LEVELS.forEach(prepLevel);
 let mode = 'title', li = 0, L = null, p = null, camX = 0, camY = 0, T = 0;     // camY: how far the view has moved up (0 = ground level, negative = looking up at clouds and treetops)
 let bonus = [], bonusN = 0;
 let terr = [], items = [], stars = [], plats = [], followers = [], parts = [], hist = [], flowers = [];
+let pocket = [], sts = [];          // pocket: things she carries (up to 4); sts: the places that use them (bowl, oven, nest, plates ...)
 let got = 0, meter = 0, fin = null, arrived = false, hintT = 0, maxX = 0, danceN = 0, said = {}, falls = 0, trail = false;
 
 function paradeFor(i){
@@ -252,6 +340,8 @@ function startLevel(i){
   li = i; L = LEVELS[i]; T = 0; mode = 'play';
   p = { x: 140, y: G, vx: 0, vy: 0, face: 1, on: true, run: 0, dance: 0, move: 0, wings: 0, bubble: 0, squash: 1 };
   items = L.items.map(o => ({ ...o, got: false, bob: rand(0, 6) }));
+  pocket = []; sts = (L.stations || []).map(o => ({ ...o, have: 0, done: false, t: 0, cd: 0, armed: 0 }));
+  sts.forEach(st => { if (st.kind === 'riddle') { st.want = Math.random() < 0.5 ? 'red' : 'blue'; st.objs = [['apple', 'red'], ['ball', 'blue'], ['leaf', 'green']].sort(() => Math.random() - 0.5).map((o, i) => ({ k: o[0], col: o[1], x: st.x + (i - 1) * 250, wob: 0 })); } });
   stars = (L.stars || []).map(o => ({ ...o, y: G - 70, got: false, back: 0 }));
   bonus = (L.bonus || []).map(o => ({ ...o, got: false })); bonusN = 0;
   plats = L.plats.map(o => ({ ...o, dx: 0 })); terr = L.terrain;
@@ -268,14 +358,18 @@ function groundAt(x){ let t = null; for (const g of terr) if (x > g.x0 - 8 && x 
 function inGap(x){ return (L.gaps || []).find(g => x > g.x && x < g.x + g.w); }
 function burst(x, y, n, cols, shape){ for (let i = 0; i < n; i++) parts.push({ x, y, vx: rand(-3, 3), vy: rand(-4.5, -0.5), life: 1, c: cols[i % cols.length], s: rand(5, 11), shape: shape || 'dot', g: 0.12 }); }
 const starsOK = () => bonusN >= (L.need || 0);
-const goalMet = () => got === items.length && starsOK();       // to finish a level: all the things AND enough gold stars
-function target(){ const it = items.find(o => !o.got);
+const stationsOK = () => sts.every(s => s.done);
+const goalMet = () => got === items.length && starsOK() && stationsOK();       // to finish a level: all the things (and each one put to use) AND enough gold stars
+function target(){ const it = items.find(o => !o.got && !o.hidden);
+  if (pocket.length) { const st = sts.find(s => s.id === pocket[0].to); if (st) return { x: st.x, y: G - 60 }; }
   if (it) return { x: it.x, y: it.y };
+  { const st = sts.find(s => !s.done && !s.auto && !s.dance); if (st && got >= items.length - items.filter(o => o.hidden).length) return { x: st.kind === 'riddle' ? st.x - 300 : st.x, y: G - 60 }; }
   if (!starsOK()) { const b = bonus.filter(o => !o.got).sort((a, c) => Math.abs(a.x - p.x) - Math.abs(c.x - p.x))[0]; if (b) return { x: b.x, y: b.y }; }
   return { x: L.friend.x, y: G - 60 }; }
 function curIns(){
-  if (got < items.length) return L.ins;
+  if (got < items.length) return items.some(o => !o.got && !o.hidden) ? (L.noIns ? null : L.ins) : null;
   if (!starsOK()) return 'ins_10';
+  if (!stationsOK()) return null;
   if (Math.abs(p.x - L.friend.x) > 190) return 'ins_24';
   return L.auto ? null : 'ins_06';
 }
@@ -285,11 +379,21 @@ function progress(){ hintT = 0; nextHint = 480; trail = false; }
 function pickup(it){
   it.got = true; got++; progress(); sfx.pick();
   burst(it.x, it.y, 12, RB, 'star');
-  Voice.say('num_0' + got);
-  if (it.col) Voice.say(COL[it.col][1]);
-  if (got === items.length) { Voice.say('pr_12'); Voice.say(starsOK() ? 'ins_24' : 'ins_10'); }
+  if (it.to) pocket.push(it);
+  if (got <= 10) Voice.say('num_' + (got < 10 ? '0' : '') + got);
+  if (it.col && COL[it.col]) Voice.say(COL[it.col][1]);
+  if (got === items.length) { Voice.say('pr_12'); if (!starsOK()) Voice.say('ins_10'); else if (stationsOK()) Voice.say('ins_24'); }
   else if (items.length - got === 1) Voice.say('ins_25');
   else praise();
+}
+/* a station has everything it needs */
+function complete(st){
+  st.done = true; st.t = 0; progress(); sfx.win && st.kind !== 'plate' ? sfx.star() : sfx.pick(); burst(st.x, G - 120, st.kind === 'plate' ? 10 : 26, RB, 'star');
+  (st.say || []).forEach(id => Voice.say(id));
+  if (st.spawn) { const it = items.find(o => o.hid === st.spawn); if (it) { it.hidden = false; it.x = st.x + 10; it.y = G - 90; burst(it.x, it.y, 20, ['#ffe14d', '#fff'], 'star'); } }
+  if (st.kind === 'bowl') { const ov = sts.find(s => s.id === 'oven'); if (ov) ov.armed = 110; }
+  if (st.kind === 'riddle') st.objs.forEach(o => burst(o.x, G - 70, 8, RB, 'star'));
+  if (got === items.length && starsOK() && stationsOK()) Voice.say('ins_24');
 }
 function finish(){
   fin = { t: 0 }; L.friend.happy = true; progress(); glow(null); sfx.win();
@@ -324,16 +428,20 @@ function update(dt){
     if (p.on && ax && groundAt(p.x + ax * 50) === null && Math.abs(dx) > 120) wantJump = true;   // a gap ahead: hop over it
     if (p.on && ax && terr.some(g => g.top < p.y - 10 && ((ax > 0 && g.x0 > p.x && g.x0 - p.x < 100) || (ax < 0 && g.x1 < p.x && p.x - g.x1 < 100)))) wantJump = true;   // a step ahead
   }
-  p.vx = ax * 5.2; if (ax) p.face = ax;
+  const muddy = p.on && (L.mud || []).some(m => p.x > m.x && p.x < m.x + m.w && p.y >= G - 4);
+  p.vx = ax * 5.2 * (muddy ? 0.45 : 1); if (ax) p.face = ax;
+  if (muddy && ax && !said.mud) { said.mud = 1; tone(150, 0.2, 'sine', 0.09, 60); }
   // jump
-  if (wantJump && p.on && !locked && !dancing) { p.vy = -13.2; p.on = false; p.squash = 1.25; sfx.jump(); if ($('bj').classList.contains('glow')) glow(null); }
+  if (wantJump && p.on && !locked && !dancing) { p.vy = L.floaty ? -11.6 : -13.2; p.on = false; p.squash = 1.25; sfx.jump(); if ($('bj').classList.contains('glow')) glow(null); }
   // super jump
   if (wantSuper && !locked && p.on && meter >= 3) { p.vy = -21.5; p.on = false; p.wings = 1; meter = 0; p.dance = 0; sfx.sup(); Voice.say('ex_04'); $('bs').classList.remove('ready', 'glow'); }
   // dance
   if (wantDance && save.dance && p.on && !locked && !dancing) {
     p.dance = 110; p.move = danceN++ % Math.max(1, save.done.filter(Boolean).length); sfx.dance(); if ($('bd').classList.contains('glow')) glow(null);
     const near = Math.abs(p.x - L.friend.x) < 200 && goalMet();
-    if (near && !L.auto) finish();
+    const cd = sts.find(s => s.dance && !s.done && Math.abs(p.x - s.x) < 280);
+    if (cd) { complete(cd); }
+    else if (near && !L.auto) finish();
     else if (L.danceZone && p.x > L.danceZone.a && p.x < L.danceZone.b) { for (let i = 0; i < 9; i++) flowers.push({ x: p.x + rand(-260, 260), c: RB[i % 6], t: 0 }); if (!said.dz) { said.dz = 1; Voice.say('pr_07'); } progress(); }
     else Voice.sayIfFree(Math.random() < 0.5 ? 'pr_07' : 'pr_08');
   }
@@ -344,7 +452,7 @@ function update(dt){
   if (p.bubble > 0) { p.bubble -= dt; const ty = groundAt(p.x); const gy = ty === null ? G : ty; p.y += (gy - p.y) * 0.06 * dt; p.vy = 0; if (p.bubble <= 0 || Math.abs(gy - p.y) < 3) { p.bubble = 0; p.y = gy; p.on = true; sfx.pop(); } }
   else {
     const py = p.y;
-    p.vy += (p.wings && p.vy > 0 ? 0.22 : 0.62) * dt; if (p.vy > 16) p.vy = 16;
+    p.vy += (p.wings && p.vy > 0 ? 0.22 : L.floaty ? 0.44 : 0.62) * dt; if (p.vy > 16) p.vy = 16;
     const px0 = p.x; p.x = clamp(p.x + p.vx * dt, 60, L.len - 60); p.y += p.vy * dt;
     for (const g of terr) if (p.y > g.top + 12 && p.x + 34 > g.x0 && p.x - 34 < g.x1) {        // the side of a raised block or the wall of a gap
       if (px0 + 34 <= g.x0 + 2) p.x = g.x0 - 34; else if (px0 - 34 >= g.x1 - 2) p.x = g.x1 + 34; }
@@ -375,15 +483,29 @@ function update(dt){
 
   // items and stars
   const cx = p.x, cy = p.y - 62;
-  items.forEach(it => { it.bob += 0.05 * dt; if (!it.got && Math.hypot(it.x - cx, it.y - cy) < 72) pickup(it);
-    if (!it.got && hintT > 2400 && it === items.find(o => !o.got)) { it.x += Math.sign(cx - it.x) * 1.4 * dt; it.y += Math.sign(cy - it.y) * 1.0 * dt; } });
+  items.forEach(it => { it.bob += 0.05 * dt; if (!it.got && !it.hidden && Math.hypot(it.x - cx, it.y - cy) < 72 && !(it.to && pocket.length >= 4)) pickup(it);
+    if (!it.got && !it.hidden && hintT > 2400 && it === items.find(o => !o.got && !o.hidden)) { it.x += Math.sign(cx - it.x) * 1.4 * dt; it.y += Math.sign(cy - it.y) * 1.0 * dt; } });
   bonus.forEach(b => { if (!b.got && Math.hypot(b.x - cx, b.y - cy) < 60) { b.got = true; bonusN++; sfx.star(); burst(b.x, b.y, 6, ['#ffe14d', '#fff'], 'star');
-    if (bonusN === L.need) { Voice.say('pr_12'); if (got === items.length) Voice.say('ins_24'); } else if (bonusN % 10 === 0) praise(); } });
+    if (bonusN === L.need) { Voice.say('pr_12'); if (got === items.length && stationsOK()) Voice.say('ins_24'); } else if (bonusN % 10 === 0) praise(); } });
   stars.forEach(st => {
     if (!st.got && Math.hypot(st.x - cx, st.y - cy) < 66 && meter < 3) { st.got = true; st.back = 300; meter++; sfx.star(); burst(st.x, st.y, 8, ['#ffe14d', '#fff'], 'star');
       if (meter === 3) { Voice.say('ex_03'); if (!save.sup) { save.sup = true; persist(); showButtons(); Voice.say('ins_08'); } $('bs').classList.add('ready', 'glow'); } }
     else if (st.got) { const need = items.find(o => o.high === st.g && !o.got); if (need && meter < 3 && !p.wings) { st.back -= dt; if (st.back <= 0) st.got = false; } }
   });
+
+  // stations: what she carries drops in when she walks up to the right place
+  sts.forEach(st => { st.cd -= dt; st.t += dt;
+    if (st.done) return;
+    if (st.auto) { if (st.armed > 0) { st.armed -= dt; if (st.armed <= 0) complete(st); } return; }
+    if (st.dance) return;
+    if (st.kind === 'riddle') {
+      if (!st.asked && Math.abs(p.x - st.x) < 800 && got >= items.length) { st.asked = 1; Voice.say('l7_b'); Voice.say('fr_15'); Voice.say(st.want === 'red' ? 'ins_21' : 'ins_22'); }
+      if (st.asked) st.objs.forEach(o => { o.wob = Math.max(0, o.wob - dt);
+        if (!st.done && Math.abs(p.x - o.x) < 80 && p.y > G - 130 && o.wob <= 0) {
+          if (o.col === st.want) complete(st); else { o.wob = 60; sfx.boing(); if (st.cd <= 0) { st.cd = 300; Voice.say(st.want === 'red' ? 'ins_21' : 'ins_22'); } } } });
+      return; }
+    if (st.cd <= 0 && Math.abs(p.x - st.x) < (st.r || 140)) { const i = pocket.findIndex(o => o.to === st.id);
+      if (i >= 0) { pocket.splice(i, 1); st.have++; st.cd = 16; sfx.pop(); burst(st.x, G - 110, 10, RB, 'star'); if (st.have >= st.need) complete(st); else if (Math.random() < 0.4) praise(); } } });
 
   // friend
   const near = Math.abs(p.x - L.friend.x) < 170;
@@ -434,7 +556,7 @@ function face(x, y, s, happy, closed){
 function star5(x, y, r, c){ ctx.fillStyle = c; ctx.beginPath(); for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, q = i % 2 ? r * 0.45 : r; ctx.lineTo(x + Math.cos(a) * q, y + Math.sin(a) * q); } ctx.closePath(); ctx.fill(); }
 
 /* ---------- drawing: friends (stand-ins; x,y = feet) ---------- */
-const FH = { pitzi: 150, bird: 84, mamabird: 115, bobo: 135, shluli: 105, tree: 370, bilam: 168 };   // height of the whole picture frame, feet at the bottom
+const FH = { pitzi: 150, bird: 84, mamabird: 115, bobo: 135, shluli: 105, tree: 370, bilam: 168, koko: 170, armon: 230, anana: 230, rhino: 280, luna: 110, solomon: 260, riddletree: 330, princess1: 250, princess2: 250, grandpa: 250, cloudunicorn: 200 };   // height of the whole picture frame, feet at the bottom
 function drawFriend(kind, x, y, happy, o){
   o = o || {};
   const im = IMG[kind + (happy ? '_happy' : '_sad')];
@@ -578,7 +700,7 @@ function drawPlat(pl){
 function hills(par, base, amp, c, f){ ctx.fillStyle = c; ctx.beginPath(); ctx.moveTo(0, VH); for (let sx = 0; sx <= VW + 40; sx += 40) { const wx = sx + camX * par; ctx.lineTo(sx, base - Math.sin(wx * f) * amp - Math.sin(wx * f * 2.3 + 1) * amp * 0.4); } ctx.lineTo(VW, VH); ctx.fill(); }
 function drawWorld(){
   const n = L.name, im = IMG['bg_' + n];
-  const sky = { garden: ['#bfe9ff', '#eafff0'], rainbow: ['#ffdff3', '#e6dcff'], forest: ['#cdeccf', '#f4ffd9'] }[n];
+  const sky = { garden: ['#bfe9ff', '#eafff0'], rainbow: ['#ffdff3', '#e6dcff'], forest: ['#cdeccf', '#f4ffd9'], sky: ['#ffb78a', '#f6c7ee'], farm: ['#bfe3ff', '#f1ffe0'], shabbat: ['#ffe2a6', '#fff3d6'], night: ['#1f2a5e', '#4b5fa8'], castle: ['#bfe9ff', '#ffe8f6'] }[n] || ['#bfe9ff', '#eafff0'];
   const gr = ctx.createLinearGradient(0, 0, 0, VH); gr.addColorStop(0, sky[0]); gr.addColorStop(1, sky[1]); ctx.fillStyle = gr; ctx.fillRect(0, 0, VW, VH);
   if (im) { const h = VH, w = h * im.width / im.height, off = -((camX * 0.4) % w), by = -camY * 0.4;
     for (let x = off; x < VW; x += w) { if (by > 0) ctx.drawImage(im, 0, 0, im.width, 6, x, 0, w, by + 2); ctx.drawImage(im, x, by, w, h); } }
@@ -601,11 +723,45 @@ function drawWorld(){
   terr.forEach(sg => { const x0 = sg.x0, x1 = sg.x1, top = sg.top;
     if (n === 'rainbow') { RB.forEach((c, i) => rr(x0, top + i * 12, x1 - x0, 14, i ? 0 : 7, c)); rr(x0, top + 72, x1 - x0, VH, 0, '#fff');
       for (let x = x0 + 40; x < x1; x += 90) circ(x, top + 84, 46, '#fff'); }
-    else { const c = n === 'garden' ? ['#7fd58a', '#63bd72', '#c59a6d'] : ['#5fae68', '#4c9657', '#8f6d4b'];
+    else { const c = { garden: ['#7fd58a', '#63bd72', '#c59a6d'], sky: ['#ffd1ec', '#f6b0da', '#d58fbf'], farm: ['#8ccf6a', '#6fb556', '#7a5a3c'], shabbat: ['#e6c866', '#d1a84d', '#a8794a'], night: ['#5a78bc', '#4562a6', '#2c3f78'], castle: ['#8fdc8a', '#6fc873', '#9a7a56'] }[n] || ['#5fae68', '#4c9657', '#8f6d4b'];
       rr(x0, top, x1 - x0, VH, 0, c[2]); rr(x0, top - 4, x1 - x0, 40, 10, c[0]); rr(x0, top + 22, x1 - x0, 14, 0, c[1]);
       for (let x = Math.ceil(x0 / 130) * 130 + 40; x < x1 - 20; x += 130) { const k = (x * 7) % 5; ctx.fillStyle = '#4c9657'; ctx.fillRect(x - 1, top - 22, 3, 20); circ(x, top - 26, 8, RB[k]); circ(x, top - 26, 3.5, '#fff7c4'); } }
   });
   ctx.restore();
+}
+
+/* ---------- drawing: stations, props, pocket ---------- */
+function pic(im, cx, bottom, w, sq){ const h = w * im.height / im.width * (sq || 1); ctx.drawImage(im, cx - w / 2, bottom - h, w, h); return h; }
+function groups(){ const g = []; items.forEach(it => { const k = it.grp || it.kind || L.collect; let e = g.find(x => x.k === k); if (!e) { e = { k, kind: it.kind || L.collect, col: it.col, n: 0, got: 0 }; g.push(e); } e.n++; if (it.got) e.got++; }); return g; }
+function drawProps(){
+  (L.mud || []).forEach(m => { const im = IMG.prop_mud; if (im) pic(im, m.x + m.w / 2, G + 22, m.w * 1.08); else ell(m.x + m.w / 2, G + 4, m.w / 2, 14, '#8a6a46'); });
+  (L.props || []).forEach(o => { const im = IMG['prop_' + o.k]; if (im) pic(im, o.x, G + 4, o.w); });
+  if (L.lights) items.forEach(it => { if (it.got) { const g = ctx.createRadialGradient(it.x + 380, G - 40, 40, it.x + 380, G - 40, 520); g.addColorStop(0, 'rgba(255,244,170,.38)'); g.addColorStop(1, 'rgba(255,244,170,0)'); ctx.fillStyle = g; ctx.fillRect(it.x - 160, G - 560, 1080, 700); } });
+}
+function drawStations(){
+  sts.forEach(st => { const x = st.x, k = st.kind;
+    if (k === 'cloud') { const im = IMG.prop_cotton_candy_platform, w = 640, top = G - 340; if (im) pic(im, x, top + 210, w); else ell(x, top + 110, 300, 90, '#ffb3d9');
+      for (let i = 0; i < 3; i++) { const ux = x + (i - 1) * 200;
+        if (i < st.have) drawFriend('cloudunicorn', ux, top + 70 + Math.sin(T * 0.06 + i * 2) * 8, true, { bounce: true });
+        else { ctx.fillStyle = '#ffd84d'; ctx.beginPath(); ctx.moveTo(ux - 12, top + 52); ctx.lineTo(ux, top + 4); ctx.lineTo(ux + 12, top + 52); ctx.fill(); const wag = Math.sin(T * 0.25 + i) * 10; ctx.strokeStyle = '#ff8fc7'; ctx.lineWidth = 8; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(ux + 40, top + 80); ctx.quadraticCurveTo(ux + 60 + wag, top + 50, ux + 52 + wag, top + 30); ctx.stroke(); } } }
+    else if (k === 'bridge') { const im = IMG.prop_plank_bridge, w = 440; if (im && st.have > 0) { const f = Math.min(1, st.have / st.need), h = w * im.height / im.width * 0.5; ctx.drawImage(im, 0, 0, im.width * f, im.height, x - w / 2, G + 8 - h, w * f, h); }
+      else if (!im && st.have > 0) rr(x - 220, G - 20, 440 * st.have / st.need, 24, 6, '#c58a4a'); }
+    else if (k === 'bowl') { const im = IMG[st.have >= st.need ? 'prop_bowl_dough' : 'prop_bowl']; if (im) pic(im, x, G + 4, 170); for (let i = 0; i < st.need; i++) circ(x - 30 + i * 30, G - 130, 9, i < st.have ? '#ffd028' : 'rgba(255,255,255,.7)'); }
+    else if (k === 'oven') { const im = IMG[st.done ? 'prop_oven_lit' : 'prop_oven']; if (im) pic(im, x, G + 4, 270); if (st.armed > 0) for (let i = 0; i < 3; i++) circ(x - 20 + i * 20, G - 250 - ((T * 1.5 + i * 25) % 70), 10, 'rgba(255,255,255,.7)'); }
+    else if (k === 'candles') { const im = IMG[st.done ? 'prop_candle_lit' : 'prop_candle_unlit']; if (im) pic(im, x, G + 2, 150);
+      for (let i = 0; i < 2; i++) { const sx = st.done ? x - 26 + i * 52 : x + Math.cos(T * 0.03 + i * 3.1) * 180, sy = st.done ? G - 140 : G - 200 + Math.sin(T * 0.05 + i * 2) * 60; drawItem('spark', sx, sy, null, T * 0.1 + i); } }
+    else if (k === 'table') { const im = IMG.prop_plank_bridge; if (im) pic(im, x, G + 6, 420); else rr(x - 200, G - 110, 400, 40, 8, '#c58a4a'); if (st.done) drawItem('challah', x, G - 160, null, T * 0.04); }
+    else if (k === 'bilam') { drawFriend('bilam', x, G, st.done, { face: -1, bounce: st.done }); for (let i = 0; i < st.need; i++) circ(x - 45 + i * 30, G - 210, 9, i < st.have ? '#ff9f43' : 'rgba(255,255,255,.7)'); }
+    else if (k === 'plate') { const im = IMG.item_gift_plate; if (im) pic(im, x, G - 8, 82); else ell(x, G - 30, 40, 14, '#fff'); const ic = IMG['item_' + st.icon]; ctx.globalAlpha = st.done ? 1 : 0.32; if (ic) ctx.drawImage(ic, x - 24, G - 66, 48, 48); ctx.globalAlpha = 1; if (st.done) circ(x, G - 80, 6 + Math.sin(T * 0.2 + x) * 2, '#ffe14d'); }
+    else if (k === 'riddle' && st.asked && !st.done) st.objs.forEach(o => { const im = IMG['riddle_' + o.k]; ctx.save(); ctx.translate(o.x, G); ctx.rotate(o.wob > 0 ? Math.sin(o.wob * 0.5) * 0.25 : 0); if (im) pic(im, 0, 4, 130); else circ(0, -50, 50, COL[o.col] ? COL[o.col][0] : '#6fdc8c'); ctx.restore(); });
+  });
+}
+function drawPocket(){
+  if (!L.carry) return; const x0 = bonus.length ? 196 : 18, y0 = bonus.length ? 98 : 98, w = 56 + 4 * 56;
+  rr(x0, y0, w, 54, 27, 'rgba(255,255,255,.78)');
+  for (let i = 0; i < 4; i++) circ(x0 + 78 + i * 56, y0 + 27, 22, 'rgba(176,64,154,.14)');
+  ctx.fillStyle = '#b0409a'; ctx.font = 'bold 26px "Comic Sans MS", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('\u{1F392}', x0 + 28, y0 + 29);
+  pocket.forEach((it, i) => { ctx.save(); ctx.translate(x0 + 78 + i * 56, y0 + 27 + Math.sin(T * 0.1 + i) * 2); ctx.scale(0.44, 0.44); drawItem(it.kind || L.collect, 0, 0, it.col, 0); ctx.restore(); });
 }
 
 /* ---------- draw everything ---------- */
@@ -613,22 +769,25 @@ function draw(){
   ctx.setTransform(S, 0, 0, S, 0, 0);
   drawWorld();
   ctx.save(); ctx.translate(-camX, -camY);
-  if (L.splash) { /* puddle is the friend Shluli, drawn with the decos */ }
+  drawProps();
   flowers.forEach(f => { const k = Math.min(1, f.t / 20); ctx.fillStyle = '#4c9657'; ctx.fillRect(f.x - 2, G - 34 * k, 4, 34 * k); for (let a = 0; a < 5; a++) circ(f.x + Math.cos(a * 1.257) * 11 * k, G - 36 * k + Math.sin(a * 1.257) * 11 * k, 8 * k, f.c); circ(f.x, G - 36 * k, 6 * k, '#fff7c4'); });
   (L.decos || []).forEach(d => { if (d.kind === 'mamabird') { rr(d.x - 16, d.y, 32, G - d.y, 12, '#9a6a45'); circ(d.x - 30, d.y - 30, 70, '#7fcf7a'); circ(d.x + 40, d.y - 10, 60, '#63bd69'); rr(d.x - 90, d.y, 110, 14, 7, '#9a6a45'); drawFriend(d.kind, d.x - 50, d.y + 2, true); }
-    else if (!(d.kind === 'pitzi' && followers.find(f => f.kind === 'pitzi'))) drawFriend(d.kind, d.x, d.y || G, d.happy, { bounce: d.kind === 'pitzi' }); });
+    else if (!(d.kind === 'pitzi' && followers.find(f => f.kind === 'pitzi'))) { const hp = d.hap ? !!(sts.find(s => s.id === d.hap) || {}).done : d.happy; drawFriend(d.kind, d.x, d.y || G, hp, { bounce: d.kind === 'pitzi' || (d.hap && hp) }); } });
   plats.forEach(drawPlat);
+  drawStations();
   // the friend she is helping
   const fr = L.friend, fy = G - (fr.on || 0);
+  if (fin && L.fireworks && IMG.prop_party_firework) { ctx.globalAlpha = Math.min(1, fin.t / 40) * 0.95; const w = 1100, h = w * 1024 / 1536; ctx.drawImage(IMG.prop_party_firework, fr.x - w / 2, G - 130 - h, w, h); ctx.globalAlpha = 1; }
+  if (fin && L.lights && IMG.prop_shadow_stage) { ctx.globalAlpha = Math.min(1, fin.t / 50) * 0.9; const w = 760, h = w * 887 / 1774; ctx.drawImage(IMG.prop_shadow_stage, fr.x - w / 2 - 330, G - 30 - h, w, h); ctx.globalAlpha = 1; }
   if (!(fin && fr.kind === 'bird')) { if (fr.kind !== 'pitzi' || !followers.find(f => f.kind === 'pitzi') ) drawFriend(fr.kind, fr.x, fy, fr.happy, { bloom: fr.bloom, bounce: fr.happy && fr.kind !== 'tree', face: fr.kind === 'tree' ? 1 : -1 }); }
   else { const a = fin.t * 0.05, r = Math.min(150, fin.t * 1.4); drawFriend('bird', fr.x + Math.sin(a) * r, fy - 60 - (1 - Math.cos(a)) * r * 0.7, true, { face: Math.cos(a) > 0 ? 1 : -1 }); }
   if (!fr.happy && got < items.length) {      // thought bubble: what the friend needs
     const bx = fr.x - 30, by = fy - (FH[fr.kind] || 100) - 70; circ(bx, by, 46, 'rgba(255,255,255,.95)'); circ(bx + 30, by + 46, 10, 'rgba(255,255,255,.95)'); circ(bx + 42, by + 64, 6, 'rgba(255,255,255,.95)');
-    ctx.save(); ctx.translate(bx, by); ctx.scale(0.75, 0.75); drawItem(L.collect, 0, 0, (items.find(o => !o.got) || {}).col, 0); ctx.restore(); }
+    ctx.save(); ctx.translate(bx, by); ctx.scale(0.75, 0.75); { const w = items.find(o => !o.got && !o.hidden) || items.find(o => !o.got) || {}; drawItem(w.kind || L.collect, 0, 0, w.col, 0); } ctx.restore(); }
   if (fin && L.name === 'rainbow') items.forEach((it, i) => drawItem('bubble', fr.x + Math.cos(fin.t * 0.06 + i * 1.57) * 150, G - 110 + Math.sin(fin.t * 0.06 + i * 1.57) * 80, it.col, 0));
   stars.forEach(st => { if (!st.got && IMG.item_star) { const bob = Math.sin(T * 0.08 + st.x) * 5; circ(st.x, st.y + bob, 34, 'rgba(255,240,150,.35)'); ctx.drawImage(IMG.item_star, st.x - 38, st.y + bob - 38, 76, 76); } else if (!st.got) { circ(st.x, st.y, 30, 'rgba(255,240,150,.35)'); star5(st.x, st.y + Math.sin(T * 0.08 + st.x) * 5, 22, '#ffd028'); star5(st.x - 4, st.y - 4 + Math.sin(T * 0.08 + st.x) * 5, 8, '#fff6b8'); } });
   bonus.forEach((b, i) => { if (!b.got && b.x > camX - 60 && b.x < camX + VW + 60) { const yy = b.y + Math.sin(T * 0.09 + i) * 4; circ(b.x, yy, 24, 'rgba(255,240,150,.4)'); star5(b.x, yy, 17, '#ffd028'); star5(b.x - 3, yy - 3, 6, '#fff6b8'); } });
-  items.forEach(it => { if (!it.got) drawItem(L.collect, it.x, it.y, it.col, it.bob); });
+  items.forEach(it => { if (!it.got && !it.hidden) drawItem(it.kind || L.collect, it.x, it.y, it.col, it.bob); });
   // sparkle trail to the next thing
   if (trail && !fin) { const tg = target(), dx = tg.x - p.x, dy = tg.y - (p.y - 62), n = Math.floor(Math.hypot(dx, dy) / 60);
     for (let i = 1; i < n; i++) { const k = i / n; star5(p.x + dx * k, p.y - 62 + dy * k - Math.sin(k * Math.PI) * 60, 7 + Math.sin(T * 0.2 - i) * 4, '#fff'); } }
@@ -645,17 +804,20 @@ function draw(){
   parts.forEach(q => { ctx.globalAlpha = clamp(q.life, 0, 1); if (q.shape === 'star') star5(q.x, q.y, q.s, q.c); else if (q.shape === 'petal') ell(q.x, q.y, q.s, q.s * 0.6, q.c, q.x * 0.05 + T * 0.05); else circ(q.x, q.y, q.s, q.c); }); ctx.globalAlpha = 1;
   ctx.restore();
   // top bar: what she is collecting, and the star meter
-  rr(18, 14, 34 + items.length * 62, 76, 38, 'rgba(255,255,255,.75)');
-  items.forEach((it, i) => { ctx.save(); ctx.translate(66 + i * 62, 52); ctx.scale(0.72, 0.72); ctx.globalAlpha = i < got ? 1 : 0.28; drawItem(L.collect, 0, 0, it.col, 0); ctx.restore(); });
+  if (items.length <= 6) { rr(18, 14, 34 + items.length * 62, 76, 38, 'rgba(255,255,255,.75)');
+    items.forEach((it, i) => { ctx.save(); ctx.translate(66 + i * 62, 52); ctx.scale(0.72, 0.72); ctx.globalAlpha = i < got ? 1 : 0.28; drawItem(it.kind || L.collect, 0, 0, it.col, 0); ctx.restore(); }); }
+  else { let gx = 18; groups().forEach(g => { rr(gx, 14, 150, 76, 38, g.got === g.n ? 'rgba(200,255,210,.85)' : 'rgba(255,255,255,.75)'); ctx.save(); ctx.translate(gx + 44, 52); ctx.scale(0.72, 0.72); drawItem(g.kind, 0, 0, g.col, 0); ctx.restore();
+      ctx.fillStyle = '#b0409a'; ctx.font = 'bold 30px "Comic Sans MS", sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText(g.got + '/' + g.n, gx + 82, 54); gx += 160; }); }
+  drawPocket();
   if (bonus.length) { const ok = starsOK(); rr(18, 98, 170, 54, 27, ok ? 'rgba(200,255,210,.85)' : 'rgba(255,255,255,.75)'); star5(50, 125, 19, '#ffd028'); ctx.fillStyle = '#b0409a'; ctx.font = 'bold 30px "Comic Sans MS", sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText(bonusN + ' / ' + (L.need || '?'), 78, 127); }
   // the goal of the level, big on the screen for the first seconds
-  if (T < 420 && !fin) { const a = T < 360 ? 1 : 1 - (T - 360) / 60, cx = VW / 2, cy = 215; ctx.globalAlpha = a;
-    rr(cx - 330, cy - 75, 660, 150, 40, 'rgba(255,255,255,.88)');
+  if (T < 420 && !fin) { const a = T < 360 ? 1 : 1 - (T - 360) / 60, cx = VW / 2, cy = 215, gs = groups(), w = 140 + gs.length * 190 + 170; ctx.globalAlpha = a;
+    const fit = Math.min(1, (VW - 30) / w); ctx.save(); ctx.translate(cx, cy); ctx.scale(fit, fit); ctx.translate(-cx, -cy);
+    rr(cx - w / 2, cy - 75, w, 150, 40, 'rgba(255,255,255,.88)');
     ctx.fillStyle = '#b0409a'; ctx.font = 'bold 64px "Comic Sans MS", sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-    ctx.save(); ctx.translate(cx - 250, cy); ctx.scale(1.1, 1.1); drawItem(L.collect, 0, 0, (items[0] || {}).col, 0); ctx.restore();
-    ctx.fillText('×' + items.length, cx - 190, cy + 4);
-    star5(cx + 60, cy, 44, '#ffd028'); ctx.fillText('×' + (L.need || 0), cx + 125, cy + 4);
-    ctx.globalAlpha = 1; }
+    let gx = cx - w / 2 + 70; gs.forEach(g => { ctx.save(); ctx.translate(gx, cy); ctx.scale(1.1, 1.1); drawItem(g.kind, 0, 0, g.col, 0); ctx.restore(); ctx.fillText('×' + g.n, gx + 58, cy + 4); gx += 190; });
+    star5(gx + 10, cy, 44, '#ffd028'); ctx.fillText('×' + (L.need || 0), gx + 75, cy + 4);
+    ctx.restore(); ctx.globalAlpha = 1; }
   if (stars.length) { rr(VW - 232, 14, 214, 76, 38, 'rgba(255,255,255,.75)'); for (let i = 0; i < 3; i++) star5(VW - 185 + i * 60, 52, 24 + (meter >= 3 ? Math.sin(T * 0.2 + i) * 3 : 0), i < meter ? '#ffd028' : 'rgba(170,170,190,.45)'); }
 }
 
@@ -671,7 +833,7 @@ requestAnimationFrame(frame);
 /* ---------- title, map, end screens ---------- */
 const MAP_POS = [[13, 25], [37.5, 24], [62, 25], [86, 27], [86, 70], [60.5, 69], [36.5, 70], [12, 72]];   // the eight stops on art/ui/map.jpg, in percent
 function showMap(){
-  mode = 'map'; showButtons(); glow(null); Voice.hush();
+  mode = 'map'; showButtons(); glow(null); Voice.hush(); Song.play('title');
   ['title', 'end'].forEach(s => $(s).classList.add('hide'));
   const box = $('stops'); box.innerHTML = '';
   const nextI = LEVELS.findIndex((lv, i) => !save.done[i]);
@@ -695,6 +857,6 @@ showButtons();
 /* for testing in the browser console */
 window.__g = {
   get s(){ return { mode, li, x: p && Math.round(p.x), y: p && Math.round(p.y), on: p && p.on, got, total: items.length, meter, fin: !!fin, followers: followers.map(f => f.kind), said: Voice.last, save }; },
-  keys, start: startLevel, P: () => p, LV: () => L, gnd: groundAt, bonus: () => bonus, plats: () => plats, jump(){ wantJump = true; }, dance(){ wantDance = true; }, sup(){ wantSuper = true; },
+  keys, start: startLevel, P: () => p, sts: () => sts, pocket: () => pocket, goalMet: () => goalMet(), LV: () => L, gnd: groundAt, bonus: () => bonus, plats: () => plats, jump(){ wantJump = true; }, dance(){ wantDance = true; }, sup(){ wantSuper = true; },
   step(n){ for (let i = 0; i < n; i++) update(1); draw(); }, tp(x){ p.x = x; p.y = G; p.vy = 0; }, items: () => items, reset(){ localStorage.removeItem(SAVE_KEY); }
 };

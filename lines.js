@@ -34,7 +34,7 @@ window.LINES = {
   fr_13:"The challah is ready!", fr_14:"Tea time!", fr_15:"Here is my riddle!", fr_16:"Welcome, Princess Noga!",
 
   x_count:"Pop the bubbles in order: one, two, three!", x_rain:"Catch the falling stars!", x_draft:"The wind will lift you up!",
-  x_seek_a:"The chicks are hiding in the hay! Touch the hay!", x_seek_b:"Something is hiding under the sand! Touch the sand!", x_chick:"Peep peep! You found me!", x_gem:"Wow! A shiny gem!",
+  x_hide:"My friends are hiding in the bushes! Touch the bushes!", x_seek_a:"The chicks are hiding in the hay! Touch the hay!", x_seek_b:"Something is hiding under the sand! Touch the sand!", x_chick:"Peep peep! You found me!", x_gem:"Wow! A shiny gem!",
   x_simon:"Watch the lanterns!", x_now:"Now you! Stand on the lanterns in the same order.", x_rhythm:"Dance when the circle is small!", x_well:"Bring the water to the well!",
   x_find_water:"Find three drops of water!", x_find_moon:"Find five moon stars!",
   fin_a:"All the friends are coming to the party!", fin_b:"This is a love party! We love you, Noga!", fin_c:"Look! Fireworks!", fin_d:"Let's all dance together!", fin_e:"Noga, you are our princess. We love you!",
@@ -82,7 +82,7 @@ window.LINES_HE = {
   fr_13:"החלה מוכנה!", fr_14:"זמן תה!", fr_15:"הנה החידה שלי!", fr_16:"ברוכה הבאה, הנסיכה נוגה!",
 
   x_count:"פוצצי את הבועות לפי הסדר: אחת, שתיים, שלוש!", x_rain:"תפסי את הכוכבים הנופלים!", x_draft:"הרוח תרים אותך למעלה!",
-  x_seek_a:"האפרוחים מתחבאים בקש! געי בקש!", x_seek_b:"משהו מתחבא מתחת לחול! געי בחול!", x_chick:"ציף ציף! מצאת אותי!", x_gem:"וואו! אבן יקרה נוצצת!",
+  x_hide:"החברים מתחבאים בשיחים! געי בשיחים!", x_seek_a:"האפרוחים מתחבאים בקש! געי בקש!", x_seek_b:"משהו מתחבא מתחת לחול! געי בחול!", x_chick:"ציף ציף! מצאת אותי!", x_gem:"וואו! אבן יקרה נוצצת!",
   x_simon:"תסתכלי על הפנסים!", x_now:"עכשיו את! עמדי על הפנסים באותו סדר.", x_rhythm:"רקדי כשהעיגול קטן!", x_well:"הביאי את המים אל הבאר!",
   x_find_water:"מצאי שלוש טיפות מים!", x_find_moon:"מצאי חמישה כוכבי ירח!",
   fin_a:"כל החברים באים למסיבה!", fin_b:"זאת מסיבת אהבה! אנחנו אוהבים אותך, נוגה!", fin_c:"תראי! זיקוקים!", fin_d:"בואו נרקוד כולנו ביחד!", fin_e:"נוגה, את הנסיכה שלנו. אנחנו אוהבים אותך!",

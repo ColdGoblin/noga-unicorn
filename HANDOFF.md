@@ -1,5 +1,12 @@
 # Handoff: Noga and the Unicorn
 
+## ROUND 7 (15 Nov 2026, late, Hexweaver): FOUR NEW THINGS TO DO, built from Ghost's round 7 art
+- **Stage 2 rainbow slide:** terrain segments with `slide: true` (not drawn; `prop_slide` is the slide, x 4950-5382) from x 5000 to 5420; `L.slide = {a, b}` makes her slide down fast (vx 8.5, whoosh, sparkles, `pr_14` once, `prop_slide_end` splash). The hill before it is now three steps (G-70, G-125, G-177).
+- **Stage 3 hide and seek:** station `hide` (kind `seek`, `what: 'peek'`): Pitzi, Shluli and Luna peek out of three bushes at x 1650, 2790, 3850; touch the bush to find them (counts 1-3). New clip requested from Whisper: `x_hide` (`design/VOICE-V8.md`); until it exists the browser reads the text.
+- **Stage 5 farm bread for Grandpa:** the stage is longer (7400). After the bridge and horses: milk and 2 wheat -> mill (6100) -> flour -> bowl (6330, needs flour + milk) -> farm oven (6570, auto) -> loaf -> farm table (6880) -> Armon at 7230. New station kind `mill`; items `wheat`, `milk`, `loaf`. Uses existing clips only (`pr_13/14/15`).
+- **Feeding by request:** any station can have `wish: '<item>'` (and `wy` height): a thought bubble with the wished item floats over it until it has it (`drawWishes`). Set on stage 3 tea table, stage 5 horses and farm table, stage 6 Bil'am, stage 9 Sheba's table.
+- Music for stage 9 and 10 is still missing (Ghost could not reach Gemini); they alias the stage 6 and 8 tracks. Backups `game.js.before-round7`, `lines.js.before-round7`. Bot green on all 11 stages. Nobody has played any of this by hand.
+
 ## MUSIC (15 Nov, late): Ghost made `music/stage11.mp3` (Petals in the Courtyard) and `music/finale.mp3` (Where the Sunlit Bells Ring) with Gemini; stage 11 and the finale (`Song.play("finale")` in `startFinale`) use them. `stage9` and `stage10` still alias stage6 and stage8 (not delivered). Nobody has listened.
 
 ## ROUND 5 UPDATE (15 Nov 2026, evening, Hexweaver): WHISPER'S 42 CLIPS AND GHOST'S ROUND 6 ART ARE IN AND LIVE

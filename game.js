@@ -79,7 +79,9 @@ const Song = {
     this.kick(); },
   kick(){ const a = this.a; if (a && a.paused && soundOn && musicOn) { const p = a.play(); if (p && p.catch) p.catch(() => {}); } },
   stop(){ if (this.a) { try { this.a.pause(); } catch (e) {} this.a = null; } this.name = ''; },
-  tick(){ const a = this.a; if (!a) return; const want = (!soundOn || !musicOn) ? 0 : Voice.busy ? 0.05 : 0.17;
+  /* quiet gaps (15 Nov critique): the loop breathes, 34 s at normal level then 12 s nearly silent, so the stage is not a dense constant bed; the voice ducks it harder */
+  quiet(){ const t = (Date.now() - (this.t0 || (this.t0 = Date.now()))) / 1000 % 46; return t >= 34; },
+  tick(){ const a = this.a; if (!a) return; const want = (!soundOn || !musicOn) ? 0 : Voice.busy ? 0.03 : this.quiet() ? 0.04 : 0.15;
     a.volume = Math.max(0, Math.min(1, a.volume + (want - a.volume) * 0.15));
     if (want === 0 && a.volume < 0.01) { if (!a.paused) a.pause(); } else this.kick(); }
 };
@@ -249,7 +251,7 @@ const LEVELS = [
     cues: [{ x: 0, say: ['l3_a', 'ins_14', 'ins_10', 'num_10'] }, { x: 1400, say: ['ins_15'] }, { x: 3150, say: ['ins_15'] }] },
 
   /* ---- levels 4-8 (15 Nov 2026): things she picks up are USED. `to` = the station an item goes to, `stations` = the places that use them (design/STAGES-V2.md) ---- */
-  { name: 'sky', need: 5, len: 5600, sticker: 4, collect: 'steam', ins: 'ins_16', joins: ['cloudunicorn'], carry: true, floaty: true, drafts: [{ x: 2050, w: 180, h: 480 }],
+  { name: 'sky', need: 5, len: 5600, sticker: 4, collect: 'steam', ins: 'ins_16', joins: ['cloudunicorn'], carry: true, floaty: true, recover: true, drafts: [{ x: 2050, w: 180, h: 480 }],
     finSay: ['fr_08', 'l4_c', 'pr_02'],
     terrain: [{ x0: 0, x1: 900, top: G }, { x0: 900, x1: 1150, top: G - 60 }, { x0: 1150, x1: 1400, top: G - 120 }, { x0: 1400, x1: 1650, top: G - 60 }, { x0: 1650, x1: 2500, top: G },
               { x0: 2650, x1: 3700, top: G }, { x0: 3700, x1: 3950, top: G - 70 }, { x0: 3950, x1: 4200, top: G - 130 }, { x0: 4200, x1: 4450, top: G - 70 }, { x0: 4450, x1: 5600, top: G }],
@@ -589,6 +591,11 @@ function update(dt){
 
   // items and stars
   const cx = p.x, cy = p.y - 62;
+  // missed things (stage 4 first, then every carry stage): when she has walked far past one, it comes back to her, low and ahead, and the sparkle trail and the voice point at it
+  if (L.recover && !fin && p.on && !locked) items.forEach(it => { if (it.got || it.hidden || it.x > p.x - 900) return;
+    let nx = Math.min(L.len - 220, p.x + 420), g = groundAt(nx), n = 0; while (g === null && n++ < 8) { nx += 110; g = groundAt(Math.min(nx, L.len - 220)); }
+    if (g === null) return; it.x = Math.min(nx, L.len - 220); it.y = g - 100; burst(it.x, it.y, 14, ['#ffe14d', '#fff'], 'star'); tone(660, 0.25, 'sine', 0.1, 990);
+    trail = true; hintT = Math.max(hintT, 1200); Voice.say(L.noIns ? 'ins_25' : L.ins); said.back = (said.back || 0) + 1; });
   items.forEach(it => { it.bob += 0.05 * dt; if (!it.got && !it.hidden && Math.hypot(it.x - cx, it.y - cy) < 72 && !(it.to && pocket.length >= 4)) pickup(it);
     if (!it.got && !it.hidden && hintT > 2400 && it === items.find(o => !o.got && !o.hidden)) { it.x += Math.sign(cx - it.x) * 1.4 * dt; it.y += Math.sign(cy - it.y) * 1.0 * dt; } });
   bonus.forEach(b => { if (!b.got && Math.hypot(b.x - cx, b.y - cy) < 60) { b.got = true; bonusN++; sfx.star(); burst(b.x, b.y, 6, ['#ffe14d', '#fff'], 'star');

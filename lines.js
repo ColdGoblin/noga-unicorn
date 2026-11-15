@@ -37,6 +37,7 @@ window.LINES = {
   x_seek_a:"The chicks are hiding in the hay! Touch the hay!", x_seek_b:"Something is hiding under the sand! Touch the sand!", x_chick:"Peep peep! You found me!", x_gem:"Wow! A shiny gem!",
   x_simon:"Watch the lanterns!", x_now:"Now you! Stand on the lanterns in the same order.", x_rhythm:"Dance when the circle is small!", x_well:"Bring the water to the well!",
   x_find_water:"Find three drops of water!", x_find_moon:"Find five moon stars!",
+  x_tea_start:"Let's make tea! We need flowers and water.", x_tea_flowers:"Find three flowers!", x_tea_water:"Find a drop of water!", x_tea_pot:"Put everything in the teapot!", x_tea_fire:"Now put the teapot on the fire!", x_tea_boil:"The water is boiling! The tea is ready!", x_tea_thanks:"Thank you! What a tasty tea!", x_pick:"Choose two friends to come with you!",
   l9_a:"We are in the desert. The Queen of Sheba is thirsty!", l9_b:"The well is full of water!", l9_c:"Everybody has water! Thank you, Noga!", l9_d:"Thank you, Noga! You are a true friend.",
   l10_a:"We climbed the Moon Mountain! The moon is sleepy and sad.", l10_b:"The moon is waking up!", l10_c:"The moon is smiling! What a night!", l10_d:"Good night, Noga. Sweet dreams.",
 
@@ -82,6 +83,7 @@ window.LINES_HE = {
   x_seek_a:"האפרוחים מתחבאים בקש! געי בקש!", x_seek_b:"משהו מתחבא מתחת לחול! געי בחול!", x_chick:"ציף ציף! מצאת אותי!", x_gem:"וואו! אבן יקרה נוצצת!",
   x_simon:"תסתכלי על הפנסים!", x_now:"עכשיו את! עמדי על הפנסים באותו סדר.", x_rhythm:"רקדי כשהעיגול קטן!", x_well:"הביאי את המים אל הבאר!",
   x_find_water:"מצאי שלוש טיפות מים!", x_find_moon:"מצאי חמישה כוכבי ירח!",
+  x_tea_start:"בואי נכין תה! צריך פרחים ומים.", x_tea_flowers:"מצאי שלושה פרחים!", x_tea_water:"מצאי טיפת מים!", x_tea_pot:"שימי הכול בקומקום!", x_tea_fire:"עכשיו שימי את הקומקום על האש!", x_tea_boil:"המים רותחים! התה מוכן!", x_tea_thanks:"תודה! איזה תה טעים!", x_pick:"בחרי שני חברים שיבואו איתך!",
   l9_a:"אנחנו במדבר. מלכת שבא צמאה!", l9_b:"הבאר מלאה במים!", l9_c:"לכולם יש מים! תודה, נוגה!", l9_d:"תודה, נוגה! את חברה אמיתית.",
   l10_a:"טיפסנו על הר הירח! הירח ישנוני ועצוב.", l10_b:"הירח מתעורר!", l10_c:"הירח מחייך! איזה לילה!", l10_d:"לילה טוב, נוגה. חלומות מתוקים.",
 

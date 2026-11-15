@@ -240,8 +240,9 @@ const LEVELS = [
               { x0: 5460, x1: 6600, top: G }],
     friend: { kind: 'tree', x: 6200 },
     items: [{ x: 520, y: G - 45 }, { x: 1075, y: G - 215 }, { x: 2010, y: G - 375, high: 0 }, { x: 2680, y: G - 190 }, { x: 3760, y: G - 375, high: 1 },
-            { x: 3040, y: G - 50, kind: 'flower_1', grp: 'flower', to: 'pot', say: 'ins_23' }, { x: 3180, y: G - 50, kind: 'flower_2', grp: 'flower', to: 'pot', say: 'ins_23' }, { x: 4180, y: G - 50, kind: 'flower_3', grp: 'flower', to: 'pot', say: 'ins_23' },
-            { x: 0, y: 0, kind: 'teacup', to: 'serve', hid: 'cup', hidden: true }],
+            { x: 3040, y: G - 50, kind: 'flower_1', grp: 'flower', to: 'pot', say: 'x_tea_flowers' }, { x: 3180, y: G - 50, kind: 'flower_2', grp: 'flower', to: 'pot', say: 'x_tea_flowers' }, { x: 3400, y: G - 50, kind: 'flower_3', grp: 'flower', to: 'pot', say: 'x_tea_flowers' },
+            { x: 2540, y: G - 50, kind: 'water_drop', to: 'pot', say: 'x_tea_water' },
+            { x: 0, y: 0, kind: 'teapot', to: 'fire', hid: 'pot', hidden: true }, { x: 0, y: 0, kind: 'teacup', to: 'serve', hid: 'cup', hidden: true }],
     stars: [{ x: 1560, g: 0 }, { x: 1645, g: 0 }, { x: 1730, g: 0 }, { x: 3300, g: 1 }, { x: 3385, g: 1 }, { x: 3470, g: 1 }],
     bonus: [].concat(arcRow(200, 560, G - 70, 0, 5), arcRow(740, 1180, G - 130, 60, 6), arcRow(1260, 1420, G - 130, 0, 3), arcRow(1800, 2300, G - 70, 0, 5), arcRow(2300, 2480, G - 90, 120, 4),
       arcRow(2560, 3150, G - 70, 0, 7), arcRow(2780, 3000, G - 250, 40, 4), arcRow(3560, 4250, G - 70, 0, 7), arcRow(4320, 5080, G - 210, 60, 9), arcRow(5280, 5480, G - 90, 120, 4), arcRow(5560, 6000, G - 70, 0, 6),
@@ -249,9 +250,10 @@ const LEVELS = [
     plats: [{ x: 1900, w: 230, top: G - 320, kind: 'branch' }, { x: 2600, w: 116, kind: 'rock' }, { x: 2900, w: 110, kind: 'stump' },
             { x: 3650, w: 230, top: G - 320, kind: 'branch' },
             { x: 2180, w: 200, top: G - 430, kind: 'branch' }, { x: 2420, w: 200, top: G - 540, kind: 'branch' }, { x: 3930, w: 200, top: G - 430, kind: 'branch' }, { x: 4170, w: 200, top: G - 540, kind: 'branch' },{ x: 4020, w: 110, kind: 'stump' }, { x: 5600, w: 116, kind: 'rock' }, { x: 5800, w: 110, kind: 'stump' }],
-    stations: [{ id: 'pot', kind: 'pot', x: 3560, need: 3, r: 160, spawn: 'cup', say: ['fr_14'] }, { id: 'serve', kind: 'table', x: 6000, need: 1, r: 220, show: 'teacup', say: ['pr_15'] },
+    stations: [{ id: 'pot', kind: 'pot', x: 3560, need: 4, r: 160, spawn: 'pot', hint: 'x_tea_pot', near: 420, say: ['x_tea_fire'] },
+               { id: 'fire', kind: 'fire', x: 3830, need: 1, r: 170, spawn: 'cup', say: ['x_tea_boil', 'fr_14'] }, { id: 'serve', kind: 'table', x: 6000, need: 1, r: 220, show: 'teacup', say: ['x_tea_thanks', 'pr_15'] },
                { id: 'rain', kind: 'rain', x: 5725, zone: [5500, 5950], need: 6, hint: 'x_rain', near: 700, say: ['pr_13'] }],
-    cues: [{ x: 0, say: ['l3_a', 'ins_14', 'ins_10', 'num_10'] }, { x: 1400, say: ['ins_15'] }, { x: 3150, say: ['ins_15'] }] },
+    cues: [{ x: 0, say: ['l3_a', 'ins_14', 'ins_10', 'num_10'] }, { x: 1400, say: ['ins_15'] }, { x: 2450, say: ['x_tea_start'] }, { x: 3150, say: ['ins_15'] }] },
 
   /* ---- levels 4-8 (15 Nov 2026): things she picks up are USED. `to` = the station an item goes to, `stations` = the places that use them (design/STAGES-V2.md) ---- */
   { name: 'sky', need: 5, len: 5600, sticker: 4, collect: 'steam', ins: 'ins_16', joins: ['cloudunicorn'], carry: true, floaty: true, recover: true, drafts: [{ x: 2050, w: 180, h: 480 }],
@@ -838,7 +840,7 @@ function drawHero(){
 /* draw a picture centred at (cx, cy) inside a box of size `box`, keeping its shape (the new pictures are not all square) */
 function fit(im, cx, cy, box){ const a = im.width / im.height, w = a >= 1 ? box : box * a, h = a >= 1 ? box / a : box; ctx.drawImage(im, cx - w / 2, cy - h / 2, w, h); }
 function drawItem(kind, x, y, col, t){
-  const im = IMG['item_' + kind + (col ? '_' + col : '')];
+  const im = IMG['item_' + kind + (col ? '_' + col : '')] || (kind === 'teapot' ? IMG.prop_teapot : null);
   ctx.save(); ctx.translate(x, y + Math.sin(t) * 7);
   circ(0, 0, 40, 'rgba(255,255,255,.28)');
   if (im) { if (kind === 'feather') ctx.rotate(Math.sin(t * 0.6) * 0.18); fit(im, 0, 0, 88); ctx.restore(); return; }
@@ -943,9 +945,12 @@ function drawStations(){
     else if (k === 'bridge') { const im = IMG.prop_plank_bridge, w = 440; if (im && st.have > 0) { const f = Math.min(1, st.have / st.need), h = w * im.height / im.width * 0.5; ctx.drawImage(im, 0, 0, im.width * f, im.height, x - w / 2, G + 8 - h, w * f, h); }
       else if (!im && st.have > 0) rr(x - 220, G - 20, 440 * st.have / st.need, 24, 6, '#c58a4a'); }
     else if (k === 'bowl') { const im = IMG[st.have >= st.need ? 'prop_bowl_dough' : 'prop_bowl']; if (im) pic(im, x, G + 4, 170); for (let i = 0; i < st.need; i++) circ(x - 30 + i * 30, G - 130, 9, i < st.have ? '#ffd028' : 'rgba(255,255,255,.7)'); }
-    else if (k === 'pot') { const im = IMG.prop_teapot; if (im) pic(im, x, G + 4, 190); else { ell(x, G - 50, 70, 50, '#ff9fc7'); rr(x + 50, G - 70, 50, 14, 6, '#ff9fc7'); }
-      for (let i = 0; i < st.need; i++) circ(x - (st.need - 1) * 15 + i * 30, G - 190, 9, i < st.have ? '#ffd028' : 'rgba(255,255,255,.7)');
-      if (st.done) for (let i = 0; i < 3; i++) circ(x - 20 + i * 20, G - 170 - ((T * 1.4 + i * 25) % 70), 9, 'rgba(255,255,255,.75)'); }
+    else if (k === 'pot') { const im = IMG.prop_teapot; if (!st.done) { if (im) pic(im, x, G + 4, 190); else { ell(x, G - 50, 70, 50, '#ff9fc7'); rr(x + 50, G - 70, 50, 14, 6, '#ff9fc7'); }
+      for (let i = 0; i < st.need; i++) circ(x - (st.need - 1) * 15 + i * 30, G - 190, 9, i < st.have ? '#ffd028' : 'rgba(255,255,255,.7)'); } }
+    else if (k === 'fire') { ell(x, G - 6, 78, 16, 'rgba(0,0,0,.18)');      // a camp fire on stones; the teapot sits on it once she has put it there
+      for (let i = 0; i < 7; i++) { const a = i / 7 * 6.283; circ(x + Math.cos(a) * 56, G - 14 + Math.sin(a) * 9, 17, i % 2 ? '#8e8a98' : '#a9a4b4'); }
+      for (let i = 0; i < 3; i++) { const fh = 70 + Math.sin(T * 0.3 + i * 2) * 14 - Math.abs(i - 1) * 18, fx = x + (i - 1) * 24; ctx.fillStyle = i === 1 ? '#ffd028' : '#ff8a3d'; ctx.beginPath(); ctx.moveTo(fx - 20, G - 14); ctx.quadraticCurveTo(fx - 12, G - 14 - fh * 0.6, fx + Math.sin(T * 0.2 + i) * 6, G - 14 - fh); ctx.quadraticCurveTo(fx + 12, G - 14 - fh * 0.6, fx + 20, G - 14); ctx.fill(); }
+      if (st.done) { const im = IMG.prop_teapot; if (im) pic(im, x, G - 52, 170); else ell(x, G - 120, 60, 44, '#ff9fc7'); for (let i = 0; i < 3; i++) circ(x - 20 + i * 20, G - 215 - ((T * 1.4 + i * 25) % 70), 9, 'rgba(255,255,255,.75)'); } }
     else if (k === 'oven') { const im = IMG[st.done ? 'prop_oven_lit' : 'prop_oven']; if (im) pic(im, x, G + 4, 270); if (st.armed > 0) for (let i = 0; i < 3; i++) circ(x - 20 + i * 20, G - 250 - ((T * 1.5 + i * 25) % 70), 10, 'rgba(255,255,255,.7)'); }
     else if (k === 'candles') { const im = IMG[st.done ? 'prop_candle_lit' : 'prop_candle_unlit']; if (im) pic(im, x, G + 2, 150);
       for (let i = 0; i < 2; i++) { const sx = st.done ? x - 26 + i * 52 : x + Math.cos(T * 0.03 + i * 3.1) * 180, sy = st.done ? G - 140 : G - 200 + Math.sin(T * 0.05 + i * 2) * 60; drawItem('spark', sx, sy, null, T * 0.1 + i); } }
@@ -1076,7 +1081,7 @@ const MAP_POS = [[13, 25], [37.5, 24], [62, 25], [86, 27], [86, 70], [60.5, 69],
 function goLevel(i){ if (paradeFor(i).length > MAXPARTY) showPick(i); else startLevel(i, paradeFor(i)); }
 let pickSel = [];
 function showPick(i){
-  mode = 'pick'; showButtons(); glow(null); Voice.hush();
+  mode = 'pick'; showButtons(); glow(null); Voice.hush(); Voice.say('x_pick');
   ['title', 'end', 'map'].forEach(s => $(s).classList.add('hide'));
   const avail = paradeFor(i); pickSel = (save.party || []).filter(k => avail.includes(k)).slice(0, MAXPARTY);
   for (let k = avail.length - 1; k >= 0 && pickSel.length < MAXPARTY; k--) if (!pickSel.includes(avail[k])) pickSel.push(avail[k]);

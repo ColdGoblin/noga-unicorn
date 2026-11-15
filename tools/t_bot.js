@@ -4,7 +4,7 @@ const g = __g; g.reset(); g.start(LVL); const P = g.P(), L = g.LV(), out = [L.na
 const step = n => g.step(n);
 const at = (x, y) => { P.x = x; P.y = y; P.vy = 0; };
 const lanternX = (st, i) => st.x + (i - 1.5) * 150;
-function deliver() { let guard = 0; while (g.pocket().length && guard++ < 12) { const it = g.pocket()[0], st = g.sts().find(s => s.id === it.to); if (!st) break; const n0 = g.pocket().length; at(st.x, G); step(40); if (g.pocket().length === n0) { out.push('STUCK deliver ' + it.to); break; } } }
+function deliver() { let guard = 0; while (g.pocket().length && guard++ < 12) { const it = g.pocket()[0], st = g.sts().find(s => s.id === it.to); if (!st) break; const n0 = g.pocket().length + g.pocket().map(o => o.kind).join(); at(st.x, G); step(40); if (g.pocket().length + g.pocket().map(o => o.kind).join() === n0) { out.push('STUCK deliver ' + it.to); break; } } }
 function collect() {
   for (let pass = 0; pass < 4; pass++) for (const it of g.items()) { if (it.got || it.hidden) continue;
     if (it.to && g.pocket().length >= 4) deliver();

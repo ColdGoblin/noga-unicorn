@@ -24,7 +24,7 @@ const SAVE_KEY = 'nogaUnicorn2';       // new key = everybody starts from zero (
 try { localStorage.removeItem('nogaUnicorn1'); } catch (e) {}
 let save = { done: [false, false, false, false, false, false, false, false, false, false], dance: false, sup: false };
 try { const o = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null');
-  if (o && Array.isArray(o.done)) { save.done = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(i => !!o.done[i]); save.sup = !!o.sup; } } catch (e) {}
+  if (o && Array.isArray(o.done)) { save.done = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(i => !!o.done[i]); save.sup = !!o.sup; if (Array.isArray(o.party)) save.party = o.party.filter(k => typeof k === 'string').slice(0, 2); } } catch (e) {}
 save.dance = true;                    // the Dance button is there from the very first level (owner request, 14 Nov)
 function persist(){ try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) {} }
 
@@ -233,13 +233,15 @@ const LEVELS = [
     danceZone: { a: 1450, b: 2000 },
     cues: [{ x: 0, say: ['fr_02', 'l2_a', 'ins_12', 'ins_10', 'num_07'] }, { x: 940, say: ['ins_13'], glow: 'bj' }, { x: 1500, say: ['ins_06'], glow: 'bd', show: 'dance' }, { x: 2250, say: ['l2_b'] }, { x: 2900, say: ['ins_13'] }] },
 
-  { name: 'forest', need: 10, len: 6600, sticker: 3, collect: 'petal', ins: 'ins_14', joins: ['bilam'], arriveSay: 'l3_b',
+  { name: 'forest', need: 10, len: 6600, sticker: 3, collect: 'petal', ins: 'ins_14', joins: ['bilam'], arriveSay: 'l3_b', carry: true,
     finSay: ['fr_06', 'l3_c', 'pr_17'], meets: [{ kind: 'luna', x: 4200, do: 'dance' }],
     terrain: [{ x0: 0, x1: 700, top: G }, { x0: 700, x1: 950, top: G, top1: G - 120 }, { x0: 950, x1: 1200, top: G - 120 }, { x0: 1200, x1: 1450, top: G - 120, top1: G }, { x0: 1450, x1: 2300, top: G },
               { x0: 2460, x1: 4300, top: G }, { x0: 4300, x1: 4600, top: G - 70 }, { x0: 4600, x1: 4850, top: G - 130 }, { x0: 4850, x1: 5100, top: G - 70 }, { x0: 5100, x1: 5300, top: G },
               { x0: 5460, x1: 6600, top: G }],
     friend: { kind: 'tree', x: 6200 },
-    items: [{ x: 520, y: G - 45 }, { x: 1075, y: G - 215 }, { x: 2010, y: G - 375, high: 0 }, { x: 2680, y: G - 190 }, { x: 3760, y: G - 375, high: 1 }],
+    items: [{ x: 520, y: G - 45 }, { x: 1075, y: G - 215 }, { x: 2010, y: G - 375, high: 0 }, { x: 2680, y: G - 190 }, { x: 3760, y: G - 375, high: 1 },
+            { x: 3040, y: G - 50, kind: 'flower_1', grp: 'flower', to: 'pot', say: 'ins_23' }, { x: 3180, y: G - 50, kind: 'flower_2', grp: 'flower', to: 'pot', say: 'ins_23' }, { x: 4180, y: G - 50, kind: 'flower_3', grp: 'flower', to: 'pot', say: 'ins_23' },
+            { x: 0, y: 0, kind: 'teacup', to: 'serve', hid: 'cup', hidden: true }],
     stars: [{ x: 1560, g: 0 }, { x: 1645, g: 0 }, { x: 1730, g: 0 }, { x: 3300, g: 1 }, { x: 3385, g: 1 }, { x: 3470, g: 1 }],
     bonus: [].concat(arcRow(200, 560, G - 70, 0, 5), arcRow(740, 1180, G - 130, 60, 6), arcRow(1260, 1420, G - 130, 0, 3), arcRow(1800, 2300, G - 70, 0, 5), arcRow(2300, 2480, G - 90, 120, 4),
       arcRow(2560, 3150, G - 70, 0, 7), arcRow(2780, 3000, G - 250, 40, 4), arcRow(3560, 4250, G - 70, 0, 7), arcRow(4320, 5080, G - 210, 60, 9), arcRow(5280, 5480, G - 90, 120, 4), arcRow(5560, 6000, G - 70, 0, 6),
@@ -247,7 +249,8 @@ const LEVELS = [
     plats: [{ x: 1900, w: 230, top: G - 320, kind: 'branch' }, { x: 2600, w: 116, kind: 'rock' }, { x: 2900, w: 110, kind: 'stump' },
             { x: 3650, w: 230, top: G - 320, kind: 'branch' },
             { x: 2180, w: 200, top: G - 430, kind: 'branch' }, { x: 2420, w: 200, top: G - 540, kind: 'branch' }, { x: 3930, w: 200, top: G - 430, kind: 'branch' }, { x: 4170, w: 200, top: G - 540, kind: 'branch' },{ x: 4020, w: 110, kind: 'stump' }, { x: 5600, w: 116, kind: 'rock' }, { x: 5800, w: 110, kind: 'stump' }],
-    stations: [{ id: 'rain', kind: 'rain', x: 5725, zone: [5500, 5950], need: 6, hint: 'x_rain', near: 700, say: ['pr_13'] }],
+    stations: [{ id: 'pot', kind: 'pot', x: 3560, need: 3, r: 160, spawn: 'cup', say: ['fr_14'] }, { id: 'serve', kind: 'table', x: 6000, need: 1, r: 220, show: 'teacup', say: ['pr_15'] },
+               { id: 'rain', kind: 'rain', x: 5725, zone: [5500, 5950], need: 6, hint: 'x_rain', near: 700, say: ['pr_13'] }],
     cues: [{ x: 0, say: ['l3_a', 'ins_14', 'ins_10', 'num_10'] }, { x: 1400, say: ['ins_15'] }, { x: 3150, say: ['ins_15'] }] },
 
   /* ---- levels 4-8 (15 Nov 2026): things she picks up are USED. `to` = the station an item goes to, `stations` = the places that use them (design/STAGES-V2.md) ---- */
@@ -324,20 +327,23 @@ const LEVELS = [
     decos: [{ kind: 'princess2', x: 8050, happy: true }],
     cues: [{ x: 0, say: ['l8_a', 'ins_23', 'ins_10', 'num_10'] }, { x: 5600, say: ['fr_16'] }] },
   /* ---- stage 9 (round 4): the Queen of Sheba's oasis. Water drops to the well, gems in the sand, a wind draft up to a high drop ---- */
-  { name: 'oasis', need: 13, len: 7000, sticker: 9, collect: 'water_drop', ins: 'x_find_water', joins: ['sheba', 'camel'], carry: true, drafts: [{ x: 3100, w: 180, h: 590 }],
+  { name: 'oasis', need: 13, len: 7500, sticker: 9, collect: 'water_drop', ins: 'x_find_water', joins: ['sheba', 'camel'], carry: true, drafts: [{ x: 3100, w: 180, h: 590 }],
     finSay: ['l9_c', 'l9_d', 'pr_17'],
     terrain: [{ x0: 0, x1: 900, top: G }, { x0: 900, x1: 1150, top: G - 60 }, { x0: 1150, x1: 1400, top: G - 110 }, { x0: 1400, x1: 1650, top: G - 60 }, { x0: 1650, x1: 2500, top: G },
               { x0: 2660, x1: 3600, top: G }, { x0: 3600, x1: 3850, top: G - 70 }, { x0: 3850, x1: 4100, top: G - 130 }, { x0: 4100, x1: 4350, top: G - 70 }, { x0: 4350, x1: 5300, top: G },
-              { x0: 5580, x1: 7000, top: G }],
-    friend: { kind: 'sheba', x: 6500 },
-    items: [{ x: 600, y: G - 50, to: 'well' }, { x: 1275, y: G - 200, to: 'well' }, { x: 3200, y: G - 560, to: 'well' }],
+              { x0: 5580, x1: 7500, top: G }],
+    friend: { kind: 'sheba', x: 6900 },
+    items: [{ x: 600, y: G - 50, to: 'well' }, { x: 1275, y: G - 200, to: 'well' }, { x: 3200, y: G - 560, to: 'well' },
+            { x: 4800, y: G - 50, kind: 'flour', to: 'bowl', say: null }, { x: 5100, y: G - 50, kind: 'eggs', to: 'bowl', say: null }, { x: 5720, y: G - 50, kind: 'honey', to: 'bowl', say: null },
+            { x: 0, y: 0, kind: 'challah', to: 'table', hid: 'challah', hidden: true }],
     stations: [{ id: 'gems', kind: 'seek', what: 'gem', mound: 'sandmound', x: 1700, pts: [1700, 2150, 2950, 5000], hint: 'x_seek_b', near: 600, say: ['pr_13'] },
-               { id: 'well', kind: 'well', x: 4600, need: 3, r: 220, hint: 'x_well', say: ['l9_b'] }],
+               { id: 'well', kind: 'well', x: 4600, need: 3, r: 220, hint: 'x_well', say: ['l9_b'] },
+               { id: 'bowl', kind: 'bowl', x: 5900, need: 3, r: 150 }, { id: 'oven', kind: 'oven', x: 6150, need: 1, auto: true, spawn: 'challah', say: ['fr_13'] }, { id: 'table', kind: 'table', x: 6500, need: 1, r: 200, say: ['pr_16'] }],
     bonus: [].concat(arcRow(240, 820, G - 80, 40, 6), arcRow(930, 1370, G - 190, 50, 6), arcRow(1450, 1900, G - 80, 40, 5), arcRow(2000, 2450, G - 90, 70, 5), arcRow(2760, 3050, G - 80, 30, 4),
-      arcRow(3140, 3240, G - 300, 0, 3), arcRow(3140, 3240, G - 440, 0, 2), arcRow(3620, 4300, G - 200, 40, 7), arcRow(4400, 5200, G - 80, 40, 7), arcRow(5340, 5540, G - 120, 60, 3), arcRow(5700, 6300, G - 80, 30, 6)),
+      arcRow(3140, 3240, G - 300, 0, 3), arcRow(3140, 3240, G - 440, 0, 2), arcRow(3620, 4300, G - 200, 40, 7), arcRow(4400, 5200, G - 80, 40, 7), arcRow(5340, 5540, G - 120, 60, 3), arcRow(5700, 6300, G - 80, 30, 6), arcRow(6600, 6800, G - 80, 30, 3)),
     plats: [{ x: 3270, w: 130, top: G - 470, kind: 'cloud' }, { x: 5320, w: 150, top: G - 50, kind: 'cloud', move: { a: 5310, b: 5420, sp: 0.012 } }],
-    props: [300, 1950, 3000, 4950, 6100, 6800].map(x => ({ k: 'palm', x, w: 300 })),
-    decos: [{ kind: 'camel', x: 6680, hap: 'well' }],
+    props: [300, 1950, 3000, 4950, 6800, 7300].map(x => ({ k: 'palm', x, w: 300 })),
+    decos: [{ kind: 'camel', x: 7080, hap: 'well' }],
     cues: [{ x: 0, say: ['l9_a', 'x_find_water', 'ins_10'] }, { x: 2950, say: ['x_draft', 'ins_15'] }] },
 
   /* ---- stage 10 (round 4): the Moon Mountain, the last stage. Count the cloud stairs, wind up to a star, light the lanterns, dance in rhythm with the Moon ---- */
@@ -373,12 +379,13 @@ let terr = [], items = [], stars = [], plats = [], followers = [], parts = [], h
 let pocket = [], sts = [];          // pocket: things she carries (up to 4); sts: the places that use them (bowl, oven, nest, plates ...)
 let got = 0, meter = 0, fin = null, arrived = false, hintT = 0, maxX = 0, danceN = 0, said = {}, falls = 0, trail = false;
 
+const MAXPARTY = 2;
 function paradeFor(i){
   let a = [];
   LEVELS.forEach((lv, k) => { if (save.done[k]) lv.joins.forEach(j => { if (!a.includes(j)) a.push(j); }); });
   return a.filter(k => !(LEVELS[i].without || []).includes(k));
 }
-function startLevel(i){
+function startLevel(i, party){
   li = i; L = LEVELS[i]; T = 0; mode = 'play';
   p = { x: 140, y: G, vx: 0, vy: 0, face: 1, on: true, run: 0, dance: 0, move: 0, wings: 0, bubble: 0, squash: 1 };
   items = L.items.map(o => ({ ...o, got: false, bob: rand(0, 6) }));
@@ -395,10 +402,10 @@ function startLevel(i){
   meets = (L.meets || []).map(o => ({ ...o, done: false, seen: false, hop: 0 }));
   plats = L.plats.map(o => ({ ...o, dx: 0 })); terr = L.terrain;
   L.cues.forEach(c => c.done = false);
-  followers = paradeFor(i).map(k => ({ kind: k }));
+  followers = (party || paradeFor(i).slice(-MAXPARTY)).map(k => ({ kind: k }));      // at most two friends walk with her (she picks them before the stage)
   parts = []; hist = []; flowers = []; got = 0; meter = 0; fin = null; arrived = false; hintT = 0; maxX = 0; said = {}; falls = 0; trail = false; camX = 0; camY = 0;
   L.friend.happy = false; L.friend.bloom = 0; L.friend.fly = 0;
-  ['title', 'map', 'end'].forEach(s => $(s).classList.add('hide'));
+  ['title', 'map', 'end', 'pick'].forEach(s => $(s).classList.add('hide'));
   Voice.hush(); showButtons(); glow(null); startMusic(i);
 }
 
@@ -426,7 +433,7 @@ function target(){ const it = items.find(o => !o.got && !o.hidden);
   if (!starsOK()) { const b = bonus.filter(o => !o.got).sort((a, c) => Math.abs(a.x - p.x) - Math.abs(c.x - p.x))[0]; if (b) return { x: b.x, y: b.y }; }
   return { x: L.friend.x, y: G - 60 }; }
 function curIns(){
-  if (got < items.length) return items.some(o => !o.got && !o.hidden) ? (L.noIns ? null : L.ins) : null;
+  if (got < items.length) { const nx = items.find(o => !o.got && !o.hidden); return nx ? (nx.say !== undefined ? nx.say : L.noIns ? null : L.ins) : null; }
   if (!starsOK()) return 'ins_10';
   if (!stationsOK()) { const s = sts.find(o => !o.done && o.hint && (o.kind !== 'rhythm' || !o.finish || restOK(o))); return s ? s.hint : null; }
   if (Math.abs(p.x - L.friend.x) > 190) return 'ins_24';
@@ -450,7 +457,7 @@ function complete(st){
   st.done = true; st.t = 0; progress(); sfx.win && st.kind !== 'plate' ? sfx.star() : sfx.pick(); burst(st.x, G - 120, st.kind === 'plate' ? 10 : 26, RB, 'star');
   if (!st.finish) (st.say || []).forEach(id => Voice.say(id));
   if (st.spawn) { const it = items.find(o => o.hid === st.spawn); if (it) { it.hidden = false; it.x = st.x + 10; it.y = G - 90; burst(it.x, it.y, 20, ['#ffe14d', '#fff'], 'star'); } }
-  if (st.kind === 'bowl') { const ov = sts.find(s => s.id === 'oven'); if (ov) ov.armed = 110; }
+  if (st.kind === 'bowl') { const ov = sts.find(s => s.id === (st.arms || 'oven')); if (ov) ov.armed = 110; }
   if (st.kind === 'riddle') st.objs.forEach(o => burst(o.x, G - 70, 8, RB, 'star'));
   if (st.finish) { finish(); return; }
   if (got === items.length && starsOK() && stationsOK() && !sts.some(o => o.finish)) Voice.say('ins_24');
@@ -458,7 +465,7 @@ function complete(st){
 function finish(){
   fin = { t: 0 }; L.friend.happy = true; progress(); glow(null); sfx.win();
   Voice.q.length = 0; L.finSay.forEach(id => Voice.say(id));
-  L.joins.forEach(k => { if (!followers.find(f => f.kind === k) && k !== L.friend.kind) followers.push({ kind: k, enter: 0 }); });
+  L.joins.forEach(k => { if (followers.length < MAXPARTY && !followers.find(f => f.kind === k) && k !== L.friend.kind) followers.push({ kind: k, enter: 0 }); });
   burst(L.friend.x, G - 120, 40, RB, 'star');
 }
 /* a short meeting with a friend on the way (stages 1-3): the friend asks for a dance or a jump, then hops and a little arc of stars appears */
@@ -936,10 +943,13 @@ function drawStations(){
     else if (k === 'bridge') { const im = IMG.prop_plank_bridge, w = 440; if (im && st.have > 0) { const f = Math.min(1, st.have / st.need), h = w * im.height / im.width * 0.5; ctx.drawImage(im, 0, 0, im.width * f, im.height, x - w / 2, G + 8 - h, w * f, h); }
       else if (!im && st.have > 0) rr(x - 220, G - 20, 440 * st.have / st.need, 24, 6, '#c58a4a'); }
     else if (k === 'bowl') { const im = IMG[st.have >= st.need ? 'prop_bowl_dough' : 'prop_bowl']; if (im) pic(im, x, G + 4, 170); for (let i = 0; i < st.need; i++) circ(x - 30 + i * 30, G - 130, 9, i < st.have ? '#ffd028' : 'rgba(255,255,255,.7)'); }
+    else if (k === 'pot') { const im = IMG.prop_teapot; if (im) pic(im, x, G + 4, 190); else { ell(x, G - 50, 70, 50, '#ff9fc7'); rr(x + 50, G - 70, 50, 14, 6, '#ff9fc7'); }
+      for (let i = 0; i < st.need; i++) circ(x - (st.need - 1) * 15 + i * 30, G - 190, 9, i < st.have ? '#ffd028' : 'rgba(255,255,255,.7)');
+      if (st.done) for (let i = 0; i < 3; i++) circ(x - 20 + i * 20, G - 170 - ((T * 1.4 + i * 25) % 70), 9, 'rgba(255,255,255,.75)'); }
     else if (k === 'oven') { const im = IMG[st.done ? 'prop_oven_lit' : 'prop_oven']; if (im) pic(im, x, G + 4, 270); if (st.armed > 0) for (let i = 0; i < 3; i++) circ(x - 20 + i * 20, G - 250 - ((T * 1.5 + i * 25) % 70), 10, 'rgba(255,255,255,.7)'); }
     else if (k === 'candles') { const im = IMG[st.done ? 'prop_candle_lit' : 'prop_candle_unlit']; if (im) pic(im, x, G + 2, 150);
       for (let i = 0; i < 2; i++) { const sx = st.done ? x - 26 + i * 52 : x + Math.cos(T * 0.03 + i * 3.1) * 180, sy = st.done ? G - 140 : G - 200 + Math.sin(T * 0.05 + i * 2) * 60; drawItem('spark', sx, sy, null, T * 0.1 + i); } }
-    else if (k === 'table') { const im = IMG.prop_plank_bridge; if (im) pic(im, x, G + 6, 420); else rr(x - 200, G - 110, 400, 40, 8, '#c58a4a'); if (st.done) drawItem('challah', x, G - 160, null, T * 0.04); }
+    else if (k === 'table') { const im = IMG.prop_plank_bridge; if (im) pic(im, x, G + 6, 420); else rr(x - 200, G - 110, 400, 40, 8, '#c58a4a'); if (st.done) drawItem(st.show || 'challah', x, G - 160, null, T * 0.04); }
     else if (k === 'bilam') { drawFriend('bilam', x, G, st.done, { face: -1, bounce: st.done }); for (let i = 0; i < st.need; i++) circ(x - 45 + i * 30, G - 210, 9, i < st.have ? '#ff9f43' : 'rgba(255,255,255,.7)'); }
     else if (k === 'plate') { const im = IMG.item_gift_plate; if (im) pic(im, x, G - 8, 82); else ell(x, G - 30, 40, 14, '#fff'); const ic = IMG['item_' + st.icon]; ctx.globalAlpha = st.done ? 1 : 0.32; if (ic) ctx.drawImage(ic, x - 24, G - 66, 48, 48); ctx.globalAlpha = 1; if (st.done) circ(x, G - 80, 6 + Math.sin(T * 0.2 + x) * 2, '#ffe14d'); }
     else if (k === 'count') st.pts.forEach((q, i) => { if (i < st.n) return; const im = IMG.item_numbubble, nx = i === st.n, wb = st.wob[i] > 0 ? Math.sin(st.wob[i] * 0.8) * 8 : 0, sz = nx ? 112 + Math.sin(T * 0.15) * 6 : 96;
@@ -1062,9 +1072,27 @@ requestAnimationFrame(frame);
 /* ---------- title, map, end screens ---------- */
 const MAP10_POS = [[11, 27], [30, 27], [46, 27], [68, 27], [88, 27], [88, 69], [68, 69], [49.5, 69], [30, 69], [10.5, 69]];   // the ten stops on art/ui/map10.jpg (Ghost's ten-stop map), in percent
 const MAP_POS = [[13, 25], [37.5, 24], [62, 25], [86, 27], [86, 70], [60.5, 69], [36.5, 70], [12, 72], [30, 47], [60, 47]];   // the ten stops on art/ui/map.jpg, in percent (9 and 10 sit in the empty middle band until Ghost's map10.jpg arrives)
+/* choose who comes along: pictures only, at most two; with two or fewer friends to pick from she just goes */
+function goLevel(i){ if (paradeFor(i).length > MAXPARTY) showPick(i); else startLevel(i, paradeFor(i)); }
+let pickSel = [];
+function showPick(i){
+  mode = 'pick'; showButtons(); glow(null); Voice.hush();
+  ['title', 'end', 'map'].forEach(s => $(s).classList.add('hide'));
+  const avail = paradeFor(i); pickSel = (save.party || []).filter(k => avail.includes(k)).slice(0, MAXPARTY);
+  for (let k = avail.length - 1; k >= 0 && pickSel.length < MAXPARTY; k--) if (!pickSel.includes(avail[k])) pickSel.push(avail[k]);
+  const row = $('pickrow'); row.innerHTML = '';
+  const paint = () => [...row.children].forEach(b => b.classList.toggle('sel', pickSel.includes(b.dataset.k)));
+  avail.forEach(k => { const b = document.createElement('button'), im = IMG[k + '_happy'];
+    b.className = 'fr'; b.dataset.k = k; b.setAttribute('aria-label', k);
+    b.innerHTML = (im && im.src ? '<img alt="" src="' + im.src + '">' : '<span>' + k.charAt(0).toUpperCase() + '</span>') + '<i>✓</i>';
+    b.addEventListener('click', () => { ac(); const at = pickSel.indexOf(k); if (at >= 0) pickSel.splice(at, 1); else { pickSel.push(k); if (pickSel.length > MAXPARTY) pickSel.shift(); sfx.pick(); } paint(); });
+    row.appendChild(b); });
+  paint(); $('pick').classList.remove('hide');
+  $('pickgo').onclick = () => { ac(); save.party = pickSel.slice(); persist(); $('pick').classList.add('hide'); startLevel(i, pickSel.slice()); };
+}
 function showMap(){
   mode = 'map'; showButtons(); glow(null); Voice.hush(); Song.play('title');
-  ['title', 'end'].forEach(s => $(s).classList.add('hide'));
+  ['title', 'end', 'pick'].forEach(s => $(s).classList.add('hide'));
   const box = $('stops'); box.innerHTML = ''; const m10 = !!IMG.map10, POS = m10 ? MAP10_POS : MAP_POS; box.style.backgroundImage = m10 ? 'url(art/ui/map10.jpg)' : '';
   const nextI = LEVELS.findIndex((lv, i) => !save.done[i]);
   POS.forEach((pos, i) => {
@@ -1074,19 +1102,19 @@ function showMap(){
     b.innerHTML = !open ? '\u{1F512}' : save.done[i] ? '<img alt="" src="art/ui/sticker_' + lv.sticker + '.png" onerror="this.onerror=null;this.src=\'art/ui/sticker_8.png\'">' : '\u25B6';
     if (open && !save.done[i]) b.classList.add('play');
     b.setAttribute('aria-label', 'level ' + (i + 1));
-    if (open) b.addEventListener('click', () => { ac(); startLevel(i); });
+    if (open) b.addEventListener('click', () => { ac(); goLevel(i); });
     box.appendChild(b);
   });
   $('map').classList.remove('hide');
 }
 $('play').addEventListener('click', () => { ac(); const first = !save.done.some(Boolean); if (first) startLevel(0); else showMap(); Voice.say(first ? 'ex_01' : 'ex_02'); });
 $('toMap').addEventListener('click', showMap);
-$('next').addEventListener('click', () => { if (li + 1 < LEVELS.length) startLevel(li + 1); else showMap(); });
+$('next').addEventListener('click', () => { if (li + 1 < LEVELS.length) goLevel(li + 1); else showMap(); });
 showButtons();
 
 /* for testing in the browser console */
 window.__g = {
   get s(){ return { mode, li, meets: meets.map(m => m.kind + (m.done ? "!" : "")), x: p && Math.round(p.x), y: p && Math.round(p.y), on: p && p.on, got, total: items.length, meter, fin: !!fin, followers: followers.map(f => f.kind), said: Voice.last, save }; },
-  keys, start: startLevel, P: () => p, sts: () => sts, pocket: () => pocket, goalMet: () => goalMet(), LV: () => L, gnd: groundAt, bonus: () => bonus, plats: () => plats, jump(){ wantJump = true; }, dance(){ wantDance = true; }, sup(){ wantSuper = true; },
+  keys, start: startLevel, goLevel, pickSel: () => pickSel, P: () => p, sts: () => sts, pocket: () => pocket, goalMet: () => goalMet(), LV: () => L, gnd: groundAt, bonus: () => bonus, plats: () => plats, jump(){ wantJump = true; }, dance(){ wantDance = true; }, sup(){ wantSuper = true; },
   step(n){ for (let i = 0; i < n; i++) update(1); draw(); }, tp(x){ p.x = x; p.y = G; p.vy = 0; }, items: () => items, meets: () => meets, reset(){ localStorage.removeItem(SAVE_KEY); }
 };

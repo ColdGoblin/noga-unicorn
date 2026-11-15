@@ -59,6 +59,13 @@
   @keyframes pop{from{transform:scale(0) rotate(-40deg)}to{transform:scale(1) rotate(0)}}
   .small{width:15vh;height:15vh;border-radius:50%;border:5px solid #fff;font-size:7vh;cursor:pointer;background:#4aa8ff;color:#fff;padding:0;
     box-shadow:0 6px 0 rgba(0,0,0,.15)}
+  #pickrow{max-width:94vw;gap:2.5vh}
+  .fr{position:relative;width:21vh;height:21vh;border-radius:50%;border:.8vh solid #fff;background:rgba(255,255,255,.75);padding:1vh;cursor:pointer;box-shadow:0 6px 0 rgba(0,0,0,.15);opacity:.6;font-size:9vh;color:#c048a0}
+  .fr img{width:100%;height:100%;object-fit:contain;display:block}
+  .fr i{display:none;position:absolute;right:-1vh;top:-1vh;width:7vh;height:7vh;border-radius:50%;background:#3ecf6e;color:#fff;font-style:normal;font-size:5vh;line-height:7vh;border:.5vh solid #fff}
+  .fr.sel{opacity:1;border-color:#3ecf6e;transform:scale(1.08)}
+  .fr.sel i{display:block}
+  #pick .big{width:19vh;height:19vh;font-size:9vh}
   #rotate{font-size:20vw}
 </style>
 </head>
@@ -88,6 +95,11 @@
     <button class="small" id="toMap" aria-label="map">&#127968;</button>
     <button class="big" id="next" aria-label="next level">&#9654;</button>
   </div>
+</div>
+
+<div class="screen hide" id="pick">
+  <div class="row" id="pickrow"></div>
+  <button class="big" id="pickgo" aria-label="go">&#9654;</button>
 </div>
 
 <div class="screen hide" id="rotate">&#128260;</div>

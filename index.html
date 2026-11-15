@@ -29,6 +29,9 @@
                    to{filter:drop-shadow(0 0 2.2vh #fff) drop-shadow(0 0 1vh #fff);transform:scale(1.14)}}
   #snd{position:fixed;bottom:2.5vh;right:50%;transform:translateX(50%);width:8vh;height:8vh;border-radius:50%;border:3px solid #fff;
     background:rgba(255,255,255,.55);font-size:4vh;z-index:6;cursor:pointer;padding:0}
+  #mus{position:fixed;bottom:2.5vh;left:calc(50% - 13vh);width:8vh;height:8vh;border-radius:50%;border:3px solid #fff;
+    background:rgba(255,255,255,.55);font-size:4vh;z-index:6;cursor:pointer;padding:0;position:fixed;overflow:hidden}
+  #mus.off{opacity:.8}#mus i{position:absolute;left:12%;top:46%;width:76%;height:.7vh;background:#e0245e;border-radius:1vh;transform:rotate(-40deg)}
   .screen{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3vh;
     background:linear-gradient(#ffe3f4,#dff3ff)}
   .screen.hide{display:none}
@@ -66,6 +69,7 @@
 <button class="btn hide" id="bd" aria-label="dance">&#9835;</button>
 <button class="btn hide" id="bs" aria-label="super jump">&#9733;</button>
 <button id="snd" aria-label="sound">&#128266;</button>
+<button id="mus" aria-label="music">&#127925;</button>
 
 <div class="screen" id="title">
   <h1>Noga and the Unicorn</h1>

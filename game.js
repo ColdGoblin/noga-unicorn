@@ -67,26 +67,24 @@ const sfx = {
   win(){ [523, 659, 784, 1047, 1319].forEach((f, i) => setTimeout(() => tone(f, 0.28, 'triangle', 0.13), i * 140)); },
   pop(){ tone(500, 0.12, 'sine', 0.1, 200); }
 };
-/* a soft looping tune, quieter while the voice speaks */
-const TUNES = [[523, 659, 784, 659, 698, 784, 880, 784], [587, 740, 880, 740, 659, 784, 988, 784], [440, 523, 659, 523, 494, 587, 698, 587]];
-let tuneI = 0, tuneN = 0, tuneTimer = null;
-/* recorded music: music/stage1.mp3 ... stage8.mp3 and title.mp3 loop under the voice; if a file is missing the little synth tune above plays instead */
+/* recorded music: music/stage1.mp3 ... stage10.mp3 and title.mp3 loop quietly under the voice (the little synth tune is gone: it was the annoying beeping) */
+let musicOn = true; try { musicOn = localStorage.getItem('nogaMusic') !== '0'; } catch (e) {}
+const MUSIC_ALIAS = { stage9: 'stage6', stage10: 'stage8' };      // stand-ins until stage9.mp3 and stage10.mp3 are made
 const Song = {
-  a: null, name: '', ok: {},
+  a: null, name: '',
   play(name){ if (this.name === name) return; this.stop(); this.name = name;
     const a = new Audio('music/' + name + '.mp3'); a.loop = true; a.volume = 0; this.a = a;
-    a.onerror = () => { Song.ok[name] = false; };
-    const p = a.play(); if (p && p.then) p.then(() => { Song.ok[name] = true; }).catch(() => { if (Song.ok[name] !== true) Song.ok[name] = false; }); },
+    a.onerror = () => { if (MUSIC_ALIAS[name] && a.src.indexOf(MUSIC_ALIAS[name]) < 0) { a.src = 'music/' + MUSIC_ALIAS[name] + '.mp3'; this.kick(); } };
+    this.kick(); },
+  kick(){ const a = this.a; if (a && a.paused && soundOn && musicOn) { const p = a.play(); if (p && p.catch) p.catch(() => {}); } },
   stop(){ if (this.a) { try { this.a.pause(); } catch (e) {} this.a = null; } this.name = ''; },
-  live(){ return !!this.name && Song.ok[this.name] === true; },
-  tick(){ const a = this.a; if (!a) return; const want = !soundOn ? 0 : Voice.busy ? 0.1 : 0.34;
-    a.volume = Math.max(0, Math.min(1, a.volume + (want - a.volume) * 0.2)); if (a.paused && soundOn && Song.ok[this.name] !== false) a.play().catch(() => {}); }
+  tick(){ const a = this.a; if (!a) return; const want = (!soundOn || !musicOn) ? 0 : Voice.busy ? 0.05 : 0.17;
+    a.volume = Math.max(0, Math.min(1, a.volume + (want - a.volume) * 0.15));
+    if (want === 0 && a.volume < 0.01) { if (!a.paused) a.pause(); } else this.kick(); }
 };
 setInterval(() => Song.tick(), 100);
-function startMusic(i){ tuneI = i % TUNES.length; tuneN = 0; Song.play('stage' + (i + 1)); if (tuneTimer) return;
-  tuneTimer = setInterval(() => { if (!soundOn || mode !== 'play' || Song.live()) return;
-    const f = TUNES[tuneI][tuneN++ % 8]; tone(f, 0.34, 'sine', Voice.busy ? 0.012 : 0.035); if (tuneN % 2 === 0) tone(f / 2, 0.5, 'triangle', Voice.busy ? 0.008 : 0.022); }, 380);
-}
+['pointerdown', 'keydown', 'touchstart'].forEach(ev => addEventListener(ev, () => Song.kick(), { passive: true }));      // browsers only allow sound after a tap: try again on every tap
+function startMusic(i){ Song.play('stage' + (i + 1)); }
 
 /* ---------- voice: recorded clip if present, otherwise the browser reads the line ---------- */
 let LANG = 'he';                      // spoken language: 'he' (default, the owner needs Hebrew) or 'en'
@@ -173,13 +171,16 @@ $('snd').addEventListener('pointerdown', () => { langDone = false; clearTimeout(
   LANG = LANG === 'he' ? 'en' : 'he'; try { localStorage.setItem('nogaLang', LANG); } catch (e) {} applyLang(); Voice.hush(); Voice.init(); Voice.say('ex_01'); }, 1500); });
 ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => $('snd').addEventListener(ev, () => clearTimeout(langHold)));
 $('snd').addEventListener('click', () => { if (langDone) { langDone = false; return; } soundOn = !soundOn; $('snd').innerHTML = soundOn ? '&#128266;' : '&#128263;'; if (!soundOn) Voice.hush(); });
+function setMus(){ $('mus').innerHTML = musicOn ? '&#127925;' : '&#127925;<i></i>'; $('mus').classList.toggle('off', !musicOn); }
+$('mus').addEventListener('click', () => { musicOn = !musicOn; try { localStorage.setItem('nogaMusic', musicOn ? '1' : '0'); } catch (e) {} setMus(); Song.tick(); });
+setMus();
 function glow(which){ ['bl', 'br', 'bj', 'bd'].forEach(b => $(b).classList.toggle('glow', b === which)); }
 function showButtons(){
   const play = mode === 'play';
   ['bl', 'br', 'bj'].forEach(b => $(b).classList.toggle('hide', !play));
   $('bd').classList.toggle('hide', !(play && save.dance));
   $('bs').classList.toggle('hide', !(play && save.sup));
-  $('snd').classList.toggle('hide', false);
+  $('snd').classList.toggle('hide', false); $('mus').classList.toggle('hide', false);
 }
 
 /* ---------- levels ---------- */
@@ -279,11 +280,11 @@ const LEVELS = [
               { x0: 2850, x1: 3900, top: G }, { x0: 4040, x1: 6000, top: G }],
     friend: { kind: 'rhino', x: 5800 },
     items: [{ x: 600, y: G - 50, kind: 'flour', to: 'bowl' }, { x: 1375, y: G - 205, kind: 'eggs', to: 'bowl' }, { x: 3150, y: G - 185, kind: 'honey', to: 'bowl' },
-            { x: 1900, y: G - 50, kind: 'carrot', to: 'bilam' }, { x: 2260, y: G - 190, kind: 'carrot', to: 'bilam' }, { x: 4300, y: G - 50, kind: 'carrot', to: 'bilam' }, { x: 4560, y: G - 170, kind: 'carrot', to: 'bilam' },
+            { x: 1900, y: G - 50, kind: 'carrot', to: 'bilam' }, { x: 4300, y: G - 50, kind: 'carrot', to: 'bilam' }, { x: 4560, y: G - 170, kind: 'carrot', to: 'bilam' },
             { x: 0, y: 0, kind: 'challah', to: 'table', hid: 'challah', hidden: true }],
     stations: [{ id: 'bowl', kind: 'bowl', x: 3550, need: 3, r: 150 },
                { id: 'oven', kind: 'oven', x: 3800, need: 1, auto: true, spawn: 'challah', say: ['fr_13'] },
-               { id: 'bilam', kind: 'bilam', x: 4800, need: 4, r: 200, say: ['fr_12', 'pr_16'] },
+               { id: 'bilam', kind: 'bilam', x: 4800, need: 3, r: 200, say: ['fr_12', 'pr_16'] },
                { id: 'candles', kind: 'candles', x: 5150, need: 1, dance: true, say: ['l6_c'] },
                { id: 'table', kind: 'table', x: 5450, need: 1, r: 220, say: ['fr_14'] }],
     bonus: [].concat(arcRow(240, 900, G - 80, 40, 6), arcRow(1800, 2600, G - 80, 60, 7), arcRow(2900, 3800, G - 90, 40, 7), arcRow(4100, 5000, G - 80, 30, 7), arcRow(1500, 1750, G - 160, 0, 3)),
@@ -522,7 +523,7 @@ function update(dt){
     if (L.friend.kind === 'tree') { L.friend.bloom = Math.min(1, fin.t / 150); p.x += (L.friend.x - 210 - p.x) * 0.05 * dt; p.face = 1; }   // step aside so the tree is seen
     if (p.on && fin.t % 46 < dt && fin.t < 230) { p.dance = 44; p.move = Math.floor(fin.t / 46) % 3; }
     if (Math.random() < 0.35) parts.push({ x: L.friend.x + rand(-260, 260), y: G - rand(260, 420), vx: rand(-1, 1), vy: rand(0.5, 2), life: 1.6, c: L.friend.kind === 'tree' ? '#ff9fd0' : RB[Math.floor(rand(0, 6))], s: rand(6, 11), shape: 'petal', g: 0.01 });
-    if (fin.t > 260 && Voice.idle()) endLevel();
+    if (fin.t > 260 && (Voice.idle() || fin.t > 900)) endLevel();      // never hang at the end if a voice clip does not finish
   }
 
   // help when she is stuck

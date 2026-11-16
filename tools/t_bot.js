@@ -14,9 +14,9 @@ function collect() {
 function doStation(st) {
   const k = st.kind;
   if (st.done) return;
-  if (k === 'count') { for (const q of st.pts) { at(q[0], q[1] + 62); step(2); } }
+  if (k === 'count') { g.tap(st.pts[st.pts.length - 1][0], st.pts[st.pts.length - 1][1]); for (const q of st.pts) { g.tap(q[0], q[1]); step(2); } }
   else if (k === 'rain') { at((st.zone[0] + st.zone[1]) / 2, G); let n = 0; while (!st.done && n++ < 6000) { step(1); for (const d of st.drops) if (d.y > G - 100 && d.y < G - 30) P.x = d.x; } }
-  else if (k === 'seek') { for (const x of st.pts) { at(x, G); step(2); } }
+  else if (k === 'seek') { for (const x of st.pts) { at(x, G); step(2); } const n0 = st.n; if (!st.done) out.push('seek by walking opened ' + n0); for (const x of st.pts) { g.tap(x + 20, G - 150); step(2); } }
   else if (k === 'simon') {
     at(st.x, G); let n = 0; while (st.phase !== 'input' && n++ < 800) step(1);
     out.push('simon seq ' + st.seq.join('') + ' phase ' + st.phase);
@@ -34,6 +34,7 @@ function doStation(st) {
     out.push('rhythm hits ' + st.hits + ' done ' + st.done);
   }
   else if (k === 'riddle') { step(1); at(st.x - 300, G); step(5); const o = st.objs.find(o => o.col === st.want); at(o.x, G); step(5); }
+  else if (k === 'bounce') { const pd = g.LV().pads.find(q => q.st === st.id); let n = 0; while (!st.done && n++ < 20) { P.x = pd.x + pd.w / 2; P.y = pd.top + 2; P.vy = 3; P.on = false; step(3); } out.push('bounces ' + st.n); }
   else if (st.dance) { at(st.x, G); g.dance(); step(3); step(150); }
   else if (st.auto) { step(250); }
   else { at(st.x, G); step(80); }

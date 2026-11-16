@@ -43,7 +43,8 @@ window.LINES = {
   l9_a:"We are in the desert. The Queen of Sheba is thirsty!", l9_b:"The well is full of water!", l9_c:"Everybody has water! Thank you, Noga!", l9_d:"Thank you, Noga! You are a true friend.",
   l10_a:"We climbed the Moon Mountain! The moon is sleepy and sad.", l10_b:"The moon is waking up!", l10_c:"The moon is smiling! What a night!", l10_d:"Good night, Noga. Sweet dreams.",
 
-  ex_01:"Noga and the Unicorn!", ex_02:"Welcome back, Noga!", ex_03:"Super jump is ready!", ex_04:"Wheee!", ex_05:"See you soon, Noga!"
+  ex_01:"Noga and the Unicorn!", ex_02:"Welcome back, Noga!", ex_03:"Super jump is ready!", ex_04:"Wheee!", ex_05:"See you soon, Noga!",
+  l12_a:"Welcome to Bouncy Castle Land! Everything here bounces!", x_pad:"The trampolines will fly you up!", x_bounce:"Jump on the big trampoline! Five times!", x_candy:"Collect the candies! Jump high!", x_candy_got:"Yummy!", l12_b:"Hi Noga! Come bounce with us!", fr_17:"Wheee! Again!", l12_c:"What fun! We bounced up to the sky!", l12_d:"The candies are so sweet! You are the bounce princess!", x_tap:"Touch it!", x_bowl:"Put everything in the bowl!", x_oven:"The oven is baking the challah!", x_table:"Put it on the table!", x_feed:"Give him a carrot!", x_mill:"Bring wheat to the mill!", x_bridge:"Build the bridge from the planks!", x_horses:"Feed the horses!", x_bed:"Water the garden bed!"
 };
 
 /* Hebrew voice (the owner needs Hebrew sounds). Spoken to a girl, so commands are feminine.
@@ -91,5 +92,6 @@ window.LINES_HE = {
   l9_a:"אנחנו במדבר. מלכת שבא צמאה!", l9_b:"הבאר מלאה במים!", l9_c:"לכולם יש מים! תודה, נוגה!", l9_d:"תודה, נוגה! את חברה אמיתית.",
   l10_a:"טיפסנו על הר הירח! הירח ישנוני ועצוב.", l10_b:"הירח מתעורר!", l10_c:"הירח מחייך! איזה לילה!", l10_d:"לילה טוב, נוגה. חלומות מתוקים.",
 
-  ex_01:"נוגה והחד-קרן!", ex_02:"ברוכה השבה, נוגה!", ex_03:"קפיצת העל מוכנה!", ex_04:"וויייי!", ex_05:"להתראות, נוגה!"
+  ex_01:"נוגה והחד-קרן!", ex_02:"ברוכה השבה, נוגה!", ex_03:"קפיצת העל מוכנה!", ex_04:"וויייי!", ex_05:"להתראות, נוגה!",
+  l12_a:"ברוכה הבאה לארץ הבאונסי קאסל! כאן הכול קופץ!", x_pad:"המקפצות יעיפו אותך למעלה!", x_bounce:"קפצי על המקפצה הגדולה! חמש פעמים!", x_candy:"אספי את הסוכריות! קפצי גבוה!", x_candy_got:"מתוק!", l12_b:"היי נוגה! בואי לקפוץ איתנו!", fr_17:"וויי! עוד פעם!", l12_c:"איזה כיף! קפצנו עד השמיים!", l12_d:"הסוכריות כל כך מתוקות! את נסיכת הקפיצות!", x_tap:"געי בו!", x_bowl:"שימי הכול בקערה!", x_oven:"התנור אופה את החלה!", x_table:"שימי על השולחן!", x_feed:"תני לו גזר!", x_mill:"הביאי חיטה לטחנה!", x_bridge:"בני את הגשר מהקרשים!", x_horses:"האכילי את הסוסים!", x_bed:"השקי את הערוגה!"
 };

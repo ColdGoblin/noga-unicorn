@@ -1,0 +1,134 @@
+[
+  {
+    "name": "bg_candy",
+    "file": "G:\\My Drive\\Projects\\אייל\\noga-unicorn\\art\\bg\\bg_candy.jpg",
+    "size": [
+      3600,
+      1200
+    ],
+    "source": "C:\\Users\\kirga\\.codex\\generated_images\\01a1ef57-1cf5-7682-bfad-95eb2fd862dc\\exec-a85d4d85-369e-4541-b555-abb9d86cd61e.png",
+    "alpha": false,
+    "bytes": 555304
+  },
+  {
+    "name": "prop_cotton_castle",
+    "file": "G:\\My Drive\\Projects\\אייל\\noga-unicorn\\art\\props\\prop_cotton_castle.png",
+    "size": [
+      1250,
+      756
+    ],
+    "source": "C:\\Users\\kirga\\.codex\\generated_images\\01a1ef57-1cf5-7682-bfad-95eb2fd862dc\\exec-a194db11-47d5-459d-af93-16ee40d5a653.png",
+    "alpha": true,
+    "bytes": 1147708
+  },
+  {
+    "name": "prop_choc_fall",
+    "file": "G:\\My Drive\\Projects\\אייל\\noga-unicorn\\art\\props\\prop_choc_fall.png",
+    "size": [
+      520,
+      669
+    ],
+    "source": "C:\\Users\\kirga\\.codex\\generated_images\\01a1ef57-1cf5-7682-bfad-95eb2fd862dc\\exec-39cead45-ed6c-4d45-9f9c-1469af50483e.png",
+    "alpha": true,
+    "bytes": 460593
+  },
+  {
+    "name": "prop_candy_machine",
+    "file": "G:\\My Drive\\Projects\\אייל\\noga-unicorn\\art\\props\\prop_candy_machine.png",
+    "size": [
+      330,
+      355
+    ],
+    "source": "C:\\Users\\kirga\\.codex\\generated_images\\01a1ef57-1cf5-7682-bfad-95eb2fd862dc\\exec-02295d93-8016-4e78-a377-3016e21a2925.png",
+    "alpha": true,
+    "bytes": 161916
+  },
+  {
+    "name": "item_lollipop",
+    "file": "G:\\My Drive\\Projects\\אייל\\noga-unicorn\\art\\items\\item_lollipop.png",
+    "size": [
+      300,
+      300
+    ],
+    "source": "C:\\Users\\kirga\\.codex\\generated_images\\01a1ef57-1cf5-7682-bfad-95eb2fd862dc\\exec-3c3f1b3b-5748-43ba-b9dd-0b2b92ee840c.png",
+    "alpha": true,
+    "bytes": 64199
+  },
+  {
+    "name": "item_candycane",
+    "file": "G:\\My Drive\\Projects\\אייל\\noga-unicorn\\art\\items\\item_candycane.png",
+    "size": [
+      300,
+      300
+    ],
+    "source": "C:\\Users\\kirga\\.codex\\generated_images\\01a1ef57-1cf5-7682-bfad-95eb2fd862dc\\exec-45fbfdd7-b526-4178-ab10-5d6bab61f98a.png",
+    "alpha": true,
+    "bytes": 43262
+  },
+  {
+    "name": "item_chocstar",
+    "file": "G:\\My Drive\\Projects\\אייל\\noga-unicorn\\art\\items\\item_chocstar.png",
+    "size": [
+      300,
+      300
+    ],
+    "source": "C:\\Users\\kirga\\.codex\\generated_images\\01a1ef57-1cf5-7682-bfad-95eb2fd862dc\\exec-1a92196f-02e3-4d8b-a844-eb48b3f819d9.png",
+    "alpha": true,
+    "bytes": 72364
+  },
+  {
+    "name": "item_sugar",
+    "file": "G:\\My Drive\\Projects\\אייל\\noga-unicorn\\art\\items\\item_sugar.png",
+    "size": [
+      300,
+      300
+    ],
+    "source": "C:\\Users\\kirga\\.codex\\generated_images\\01a1ef57-1cf5-7682-bfad-95eb2fd862dc\\exec-96b11697-c9ac-4644-8c8b-2948f320d667.png",
+    "alpha": true,
+    "bytes": 75168
+  },
+  {
+    "name": "item_chocbar",
+    "file": "G:\\My Drive\\Projects\\אייל\\noga-unicorn\\art\\items\\item_chocbar.png",
+    "size": [
+      300,
+      300
+    ],
+    "source": "C:\\Users\\kirga\\.codex\\generated_images\\01a1ef57-1cf5-7682-bfad-95eb2fd862dc\\exec-8a882c50-fa68-4724-908b-4b3839786e5d.png",
+    "alpha": true,
+    "bytes": 77445
+  },
+  {
+    "name": "item_strawberry",
+    "file": "G:\\My Drive\\Projects\\אייל\\noga-unicorn\\art\\items\\item_strawberry.png",
+    "size": [
+      300,
+      300
+    ],
+    "source": "C:\\Users\\kirga\\.codex\\generated_images\\01a1ef57-1cf5-7682-bfad-95eb2fd862dc\\exec-fb0f10a6-c86b-473e-8449-073f85646cb5.png",
+    "alpha": true,
+    "bytes": 84144
+  },
+  {
+    "name": "sticker_13",
+    "file": "G:\\My Drive\\Projects\\אייל\\noga-unicorn\\art\\ui\\sticker_13.png",
+    "size": [
+      300,
+      300
+    ],
+    "source": "C:\\Users\\kirga\\.codex\\generated_images\\01a1ef57-1cf5-7682-bfad-95eb2fd862dc\\exec-95b1c5f3-4d7a-4540-9f16-c01cb6c2e2b2.png",
+    "alpha": true,
+    "bytes": 129967
+  },
+  {
+    "name": "prop_candy_machine_run",
+    "file": "G:\\My Drive\\Projects\\אייל\\noga-unicorn\\art\\props\\prop_candy_machine_run.png",
+    "size": [
+      330,
+      355
+    ],
+    "source": "C:\\Users\\kirga\\.codex\\generated_images\\01a1ef57-1cf5-7682-bfad-95eb2fd862dc\\exec-7fe4ea25-36a1-4f72-96e6-c9c93d8d8b1f.png",
+    "alpha": true,
+    "bytes": 160257
+  }
+]

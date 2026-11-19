@@ -517,6 +517,48 @@ addB(1, 4250, 6950, B => {
   B.stars(4300, 4950, G - 80, 50, 6); B.stars(5120, 5700, G - 160, 70, 6); B.stars(5800, 6000, G - 80, 0, 3); B.stars(6700, 7350, G - 80, 40, 6); B.stars(7500, 8400, G - 190, 90, 8);
   B.item({ x: 7950, y: G - 215, col: 'red' }); B.stars(8550, 9450, G - 80, 50, 7); B.stars(9600, 10100, G - 250, 60, 5); B.stars(10150, 10300, G - 80, 0, 3); B.stars(11000, 11150, G - 80, 0, 2);
 });
+/* stage 3, Forest (round 11 batch B): a flag, a memory game, a small hill, three branches over a gap, a second hide and seek, Luna to jump for, a branch stair to a high petal, falling leaves, a second row of numbered bubbles */
+addB(2, 5460, 7400, B => {
+  B.rest(5560, ['pr_14', 'ins_10', 'num_10']);
+  B.flat(5460, 7100); B.ramp(7100, 7350, G, G - 100); B.flat(7350, 7650, G - 100); B.ramp(7650, 7900, G - 100, G); B.flat(7900, 8300); B.flat(8900, 12860);
+  B.station({ id: 'memory', kind: 'simon', x: 6300, hint: 'x_simon', say: ['pr_13'] });
+  B.item({ x: 6800, y: G - 60 }); B.item({ x: 7500, y: G - 215 });
+  [[8420, G - 110], [8600, G - 190], [8780, G - 110]].forEach(([x, top]) => { B.plat({ x, w: 150, top, kind: 'branch' }); B.star(x, top - 70); });
+  B.item({ x: 8600, y: G - 290 });
+  B.station({ id: 'hide3b', kind: 'seek', what: 'peek', mounds: BUSHES, peeks: ['pitzi', 'bilam', 'koko'], x: 9500, pts: [9300, 9500, 9700], hint: 'x_hide', near: 600, say: ['pr_13'] });
+  B.meet({ kind: 'luna', x: 10150, do: 'jump' }); B.pad({ x: 10330, w: 170, top: G - 58 });
+  [[10600, 100], [10780, 190], [10960, 280], [11140, 370]].forEach(([x, h]) => { B.plat({ x, w: 150, top: G - h, kind: 'branch' }); B.star(x, G - h - 70); });
+  B.item({ x: 11140, y: G - 440 });
+  B.station({ id: 'leafrain', kind: 'rain', x: 11500, zone: [11250, 11750], need: 5, hint: 'x_rain', near: 700, say: ['pr_13'] });
+  B.station({ id: 'treecount', kind: 'count', x: 12230, pts: [[11950, G - 100], [12090, G - 190], [12230, G - 110], [12370, G - 210], [12510, G - 130]], hint: 'x_count', near: 650, say: ['pr_13'] });
+  B.stars(5600, 6100, G - 80, 40, 6); B.stars(6400, 7000, G - 80, 50, 7); B.stars(7150, 7850, G - 190, 60, 7); B.stars(7950, 8250, G - 80, 30, 4); B.stars(9000, 9900, G - 80, 50, 8); B.stars(10400, 10550, G - 90, 0, 3); B.stars(11800, 12800, G - 100, 60, 8);
+});
+/* stage 4, Sky (round 11 batch B): a flag, five slow moving clouds over a long gap, a wind draft up to a high cloud, a hill, a shower of shooting stars, a flock of cloud unicorns to count */
+addB(3, 5200, 6600, B => {
+  B.rest(5300, ['pr_14', 'ins_10', 'num_05']);
+  B.flat(5200, 6300); B.flat(7700, 8900); B.ramp(8900, 9150, G, G - 110); B.flat(9150, 9450, G - 110); B.ramp(9450, 9700, G - 110, G); B.flat(9700, 11800);
+  [[6520, 0, 0], [6790, 2, G - 120], [7060, 4, 0], [7330, 1, G - 120], [7560, 3, 0]].forEach(([x, ph, t], i) => { const top = t || G - 90; B.plat({ x, w: 130, top, kind: 'cloud', move: { a: x - 55, b: x + 55, sp: 0.012, ph } }); B.star(x, top - 70); });
+  B.item({ x: 6925, y: G - 210 });
+  B.plat({ x: 8520, w: 130, top: G - 470, kind: 'cloud' }); B.item({ x: 8580, y: G - 560 });
+  LEVELS[3].drafts.push({ x: 8300, w: 180, h: 480 });
+  B.item({ x: 9300, y: G - 225 });
+  B.station({ id: 'rain2', kind: 'rain', x: 10000, zone: [9700, 10300], need: 5, hint: 'x_rain', near: 700, say: ['pr_13'] });
+  B.station({ id: 'flock', kind: 'count', x: 10900, pts: [[10600, G - 100], [10750, G - 190], [10900, G - 120], [11050, G - 210], [11200, G - 130]], hint: 'x_count', near: 650, say: ['pr_13'] });
+  B.stars(5350, 6200, G - 80, 50, 7); B.stars(7750, 8800, G - 90, 60, 8); B.stars(9200, 9650, G - 210, 60, 5); B.stars(9750, 10300, G - 80, 40, 5); B.stars(11300, 11750, G - 80, 30, 5);
+});
+/* stage 13, Candy Land (round 11 batch B): a second candy machine with THREE NEW ingredients (honey, milk, chocolate star) that makes THREE DIFFERENT candies (lollipop, candy cane, chocolate star) for a second table; marshmallow steps, a trampoline, a second row of stars */
+addB(12, 8000, 2800, B => {
+  B.pad({ x: 8100, w: 170, top: G - 58, kind: 'candy', pw: -19 });
+  [[8330, 110], [8530, 215], [8730, 320]].forEach(([x, h]) => { B.plat({ x, w: 150, top: G - h, kind: 'marsh' }); B.star(x, G - h - 70); });
+  B.item({ x: 8730, y: G - 382, col: '2' });
+  B.station({ id: 'machine2', kind: 'machine', x: 9300, need: 3, tokens: ['honey', 'milk', 'chocstar'], th: [[-520, 260], [-330, 150], [-170, 270]], hint: 'x_machine', near: 800, spawn: 'made2', say: ['x_machine_done'] });
+  B.item({ x: 0, y: 0, kind: 'lollipop', to: 'feast2', hid: 'made2', hidden: true, nochip: true, dx: 150 });
+  B.item({ x: 0, y: 0, kind: 'candycane', to: 'feast2', hid: 'made2', hidden: true, nochip: true, dx: 260 });
+  B.item({ x: 0, y: 0, kind: 'chocstar', to: 'feast2', hid: 'made2', hidden: true, nochip: true, dx: 370 });
+  B.station({ id: 'feast2', kind: 'table', x: 10050, need: 3, r: 230, img: 'prop_table', show: ['lollipop', 'candycane', 'chocstar'], hint: 'x_table', near: 560, say: ['pr_17'] });
+  B.deco({ kind: 'bunicorn_mint', x: 9850, hap: 'feast2' });
+  B.stars(8350, 8650, G - 80, 30, 4); B.stars(9350, 9950, G - 150, 60, 6); B.stars(10100, 10700, G - 80, 30, 5);
+});
 const REST_W = 1.25;        // picture is a bit wider than the part you stand on
 function prepLevel(lv){
   lv.gaps = []; for (let i = 0; i + 1 < lv.terrain.length; i++) if (lv.terrain[i + 1].x0 > lv.terrain[i].x1) lv.gaps.push({ x: lv.terrain[i].x1, w: lv.terrain[i + 1].x0 - lv.terrain[i].x1 });

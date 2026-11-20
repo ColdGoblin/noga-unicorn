@@ -483,6 +483,7 @@ function addB(n, at, by, fn){
   const lv = LEVELS[n]; stretch(lv, at, by, 0); lv.stations = lv.stations || []; lv.meets = lv.meets || []; lv.decos = lv.decos || []; lv.pads = lv.pads || [];
   const ter = [], end = at + by;
   fn({ a: at, end,
+    hole: (x0, x1) => { const i = lv.terrain.findIndex(t => t.top1 === undefined && t.x0 < x0 && t.x1 > x1); if (i >= 0) { const t = lv.terrain[i]; lv.terrain.splice(i, 1, { x0: t.x0, x1: x0, top: t.top }, { x0: x1, x1: t.x1, top: t.top }); } },
     flat: (x0, x1, top) => ter.push({ x0, x1, top: top === undefined ? G : top }), ramp: (x0, x1, t0, t1) => ter.push({ x0, x1, top: t0, top1: t1 }),
     plat: o => lv.plats.push(o), item: o => lv.items.push(o), station: o => lv.stations.push(o), meet: o => lv.meets.push(o), cue: o => lv.cues.push(o), deco: o => lv.decos.push(o), pad: o => lv.pads.push(o),
     stars: (x0, x1, y, h, c) => lv.bonus.push(...arcRow(x0, x1, y, h, c)), star: (x, y) => lv.bonus.push({ x, y }),
@@ -558,6 +559,81 @@ addB(12, 8000, 2800, B => {
   B.station({ id: 'feast2', kind: 'table', x: 10050, need: 3, r: 230, img: 'prop_table', show: ['lollipop', 'candycane', 'chocstar'], hint: 'x_table', near: 560, say: ['pr_17'] });
   B.deco({ kind: 'bunicorn_mint', x: 9850, hap: 'feast2' });
   B.stars(8350, 8650, G - 80, 30, 4); B.stars(9350, 9950, G - 150, 60, 6); B.stars(10100, 10700, G - 80, 30, 5);
+});
+/* stage 5, Farm (round 11 batch C): the first bread is baked, then a flag; a second half with a dance friend, chicks in the hay, a mud patch, a second vegetable bed, a small hill with a carrot, a stone over a gap, the horses again, a second bread (wheat, mill, bowl, oven, table), then a row of hay bales to count */
+addB(4, 7500, 7500, B => {
+  B.need(9, 'num_06', 'num_09'); B.rest(7620, ['pr_14', 'ins_10', 'num_09']);
+  B.hole(10750, 10890);
+  B.ramp(11100, 11350, G, G - 130); B.flat(11350, 11650, G - 130); B.ramp(11650, 11900, G - 130, G);
+  LEVELS[4].mud.push({ x: 9500, w: 380 });
+  B.meet({ kind: 'luna', x: 7950, do: 'dance' });
+  B.station({ id: 'chicks2', kind: 'seek', what: 'chick', mound: 'haybale', x: 8600, pts: [8300, 8600, 8900, 9200], hint: 'x_seek_a', near: 600, say: ['pr_13'] });
+  B.item({ x: 10050, y: G - 50, kind: 'water_drop', to: 'bed2', say: null }); B.item({ x: 10180, y: G - 50, kind: 'water_drop', to: 'bed2', say: null });
+  B.station({ id: 'bed2', kind: 'grow', x: 10450, need: 2, r: 190, say: ['pr_15'] });
+  B.plat({ x: 10755, w: 110, kind: 'stone' });
+  B.item({ x: 10950, y: G - 50, kind: 'carrot_bunch', to: 'horses2' }); B.item({ x: 11500, y: G - 190, kind: 'carrot_bunch', to: 'horses2' });
+  B.station({ id: 'horses2', kind: 'horses', x: 12300, need: 2, r: 230, say: ['pr_16'], wish: 'carrot_bunch', wy: 310 });
+  B.deco({ kind: 'anana', x: 12550, hap: 'horses2' });
+  B.item({ x: 12600, y: G - 50, kind: 'milk', to: 'fbowl2', say: null }); B.item({ x: 12700, y: G - 50, kind: 'wheat', grp: 'wheat', to: 'mill2', say: null }); B.item({ x: 12820, y: G - 50, kind: 'wheat', grp: 'wheat', to: 'mill2', say: null });
+  B.item({ x: 0, y: 0, kind: 'flour', to: 'fbowl2', hid: 'flour2', hidden: true, nochip: true, say: null }); B.item({ x: 0, y: 0, kind: 'loaf', to: 'ftable2', hid: 'loaf2', hidden: true, nochip: true, say: null });
+  B.station({ id: 'mill2', kind: 'mill', x: 13100, need: 2, r: 160, spawn: 'flour2', say: ['pr_13'] }); B.station({ id: 'fbowl2', kind: 'bowl', x: 13330, need: 2, r: 150, arms: 'foven2' });
+  B.station({ id: 'foven2', kind: 'oven', x: 13570, need: 1, auto: true, spawn: 'loaf2', say: ['pr_14'] }); B.station({ id: 'ftable2', kind: 'table', x: 13880, need: 1, r: 220, img: 'prop_farmtable', show: 'loaf', wish: 'loaf', wy: 310, say: ['pr_15'] });
+  B.station({ id: 'haycount', kind: 'count', x: 14480, pts: [[14200, G - 100], [14340, G - 190], [14480, G - 110], [14620, G - 200], [14760, G - 120]], hint: 'x_count', near: 650, say: ['pr_13'] });
+  B.stars(7700, 8150, G - 80, 40, 5); B.stars(8350, 9300, G - 90, 50, 8); B.stars(9650, 10000, G - 80, 30, 4); B.stars(10250, 10650, G - 90, 40, 5); B.stars(11100, 11900, G - 200, 70, 7); B.stars(12000, 12500, G - 90, 40, 5); B.stars(13950, 14150, G - 80, 20, 3); B.stars(14900, 15000, G - 80, 0, 2);
+});
+/* stage 6, Shabbat (round 11 batch C): after the table a flag; then numbered bubbles, a second row of lanterns, carrots for Bil'am over a hill, honey on a mushroom, a second challah (bowl, oven, table), a shower of stars, a stone over a gap, a friend to dance for */
+addB(5, 6400, 7000, B => {
+  B.need(10, 'num_08', 'num_10'); B.rest(6520, ['pr_14', 'ins_10', 'num_10']);
+  B.hole(12500, 12650);
+  B.ramp(8500, 8750, G, G - 110); B.flat(8750, 9100, G - 110); B.ramp(9100, 9350, G - 110, G);
+  B.station({ id: 'shabcount', kind: 'count', x: 7000, pts: [[6700, G - 100], [6850, G - 190], [7000, G - 110], [7150, G - 200], [7300, G - 120]], hint: 'x_count', near: 650, say: ['pr_13'] });
+  B.station({ id: 'lights2', kind: 'simon', x: 7800, hint: 'x_simon', say: ['pr_13'] });
+  B.item({ x: 8250, y: G - 50, kind: 'carrot', to: 'bilam2' }); B.item({ x: 8400, y: G - 50, kind: 'carrot', to: 'bilam2' }); B.item({ x: 8900, y: G - 170, kind: 'carrot', to: 'bilam2' });
+  B.plat({ x: 8830, w: 110, kind: 'mushroom', base: G - 110 }); B.item({ x: 8885, y: G - 275, kind: 'honey', to: 'bowl2' });
+  B.station({ id: 'bilam2', kind: 'bilam', x: 9800, need: 3, r: 200, wish: 'carrot', wy: 310, say: ['fr_12', 'pr_16'] });
+  B.plat({ x: 9580, w: 100, kind: 'stump' }); B.star(9630, G - 140);
+  B.item({ x: 10100, y: G - 50, kind: 'flour', to: 'bowl2' }); B.item({ x: 10250, y: G - 50, kind: 'eggs', to: 'bowl2' });
+  B.item({ x: 0, y: 0, kind: 'challah', to: 'table2', hid: 'challah2', hidden: true });
+  B.station({ id: 'bowl2', kind: 'bowl', x: 10700, need: 3, r: 150, arms: 'oven2' }); B.station({ id: 'oven2', kind: 'oven', x: 10950, need: 1, auto: true, spawn: 'challah2', say: ['fr_13'] }); B.station({ id: 'table2', kind: 'table', x: 11350, need: 1, r: 220, say: ['pr_14'] });
+  B.station({ id: 'shabrain', kind: 'rain', x: 12000, zone: [11750, 12250], need: 5, hint: 'x_rain', near: 700, say: ['pr_13'] });
+  B.plat({ x: 12520, w: 110, kind: 'stone' });
+  B.meet({ kind: 'pitzi', x: 12900, do: 'dance' });
+  B.stars(6600, 6950, G - 80, 30, 4); B.stars(7400, 7700, G - 80, 30, 4); B.stars(8300, 9300, G - 190, 60, 8); B.stars(9400, 9900, G - 80, 30, 5); B.stars(10000, 10600, G - 80, 30, 5); B.stars(11600, 11700, G - 80, 0, 2); B.stars(11800, 12400, G - 90, 40, 6); B.stars(12700, 13300, G - 80, 40, 5);
+});
+/* stage 7, Night (round 11 batch C): a flag, a second row of lanterns to copy, a ribbon on a hill, a stone over a gap, a shower of shooting stars, a cloud stair to a high ribbon, a second hide and seek, numbered stars, a friend to jump for, then a second riddle before the old one */
+addB(6, 5600, 7100, B => {
+  B.need(10, 'num_08', 'num_10'); B.rest(5700, ['pr_14', 'ins_10', 'num_10']);
+  B.hole(8200, 8340);
+  B.ramp(7100, 7350, G, G - 130); B.flat(7350, 7650, G - 130); B.ramp(7650, 7900, G - 130, G);
+  B.station({ id: 'lanterns2', kind: 'simon', x: 6300, hint: 'x_simon', say: ['pr_13'] });
+  B.item({ x: 6900, y: G - 50 }); B.item({ x: 7500, y: G - 190 });
+  B.plat({ x: 8220, w: 110, kind: 'stone' });
+  B.station({ id: 'shooting', kind: 'rain', x: 9000, zone: [8700, 9300], need: 5, hint: 'x_rain', near: 700, say: ['pr_13'] });
+  [[9600, 90], [9780, 170], [9960, 250], [10140, 330]].forEach(([x, h]) => { B.plat({ x, w: 130, top: G - h, kind: 'cloud' }); B.star(x, G - h - 70); });
+  B.item({ x: 10140, y: G - 420 });
+  B.station({ id: 'hide7b', kind: 'seek', what: 'peek', mounds: BUSHES, peeks: ['luna', 'shluli', 'pitzi'], x: 10900, pts: [10700, 10900, 11100], hint: 'x_hide', near: 600, say: ['pr_13'] });
+  B.station({ id: 'nightcount', kind: 'count', x: 11500, pts: [[11200, G - 100], [11350, G - 190], [11500, G - 110], [11650, G - 200], [11800, G - 120]], hint: 'x_count', near: 650, say: ['pr_13'] });
+  B.meet({ kind: 'luna', x: 11950, do: 'jump' });
+  B.station({ id: 'riddle2', kind: 'riddle', x: 12400, need: 1, say: ['pr_08'] });
+  B.stars(5750, 6150, G - 80, 30, 5); B.stars(6500, 7000, G - 80, 40, 6); B.stars(7150, 7850, G - 200, 60, 7); B.stars(8400, 8650, G - 80, 20, 3); B.stars(9350, 9550, G - 80, 0, 3); B.stars(10300, 10650, G - 80, 30, 4); B.stars(12000, 12300, G - 80, 20, 3);
+});
+/* stage 8, Castle (round 11 batch C): a flag, flowers, a second dance on the beat, a tower hill to climb (with a flower at the top), a friend to jump for, a second hide and seek in the garden, numbered stars, a shower of sparks, a stone over a gap, a second row of lanterns, a friend to dance for; then the old gifts and plates */
+addB(7, 5700, 8900, B => {
+  B.rest(5820, ['pr_14']);
+  B.hole(13100, 13240);
+  B.ramp(7900, 8150, G, G - 110); B.flat(8150, 8400, G - 110); B.ramp(8400, 8650, G - 110, G - 220); B.flat(8650, 9000, G - 220); B.ramp(9000, 9250, G - 220, G - 110); B.flat(9250, 9500, G - 110); B.ramp(9500, 9750, G - 110, G);
+  B.item({ x: 6200, y: G - 60, col: '1' }); B.item({ x: 6600, y: G - 60, col: '2' });
+  B.station({ id: 'beat2', kind: 'rhythm', x: 7200, r: 330, need: 6, hint: 'x_rhythm', near: 520, say: ['pr_14'] });
+  B.item({ x: 8200, y: G - 170, col: '3' }); B.item({ x: 8800, y: G - 280, col: '4' });
+  B.meet({ kind: 'shluli', x: 9900, do: 'jump' });
+  B.station({ id: 'hide8b', kind: 'seek', what: 'peek', mounds: BUSHES, peeks: ['pitzi', 'koko', 'shluli'], x: 10300, pts: [10100, 10300, 10500], hint: 'x_hide', near: 600, say: ['pr_13'] });
+  B.station({ id: 'towercount', kind: 'count', x: 11200, pts: [[10900, G - 100], [11050, G - 190], [11200, G - 110], [11350, G - 200], [11500, G - 120]], hint: 'x_count', near: 650, say: ['pr_13'] });
+  B.item({ x: 11800, y: G - 60, col: '5' });
+  B.station({ id: 'sparkle', kind: 'rain', x: 12600, zone: [12300, 12900], need: 6, hint: 'x_rain', near: 700, say: ['pr_13'] });
+  B.plat({ x: 13120, w: 110, kind: 'stone' });
+  B.station({ id: 'castlelights', kind: 'simon', x: 13900, hint: 'x_simon', say: ['pr_13'] });
+  B.meet({ kind: 'pitzi', x: 14400, do: 'dance' });
+  B.stars(5900, 6500, G - 90, 40, 7); B.stars(6700, 7000, G - 90, 30, 4); B.stars(7450, 7850, G - 90, 30, 4); B.stars(8200, 8900, G - 330, 60, 7); B.stars(9800, 10050, G - 90, 30, 3); B.stars(10600, 10850, G - 90, 30, 3); B.stars(11600, 12200, G - 90, 40, 6); B.stars(12950, 13500, G - 90, 30, 5); B.stars(13600, 13800, G - 90, 20, 3); B.stars(14100, 14300, G - 90, 20, 3); B.stars(14500, 14600, G - 90, 0, 2);
 });
 const REST_W = 1.25;        // picture is a bit wider than the part you stand on
 function prepLevel(lv){
@@ -656,7 +732,7 @@ function reachRest(){
 }
 function resumeHalf(){
   const h = save.half[li], rx = L.rest.x;
-  (h.it || []).forEach(k => { const it = items[k]; if (it && !it.got) { it.got = true; got++; } });
+  (h.it || []).forEach(k => { const it = items[k]; if (it && !it.got) { it.got = true; got++; const dst = it.to && sts.find(o => o.id === it.to); if (dst && dst.x >= rx) pocket.push(it); } });
   bonus.forEach(b => { if (b.x < rx) b.got = true; }); bonusN = h.bn || 0;
   sts.forEach(st => { if (st.x < rx) st.done = true; }); meets.forEach(m => { if (m.x < rx) m.done = true; }); L.cues.forEach(c => { if (c.x < rx) c.done = true; });
   p.x = rx + 40; maxX = p.x; restDone = true; camX = clamp(p.x - VW * 0.36, 0, Math.max(0, L.len - VW)); Voice.say('pr_05');

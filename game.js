@@ -25,6 +25,9 @@ try { localStorage.removeItem('nogaUnicorn1'); } catch (e) {}
 let save = { done: [false, false, false, false, false, false, false, false, false, false, false, false, false], dance: false, sup: false, half: {} };
 try { const o = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null');
   if (o && Array.isArray(o.done)) { save.done = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(i => !!o.done[i]); save.sup = !!o.sup; if (o.half && typeof o.half === 'object') Object.keys(o.half).forEach(k => { const h = o.half[k]; if (+k >= 0 && +k < 13 && h && Array.isArray(h.it)) save.half[k] = { it: h.it.filter(Number.isInteger).slice(0, 60), bn: Math.max(0, h.bn | 0) }; }); if (Array.isArray(o.party)) save.party = o.party.filter(k => typeof k === 'string').slice(0, 2); } } catch (e) {}
+/* one-time progress reset, 21 Nov 2026 (owner request, after the stage expansion and the bigger Love Party): everyone starts the stages from the beginning ONCE. The flag below is stored in the browser, so later visits keep their progress. Friends she picked (save.party), music and language are kept. */
+const RESET_FLAG = 'nogaReset20261121';
+try { if (!localStorage.getItem(RESET_FLAG)) { save.done = save.done.map(() => false); save.half = {}; save.sup = false; localStorage.setItem(RESET_FLAG, '1'); localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } } catch (e) {}
 save.dance = true;                    // the Dance button is there from the very first level (owner request, 14 Nov)
 function persist(){ try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) {} }
 
@@ -488,7 +491,7 @@ function addB(n, at, by, fn){
     plat: o => lv.plats.push(o), item: o => lv.items.push(o), station: o => lv.stations.push(o), meet: o => lv.meets.push(o), cue: o => lv.cues.push(o), deco: o => lv.decos.push(o), pad: o => lv.pads.push(o),
     stars: (x0, x1, y, h, c) => lv.bonus.push(...arcRow(x0, x1, y, h, c)), star: (x, y) => lv.bonus.push({ x, y }),
     rest: (x, say) => { lv.rest = { x, say }; },
-    need: (k, oldNum, newNum) => { lv.need = k; lv.cues.forEach(c => { c.say = c.say.map(id => id === oldNum ? newNum : id); }); } });
+    need: (k, oldNum, newNum) => { lv.need = k; lv.cues.forEach(c => { c.say = c.say.map(id => oldNum && id === oldNum ? newNum : id); }); } });
   let k = lv.terrain.findIndex(t => t.x0 >= end); if (k < 0) k = lv.terrain.length; lv.terrain.splice(k, 0, ...ter);
 }
 /* stage 1, Garden: meadow with the flag, numbered bubbles, a ridge, a wide stream, hide and seek, a friend to jump for, a cloud stair to a feather, trampolines */
@@ -635,6 +638,61 @@ addB(7, 5700, 8900, B => {
   B.meet({ kind: 'pitzi', x: 14400, do: 'dance' });
   B.stars(5900, 6500, G - 90, 40, 7); B.stars(6700, 7000, G - 90, 30, 4); B.stars(7450, 7850, G - 90, 30, 4); B.stars(8200, 8900, G - 330, 60, 7); B.stars(9800, 10050, G - 90, 30, 3); B.stars(10600, 10850, G - 90, 30, 3); B.stars(11600, 12200, G - 90, 40, 6); B.stars(12950, 13500, G - 90, 30, 5); B.stars(13600, 13800, G - 90, 20, 3); B.stars(14100, 14300, G - 90, 20, 3); B.stars(14500, 14600, G - 90, 0, 2);
 });
+/* ---------- 21 Nov batch D/E: stages 9, 10, 11 and 12 get their second half ---------- */
+/* stage 9, Oasis: flag; a second well with three more drops, a second treasure hunt in the sand, drops to count, a second challah (bowl, oven, table) */
+addB(8, 5600, 7500, B => {
+  B.need(19, null, null); B.rest(5720, ['pr_14']);
+  [6300, 6520, 6740].forEach(x => B.item({ x, y: G - 50, to: 'well2' }));
+  B.station({ id: 'well2', kind: 'well', x: 7300, need: 3, r: 220, hint: 'x_well', say: ['pr_13'] });
+  B.station({ id: 'gems2', kind: 'seek', what: 'gem', mound: 'sandmound', x: 8300, pts: [7900, 8300, 8700, 9100], hint: 'x_seek_b', near: 600, say: ['pr_13'] });
+  B.station({ id: 'drops9b', kind: 'count', x: 9800, pts: [[9500, G - 90], [9640, G - 170], [9780, G - 100], [9920, G - 200], [10060, G - 120]], hint: 'x_count', near: 650, say: ['pr_13'] });
+  B.item({ x: 10500, y: G - 50, kind: 'flour', to: 'bowl2', say: null }); B.item({ x: 10650, y: G - 50, kind: 'eggs', to: 'bowl2', say: null }); B.item({ x: 10800, y: G - 50, kind: 'honey', to: 'bowl2', say: null });
+  B.item({ x: 0, y: 0, kind: 'challah', to: 'table2', hid: 'challah2', hidden: true, nochip: true });
+  B.station({ id: 'bowl2', kind: 'bowl', x: 11300, need: 3, r: 150, arms: 'oven2' }); B.station({ id: 'oven2', kind: 'oven', x: 11560, need: 1, auto: true, spawn: 'challah2', say: ['fr_13'] });
+  B.station({ id: 'table2', kind: 'table', x: 11950, need: 1, r: 200, wish: 'challah', wy: 310, say: ['pr_16'] });
+  B.stars(5800, 6200, G - 80, 30, 4); B.stars(6900, 7200, G - 90, 40, 4); B.stars(7500, 8200, G - 90, 40, 6); B.stars(8800, 9400, G - 90, 40, 6); B.stars(10100, 10450, G - 90, 30, 4); B.stars(10900, 11250, G - 90, 30, 4); B.stars(12100, 12700, G - 90, 30, 5);
+});
+/* stage 10, Moon: flag; a second cloud staircase to count and climb, the stars' memory game, a shower of moon stars, a wind draft up to a star, a second dance */
+addB(9, 5900, 8750, B => {
+  B.need(20, null, null); B.rest(6020, ['pr_14']);
+  for (let i = 0; i < 5; i++) B.plat({ x: 6600 + i * 200, w: 130, top: G - 90 * (i + 1), kind: 'cloud' });
+  B.plat({ x: 7580, w: 130, top: G - 540, kind: 'cloud' });
+  B.item({ x: 7645, y: G - 640 });
+  B.station({ id: 'steps2', kind: 'count', x: 7065, pts: [[6665, G - 190], [6865, G - 280], [7065, G - 370], [7265, G - 460], [7465, G - 550]], hint: 'x_count', near: 700, say: ['pr_13'] });
+  B.station({ id: 'stars2', kind: 'simon', x: 8700, hint: 'x_simon', say: ['pr_13'] });
+  B.item({ x: 9100, y: G - 60 });
+  B.station({ id: 'moonrain2', kind: 'rain', x: 9650, zone: [9350, 9950], need: 6, hint: 'x_rain', near: 700, say: ['pr_13'] });
+  LEVELS[9].drafts.push({ x: 10600, w: 180, h: 590 }); B.item({ x: 10690, y: G - 560 });
+  B.station({ id: 'moonbeat', kind: 'rhythm', x: 11900, r: 330, need: 6, hint: 'x_rhythm', near: 520, say: ['pr_14'] });
+  B.stars(6050, 6500, G - 80, 30, 4); B.stars(6700, 7500, G - 200, 40, 5); B.stars(7800, 8500, G - 80, 40, 6); B.stars(9150, 9350, G - 80, 30, 3); B.stars(10000, 10500, G - 80, 30, 4); B.stars(10850, 11500, G - 80, 40, 6); B.stars(12200, 12800, G - 80, 40, 6);
+});
+/* stage 11, Party: second round of preparations (flowers, tea pot, fire, cups), balloons to pop, a second dance, a friend to dance with; the finale stays at the end */
+addB(10, 3600, 4000, B => {
+  B.need(17, null, null); B.rest(3720, ['pr_14']);
+  B.item({ x: 4000, y: G - 50, kind: 'flower_1', grp: 'flower', to: 'pot2', say: null }); B.item({ x: 4250, y: G - 50, kind: 'flower_2', grp: 'flower', to: 'pot2', say: null }); B.item({ x: 4500, y: G - 50, kind: 'water_drop', to: 'pot2', say: null });
+  B.item({ x: 0, y: 0, kind: 'teapot', to: 'fire2', hid: 'pot2', hidden: true, nochip: true }); B.item({ x: 0, y: 0, kind: 'teacup', to: 'table2', hid: 'cup2', hidden: true, nochip: true });
+  B.station({ id: 'pot2', kind: 'pot', x: 4850, need: 3, r: 160, spawn: 'pot2', hint: 'x_tea_pot', near: 420, say: ['x_tea_fire'] });
+  B.station({ id: 'fire2', kind: 'fire', x: 5120, need: 1, r: 170, spawn: 'cup2', say: ['x_tea_boil'] });
+  B.station({ id: 'balloons', kind: 'rain', x: 5900, zone: [5600, 6200], need: 6, hint: 'x_rain', near: 700, say: ['pr_13'] });
+  B.meet({ kind: 'shluli', x: 6500, do: 'dance' });
+  B.station({ id: 'beat2', kind: 'rhythm', x: 6900, r: 330, need: 6, hint: 'x_rhythm', near: 520, say: ['pr_14'] });
+  B.station({ id: 'table2', kind: 'table', x: 7300, need: 1, r: 230, img: 'prop_table', show: ['teacup'], hint: 'x_party_table', near: 560, say: ['pr_17'] });
+  B.stars(3800, 4800, G - 80, 40, 6); B.stars(5200, 5600, G - 80, 30, 4); B.stars(6300, 6800, G - 80, 30, 4); B.stars(7000, 7250, G - 80, 20, 3);
+});
+/* stage 12, Bouncy: flag; a second bounce counter on a big pad, more candy up high, a second row of sky bubbles, a cloud step */
+addB(11, 4000, 6500, B => {
+  B.need(10, 'num_08', 'num_10'); B.rest(4100, ['pr_14']);
+  B.pad({ x: 4200, w: 150, top: G - 58, kind: 'candy', pw: -21.5 }); B.item({ x: 4350, y: G - 330, col: '3' });
+  B.pad({ x: 4800, w: 230, top: G - 80, kind: 'big', pw: -27, st: 'bigpad2' }); B.station({ id: 'bigpad2', kind: 'bounce', x: 4915, need: 6, hint: 'x_bounce', near: 700, say: ['pr_13'] }); B.item({ x: 5100, y: G - 540, col: '1' });
+  B.pad({ x: 5500, w: 150, top: G - 58, kind: 'candy', pw: -21.5 }); B.pad({ x: 5700, w: 150, top: G - 58, kind: 'candy', pw: -21.5 }); B.item({ x: 5880, y: G - 330, col: '2' });
+  B.station({ id: 'skybubbles2', kind: 'count', x: 6700, pts: [[6380, G - 200], [6540, G - 330], [6700, G - 440], [6860, G - 300], [7020, G - 420]], hint: 'x_count', near: 800, say: ['pr_13'] });
+  B.pad({ x: 7500, w: 150, top: G - 58, kind: 'candy', pw: -21.5 }); B.pad({ x: 7800, w: 150, top: G - 58, kind: 'candy', pw: -21.5 }); B.item({ x: 7980, y: G - 330, col: '3' });
+  B.pad({ x: 8300, w: 230, top: G - 80, kind: 'big', pw: -27 }); B.item({ x: 8560, y: G - 540, col: '1' });
+  B.pad({ x: 9150, w: 230, top: G - 80, kind: 'big', pw: -27 }); B.plat({ x: 9500, w: 200, top: G - 420, kind: 'cloud' }); B.item({ x: 9500, y: G - 500, col: '2' });
+  B.stars(4100, 4700, G - 120, 60, 5); B.stars(5200, 5500, G - 300, 100, 4); B.stars(6000, 6300, G - 80, 20, 3); B.stars(7100, 7450, G - 90, 30, 4); B.stars(8000, 8250, G - 80, 20, 3); B.stars(8700, 9100, G - 350, 100, 4); B.stars(9750, 10300, G - 80, 30, 4);
+});
+/* keep the order of things along the ground, so the sparkle trail and the hints always lead to the NEXT thing and never skip one she walked past */
+[4, 5, 6, 7, 8, 9, 10, 11].forEach(n => { const lv = LEVELS[n]; lv.stations.sort((a, b) => a.x - b.x); lv.items.sort((a, b) => (a.hidden ? -1 : a.x) - (b.hidden ? -1 : b.x)); (lv.meets || []).sort((a, b) => a.x - b.x); });
 const REST_W = 1.25;        // picture is a bit wider than the part you stand on
 function prepLevel(lv){
   lv.gaps = []; for (let i = 0; i + 1 < lv.terrain.length; i++) if (lv.terrain[i + 1].x0 > lv.terrain[i].x1) lv.gaps.push({ x: lv.terrain[i].x1, w: lv.terrain[i + 1].x0 - lv.terrain[i].x1 });
@@ -1516,7 +1574,7 @@ function startFinale(){
   const kinds = guestList(); fx.g = kinds.map((k, i) => { const back = i % 2 === 0, row = kinds.filter((o, j) => j % 2 === i % 2), j = row.indexOf(k), f = (j + 0.5) / row.length;
     const q = back ? 0.82 : 0.74, tx = camX + VW * (f < 0.5 ? 0.05 + 0.9 * f * q : 0.95 - 0.9 * (1 - f) * q);
     return { kind: k, back, tx, ty: back ? G - 6 : G + 34, delay: 20 + i * 22, side: i % 2 ? 1 : -1, x: 0, vis: false, ph: i * 1.3 }; });
-  fx.arrive = 20 + kinds.length * 22 + 100;
+  fx.arrive = 20 + kinds.length * 22 + 100; fx.g.forEach((g, i) => { g.idx = i; g.off = 0; g.hop = 0; });
   p = { x: cx, y: G + 34, vx: 0, vy: 0, face: 1, on: true, run: 0, dance: 110, move: 0, wings: 0, bubble: 0, squash: 1 }; parts = []; hearts = []; hist = []; followers = [];
   sfx.win();
 }
@@ -1531,16 +1589,23 @@ function finaleUpdate(dt){
   if (t > 150) say('b', 'fin_b');
   if (t > 380) say('c', 'fin_c');
   if (t > 650) say('d', 'fin_d');
-  if (t - fx.last > (t < 120 ? 9999 : 50)) { fx.last = t; fwBurst(camX + VW * rand(0.12, 0.88), rand(70, 300)); }
+  /* the bigger Love Party (21 Nov): four more parts after the first fireworks. Sway (900+), a hopping wave down the line (1900+), a giant glowing heart and two firework volleys with a heart shower (2600, 3500), a long goodbye */
+  if (t > 2300) say('e2', 'pr_19');
+  if (t > 3500) say('d2', 'fin_d');
+  fx.g.forEach(g => { const sw = t > 900 && t < 1900 ? Math.sin((t - 900) / 28 + g.ph) * 110 : 0; g.off += (sw - g.off) * 0.08; g.hop = t > 1900 && t < 3300 ? Math.max(0, Math.sin(t * 0.09 - g.idx * 0.7)) * 55 : 0; });
+  fx.heart = t > 1700 ? Math.min(1, (t - 1700) / 120) : 0;
+  [[2600, 'v1'], [3500, 'v2']].forEach(([vt, k]) => { if (t > vt && !fx.say[k]) { fx.say[k] = 1; for (let i = 0; i < 14; i++) setTimeout(() => { if (fx) fwBurst(camX + VW * rand(0.06, 0.94), rand(60, 320)); }, i * 170); heartsUp(camX + VW / 2, 60); } });
+  if (t > 1700 && Math.random() < 0.12) heartsUp(camX + rand(0.05, 0.95) * VW, 1);
+  if (t - fx.last > (t < 120 ? 9999 : t < 650 ? 50 : 32)) { fx.last = t; fwBurst(camX + VW * rand(0.12, 0.88), rand(70, 300)); }
   if (Math.random() < 0.06) heartsUp(camX + rand(0.1, 0.9) * VW, 1);
-  fx.g.forEach(g => { if (t >= g.delay) { g.vis = true; const k = Math.min(1, (t - g.delay) / 90), e = 1 - Math.pow(1 - k, 3), sx = g.side < 0 ? camX - 260 : camX + VW + 260; g.x = sx + (g.tx - sx) * e; g.arrived = k >= 1; } });
+  fx.g.forEach(g => { if (t >= g.delay) { g.vis = true; const k = Math.min(1, (t - g.delay) / 90), e = 1 - Math.pow(1 - k, 3), sx = g.side < 0 ? camX - 260 : camX + VW + 260; g.x = sx + (g.tx - sx) * e + (k >= 1 ? g.off : 0); g.arrived = k >= 1; } });
   if (wantDance) { wantDance = false; p.dance = 110; p.move = danceN++ % 3; sfx.dance(); heartsUp(p.x, 8); fwBurst(p.x + rand(-300, 300), rand(80, 260));
     if (IMG.prop_confetti) fx.fw.push({ x: p.x, y: p.y - 140, t: 0, im: IMG.prop_confetti, confetti: true }); }
   p.dance -= dt; if (p.dance <= 0) { p.dance = 110; p.move = danceN++ % 3; }
   hearts.forEach(h => { h.y -= h.vy * dt; h.sw += 0.05 * dt; }); hearts = hearts.filter(h => h.y > -60);
   parts.forEach(q => { q.x += q.vx * dt; q.y += q.vy * dt; q.vy += q.g * dt; q.life -= 0.02 * dt; }); parts = parts.filter(q => q.life > 0);
   fx.fw.forEach(w => w.t += dt); fx.fw = fx.fw.filter(w => w.t < 50);
-  if (mode === 'finale' && !fx.hold && t > 1500 && (Voice.idle() || t > 2400)) { finishLevel(); Voice.say('fin_e'); }
+  if (mode === 'finale' && !fx.hold && t > 4300 && (Voice.idle() || t > 5200)) { finishLevel(); Voice.say('fin_e'); }
 }
 function drawFinale(){
   ctx.setTransform(S, 0, 0, S, 0, 0); drawWorld();
@@ -1553,8 +1618,9 @@ function drawFinale(){
   if (IMG.prop_dancefloor) { const w = VW * 0.95, h = w * IMG.prop_dancefloor.height / IMG.prop_dancefloor.width; ctx.drawImage(IMG.prop_dancefloor, camX + VW * 0.025, G + 60 - h, w, h); }
   else { const g = ctx.createRadialGradient(p.x, G + 30, 20, p.x, G + 30, VW * 0.5); g.addColorStop(0, 'rgba(255,170,230,.55)'); g.addColorStop(1, 'rgba(255,170,230,0)'); ctx.fillStyle = g; ctx.fillRect(camX, G - 120, VW, 260); }
   const guests = fx.g.slice().sort((a, b) => a.ty - b.ty).filter(g => g.vis);
-  guests.forEach(g => { const run = !g.arrived, bob = Math.abs(Math.sin(T * 0.19 + g.ph)) * (run ? 10 : 30); ctx.save(); ctx.translate(g.x, g.ty - bob); const sc = clamp(VW / (fx.g.length / 2 * 175), 0.42, 0.95) * (g.back ? 0.86 : 1); ctx.scale(sc, sc); drawFriend(g.kind, 0, 0, true, { face: run ? (g.side < 0 ? 1 : -1) : (g.x < p.x ? 1 : -1) }); ctx.restore(); });
+  guests.forEach(g => { const run = !g.arrived, bob = Math.abs(Math.sin(T * 0.19 + g.ph)) * (run ? 10 : 30) + (g.hop || 0); ctx.save(); ctx.translate(g.x, g.ty - bob); const sc = clamp(VW / (fx.g.length / 2 * 175), 0.42, 0.95) * (g.back ? 0.86 : 1); ctx.scale(sc, sc); drawFriend(g.kind, 0, 0, true, { face: run ? (g.side < 0 ? 1 : -1) : (g.x < p.x ? 1 : -1) }); ctx.restore(); });
   ctx.save(); ctx.translate(p.x, p.y); ctx.scale(1.35, 1.35); ctx.translate(-p.x, -p.y); drawHero(); ctx.restore();
+  if (fx.heart) { const pu = 1 + Math.sin(T * 0.07) * 0.06, r = 95 * fx.heart * pu; ctx.save(); ctx.globalAlpha = 0.9 * fx.heart; ctx.shadowColor = '#ff8fc7'; ctx.shadowBlur = 40; ctx.fillStyle = '#ff5f8f'; heartPath(camX + VW / 2, 150, r); ctx.fill(); ctx.shadowBlur = 0; ctx.lineWidth = 6; ctx.strokeStyle = '#fff'; ctx.stroke(); ctx.restore(); }
   hearts.forEach(h => { const im = IMG[['prop_heart_pink', 'prop_heart_red', 'prop_heart_gold'][h.c % 3]], x = h.x + Math.sin(h.sw) * 20; ctx.globalAlpha = Math.min(1, h.y / 120);
     if (im) ctx.drawImage(im, x - h.s * 1.4, h.y - h.s * 1.4, h.s * 2.8, h.s * 2.8); else { ctx.fillStyle = HEART_COL[h.c]; heartPath(x, h.y, h.s); ctx.fill(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke(); } ctx.globalAlpha = 1; });
   fx.fw.forEach(w => { const k = w.t / 50; if (w.im) { ctx.globalAlpha = 1 - k; const sz = w.confetti ? 120 + 140 * k : 200 + 420 * Math.min(1, k * 2.2); const y = w.y + (w.confetti ? 55 * k : 0); ctx.drawImage(w.im, w.x - sz / 2, y - sz / 2, sz, sz); ctx.globalAlpha = 1; } else if (k < 0.25) { circ(w.x, w.y, 90 * (1 - k * 3), 'rgba(255,255,255,' + (0.5 - k * 2) + ')'); } });
@@ -1619,6 +1685,17 @@ function showMap(){
 $('play').addEventListener('click', () => { ac(); const first = !save.done.some(Boolean); if (first) startLevel(0, undefined, true); else showMap(); Voice.say(first ? 'ex_01' : 'ex_02'); });
 $('toMap').addEventListener('click', showMap);
 $('next').addEventListener('click', () => { if (li + 1 < LEVELS.length) goLevel(li + 1); else showMap(); });
+/* back to the main title (21 Nov, owner request): a small house button on every screen except the title itself */
+function goTitle(){ if (mode === 'play' && typeof persist === 'function') persist(); mode = 'title'; fx = null; showButtons(); glow(null); Voice.hush(); Song.play('title'); ['map', 'end', 'pick'].forEach(s => $(s).classList.add('hide')); $('title').classList.remove('hide'); homeBtn(); }
+const homeEl = document.createElement('button'); homeEl.id = 'home'; homeEl.setAttribute('aria-label', 'main screen'); homeEl.innerHTML = '<svg viewBox="0 0 64 64" width="62%" height="62%" aria-hidden="true"><path d="M32 8 L6 32 H14 V54 H27 V38 H37 V54 H50 V32 H58 Z" fill="#c048a0" stroke="#fff" stroke-width="3" stroke-linejoin="round"/></svg>';
+homeEl.style.cssText = 'position:fixed;top:2vh;right:2vh;width:max(9vh,48px);height:max(9vh,48px);border-radius:50%;border:3px solid #fff;background:rgba(255,255,255,.7);font-size:5vh;z-index:30;cursor:pointer;padding:0;display:none;align-items:center;justify-content:center';
+document.body.appendChild(homeEl); homeEl.addEventListener('click', () => { ac(); goTitle(); });
+const partyEl = document.createElement('button'); partyEl.id = 'partybtn'; partyEl.setAttribute('aria-label', 'love party'); partyEl.innerHTML = '<svg viewBox="0 0 64 64" width="62%" height="62%" aria-hidden="true"><path d="M32 56 C10 40 6 28 6 20 C6 12 12 8 19 8 C25 8 30 12 32 17 C34 12 39 8 45 8 C52 8 58 12 58 20 C58 28 54 40 32 56 Z" fill="#ff3f7f" stroke="#fff" stroke-width="3" stroke-linejoin="round"/></svg>';
+partyEl.style.cssText = 'position:fixed;top:2vh;right:calc(2vh + max(10.5vh,56px));width:max(9vh,48px);height:max(9vh,48px);border-radius:50%;border:3px solid #fff;background:rgba(255,180,220,.85);font-size:5vh;z-index:30;cursor:pointer;padding:0;display:none;align-items:center;justify-content:center';
+document.body.appendChild(partyEl);
+partyEl.addEventListener('click', () => { ac(); ['title', 'map', 'end', 'pick'].forEach(s => $(s).classList.add('hide')); startLevel(10, undefined, false); startFinale(); homeBtn(); });
+function homeBtn(){ homeEl.style.display = mode === 'title' ? 'none' : 'flex'; partyEl.style.display = save.done[10] && (mode === 'title' || mode === 'map') ? 'flex' : 'none'; }
+setInterval(homeBtn, 400); homeBtn();
 showButtons();
 
 /* for testing in the browser console */

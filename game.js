@@ -1556,21 +1556,29 @@ function drawStations(){
   });
 }
 function drawPocket(){
-  if (!L.carry) return; const x0 = bonus.length ? 196 : 18, y0 = bonus.length ? 98 : 98, w = 56 + 4 * 56;
+  if (!L.carry) return; const x0 = bonus.length ? 220 : 18, y0 = bonus.length ? 98 : 98, w = 56 + 4 * 56;
   rr(x0, y0, w, 54, 27, 'rgba(255,255,255,.78)');
   for (let i = 0; i < 4; i++) circ(x0 + 78 + i * 56, y0 + 27, 22, 'rgba(176,64,154,.14)');
   ctx.fillStyle = '#b0409a'; ctx.font = 'bold 26px "Comic Sans MS", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('\u{1F392}', x0 + 28, y0 + 29);
   pocket.forEach((it, i) => { ctx.save(); ctx.translate(x0 + 78 + i * 56, y0 + 27 + Math.sin(T * 0.1 + i) * 2); ctx.scale(0.44, 0.44); drawItem(it.kind || L.collect, 0, 0, it.col, 0); ctx.restore(); });
 }
 
+/* round 13: picture goals. Noga cannot read numbers, so every counter is a picture: up to 6 dots that light up one by one, or a tube that fills with gold; green with a tick when done */
+function goalBar(x, y, w, n, of){ const full = n >= of, h = 24;
+  if (of <= 6) { const d = Math.min(24, w / of), r = d * 0.45; for (let i = 0; i < of; i++) { const cx = x + d * (i + 0.5); circ(cx, y, r, i < n ? (full ? '#5cc96a' : '#ffc928') : 'rgba(176,64,154,.38)'); if (i < n) circ(cx - r * 0.3, y - r * 0.3, r * 0.3, 'rgba(255,255,255,.6)'); } }
+  else { const k = clamp(of ? n / of : 1, 0, 1); rr(x, y - h / 2, w, h, h / 2, 'rgba(176,64,154,.3)'); if (k > 0) { const fw = Math.max(h, w * k); rr(x, y - h / 2, fw, h, h / 2, full ? '#5cc96a' : '#ffc928'); if (fw > 16) rr(x + 6, y - h / 2 + 4, fw - 12, 6, 3, 'rgba(255,255,255,.55)'); } }
+  if (full) tick(x + w + 16, y); }
+function tick(x, y){ circ(x, y, 15, '#3fae55'); ctx.strokeStyle = '#fff'; ctx.lineWidth = 5; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.beginPath(); ctx.moveTo(x - 7, y); ctx.lineTo(x - 2, y + 6); ctx.lineTo(x + 8, y - 6); ctx.stroke(); }
+
 /* small counters for the little games (what she has done / has to do) */
+function chipFar(st){ const xs = [st.x].concat(st.zone || [], (st.pts || []).map(q => Array.isArray(q) ? q[0] : q)); return p.x < Math.min(...xs) - 1000 || p.x > Math.max(...xs) + 600; }      // round 13: only the little games near her get a counter
 function drawChips(){
-  let cx = 18; const cy = 162;
-  sts.forEach(st => { if (st.done || !(st.kind === 'count' || st.kind === 'rain' || st.kind === 'seek' || st.kind === 'rhythm' || st.kind === 'bounce' || st.kind === 'machine')) return;
-    const n = st.kind === 'rhythm' ? st.hits : st.n; if (st.kind === 'rhythm' && !st.active) return;
-    rr(cx, cy, 150, 54, 27, 'rgba(255,255,255,.78)'); ctx.save(); ctx.translate(cx + 34, cy + 27); ctx.scale(0.5, 0.5);
+  let cx = 18, nc = 0; const cy = 162;
+  sts.forEach(st => { if (st.done || nc >= 3 || (!(st.n > 0) && chipFar(st)) || !(st.kind === 'count' || st.kind === 'rain' || st.kind === 'seek' || st.kind === 'rhythm' || st.kind === 'bounce' || st.kind === 'machine')) return;
+    const n = st.kind === 'rhythm' ? st.hits : st.n; if (st.kind === 'rhythm' && !st.active) return; nc++;
+    rr(cx, cy, 196, 54, 27, n >= st.need ? 'rgba(200,255,210,.85)' : 'rgba(255,255,255,.78)'); ctx.save(); ctx.translate(cx + 34, cy + 27); ctx.scale(0.5, 0.5);
     if (st.kind === 'seek') drawItem(st.what, 0, 0, null, 0); else if (st.kind === 'rain') drawItem(st.skin === 'choc' ? 'chocstar' : 'shootingstar', 0, 0, null, 0); else if (st.kind === 'machine') drawItem('candy', 0, 0, '1', 0); else if (st.kind === 'count') drawItem('numbubble', 0, 0, null, 0); else if (st.kind === 'bounce') drawItem('star', 0, 0, null, 0); else { ctx.fillStyle = '#b0409a'; ctx.font = 'bold 60px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('\u266B', 0, 0); }
-    ctx.restore(); ctx.fillStyle = '#b0409a'; ctx.font = 'bold 30px "Comic Sans MS", sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText(n + ' / ' + st.need, cx + 66, cy + 29); cx += 160; });
+    ctx.restore(); goalBar(cx + 62, cy + 27, 96, n, st.need); cx += 206; });
 }
 
 /* ---------- draw everything ---------- */
@@ -1620,17 +1628,17 @@ function draw(){
   // top bar: what she is collecting, and the star meter
   if (items.length <= 6) { rr(18, 14, 34 + items.length * 62, 76, 38, 'rgba(255,255,255,.75)');
     items.forEach((it, i) => { ctx.save(); ctx.translate(66 + i * 62, 52); ctx.scale(0.72, 0.72); ctx.globalAlpha = i < got ? 1 : 0.28; drawItem(it.kind || L.collect, 0, 0, it.col, 0); ctx.restore(); }); }
-  else { let gx = 18; groups().forEach(g => { rr(gx, 14, 150, 76, 38, g.got === g.n ? 'rgba(200,255,210,.85)' : 'rgba(255,255,255,.75)'); ctx.save(); ctx.translate(gx + 44, 52); ctx.scale(0.72, 0.72); drawItem(g.kind, 0, 0, g.col, 0); ctx.restore();
-      ctx.fillStyle = '#b0409a'; ctx.font = 'bold 30px "Comic Sans MS", sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText(g.got + '/' + g.n, gx + 82, 54); gx += 160; }); }
+  else { let gx = 18; groups().forEach(g => { rr(gx, 14, 200, 76, 38, g.got === g.n ? 'rgba(200,255,210,.85)' : 'rgba(255,255,255,.75)'); ctx.save(); ctx.translate(gx + 44, 52); ctx.scale(0.72, 0.72); drawItem(g.kind, 0, 0, g.col, 0); ctx.restore();
+      goalBar(gx + 80, 52, 90, g.got, g.n); gx += 210; }); }
   drawPocket(); drawChips();
-  if (bonus.length) { const ok = starsOK(); rr(18, 98, 170, 54, 27, ok ? 'rgba(200,255,210,.85)' : 'rgba(255,255,255,.75)'); star5(50, 125, 19, '#ffd028'); ctx.fillStyle = '#b0409a'; ctx.font = 'bold 30px "Comic Sans MS", sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText(bonusN + ' / ' + (L.need || '?'), 78, 127); }
+  if (bonus.length) { const ok = starsOK(); rr(18, 98, 190, 54, 27, ok ? 'rgba(200,255,210,.85)' : 'rgba(255,255,255,.75)'); star5(50, 125, 19, '#ffd028'); goalBar(76, 125, 90, bonusN, L.need || 0); }
   // the goal of the level, big on the screen for the first seconds
-  if (T < 420 && !fin) { const a = T < 360 ? 1 : 1 - (T - 360) / 60, cx = VW / 2, cy = 215, gs = groups(), w = 140 + gs.length * 190 + 170; ctx.globalAlpha = a;
+  if (T < 420 && !fin) { const a = T < 360 ? 1 : 1 - (T - 360) / 60, cx = VW / 2, cy = 215, gs = groups(), w = 140 + gs.length * 210 + 200; ctx.globalAlpha = a;
     const fit = Math.min(1, (VW - 30) / w); ctx.save(); ctx.translate(cx, cy); ctx.scale(fit, fit); ctx.translate(-cx, -cy);
     rr(cx - w / 2, cy - 75, w, 150, 40, 'rgba(255,255,255,.88)');
     ctx.fillStyle = '#b0409a'; ctx.font = 'bold 64px "Comic Sans MS", sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-    let gx = cx - w / 2 + 70; gs.forEach(g => { ctx.save(); ctx.translate(gx, cy); ctx.scale(1.1, 1.1); drawItem(g.kind, 0, 0, g.col, 0); ctx.restore(); ctx.fillText('×' + g.n, gx + 58, cy + 4); gx += 190; });
-    star5(gx + 10, cy, 44, '#ffd028'); ctx.fillText('×' + (L.need || 0), gx + 75, cy + 4);
+    let gx = cx - w / 2 + 70; gs.forEach(g => { ctx.save(); ctx.translate(gx, cy); ctx.scale(1.1, 1.1); drawItem(g.kind, 0, 0, g.col, 0); ctx.restore(); ctx.save(); ctx.translate(gx + 58, cy); ctx.scale(1.4, 1.4); goalBar(0, 0, 90, 0, g.n); ctx.restore(); gx += 210; });
+    star5(gx + 10, cy, 44, '#ffd028'); ctx.save(); ctx.translate(gx + 62, cy); ctx.scale(1.4, 1.4); goalBar(0, 0, 90, 0, L.need || 0); ctx.restore();
     ctx.restore(); ctx.globalAlpha = 1; }
   if (stars.length) { rr(VW - 232, 14, 214, 76, 38, 'rgba(255,255,255,.75)'); for (let i = 0; i < 3; i++) star5(VW - 185 + i * 60, 52, 24 + (meter >= 3 ? Math.sin(T * 0.2 + i) * 3 : 0), i < meter ? '#ffd028' : 'rgba(170,170,190,.45)'); }
 }

@@ -173,22 +173,23 @@ function hold(el, on, off){
 }
 hold($('bl'), () => keys.left = true, () => keys.left = false);
 hold($('br'), () => keys.right = true, () => keys.right = false);
-hold($('bj'), () => wantJump = true);
+hold($('bj'), () => { wantJump = true; jumpHeld = true; }, () => jumpHeld = false);
 hold($('bd'), () => wantDance = true);
 hold($('bs'), () => wantSuper = true);
 addEventListener('keydown', e => {
   if (e.key === 'ArrowLeft') keys.left = true; else if (e.key === 'ArrowRight') keys.right = true;
-  else if (!e.repeat && (e.key === ' ' || e.key === 'ArrowUp')) { wantJump = true; e.preventDefault(); }
+  else if (!e.repeat && (e.key === ' ' || e.key === 'ArrowUp')) { wantJump = true; jumpHeld = true; e.preventDefault(); }
   else if (!e.repeat && (e.key === 'd' || e.key === 'D')) wantDance = true;
   else if (!e.repeat && (e.key === 's' || e.key === 'S' || e.key === 'Shift')) wantSuper = true;
 });
-addEventListener('keyup', e => { if (e.key === 'ArrowLeft') keys.left = false; else if (e.key === 'ArrowRight') keys.right = false; });
+addEventListener('keyup', e => { if (e.key === ' ' || e.key === 'ArrowUp') jumpHeld = false; if (e.key === 'ArrowLeft') keys.left = false; else if (e.key === 'ArrowRight') keys.right = false; });
 /* mouse or finger on the playfield: hold to walk toward the pointer, point above her to jump, click her to dance */
 const ptr = { down: false, cx: 0, cy: 0, id: null };
 function ptrWorld(){ const r = cv.getBoundingClientRect(); return { x: (ptr.cx - r.left) / r.width * VW + camX, y: (ptr.cy - r.top) / r.height * VH + camY }; }
 cv.addEventListener('pointerdown', e => {
   if (mode !== 'play' || !p) return; ac(); ptr.cx = e.clientX; ptr.cy = e.clientY; const w = ptrWorld();
   if (dragStart(w)) { try { cv.setPointerCapture(e.pointerId); } catch (x) {} return; }
+  if (tapFly(w)) return;
   if (tapWorld(w)) return;
   if (save.dance && Math.abs(w.x - p.x) < 90 && w.y > p.y - 200 && w.y < p.y + 12) { wantDance = true; return; }
   ptr.down = true; ptr.id = e.pointerId; try { cv.setPointerCapture(e.pointerId); } catch (x) {} });
@@ -741,6 +742,7 @@ function startLevel(i, party, resume){
   plats = L.plats.map(o => ({ ...o, dx: 0 })); terr = L.terrain;
   L.cues.forEach(c => c.done = false);
   followers = (party || paradeFor(i).slice(-MAXPARTY)).map(k => ({ kind: k }));      // at most two friends walk with her (she picks them before the stage)
+  setupFly();
   parts = []; hist = []; flowers = []; got = 0; meter = 0; fin = null; arrived = false; hintT = 0; maxX = 0; said = {}; falls = 0; trail = false; camX = 0; camY = 0;
   L.friend.happy = false; L.friend.bloom = 0; L.friend.fly = 0;
   ['title', 'map', 'end', 'pick'].forEach(s => $(s).classList.add('hide'));
@@ -952,6 +954,7 @@ function update(dt){
   if (muddy && ax && !said.mud) { said.mud = 1; tone(150, 0.2, 'sine', 0.09, 60); }
   // jump
   if (wantJump && p.on && !locked && !dancing) { p.vy = L.floaty ? -13.4 : -15.2; p.on = false; p.squash = 1.25; sfx.jump(); meetPress('jump'); if ($('bj').classList.contains('glow')) glow(null); }
+  else if (wantJump && !p.on && !p.hop2 && !(p.fly > 0) && !locked && !dancing && has('hop')) { p.vy = L.floaty ? -11.5 : -13; p.hop2 = 1; p.squash = 1.2; sfx.jump(); burst(p.x, p.y - 10, 14, RB, 'star'); powerUsed('hop'); }      // round 12: a hop friend gives a second jump in the air
   // super jump
   if (wantSuper && !locked && p.on && meter >= 3) { p.vy = -21.5; p.on = false; p.wings = 1; meter = 0; p.dance = 0; sfx.sup(); Voice.say('ex_04'); $('bs').classList.remove('ready', 'glow'); }
   // dance (a rhythm game nearby takes the press first; the dance picture is shorter then so she can press again on the next beat)
@@ -968,11 +971,12 @@ function update(dt){
     else if (L.danceZone && p.x > L.danceZone.a && p.x < L.danceZone.b) { for (let i = 0; i < 9; i++) flowers.push({ x: p.x + rand(-260, 260), c: RB[i % 6], t: 0 }); if (!said.dz) { said.dz = 1; Voice.say('pr_07'); } progress(); }
     else Voice.sayIfFree(Math.random() < 0.5 ? 'pr_07' : 'pr_08');
   }
-  wantJump = wantDance = wantSuper = false;
+  const flapNow = wantJump; wantJump = wantDance = wantSuper = false;
   if (p.dance > 0) p.dance -= dt;
 
   // rescue bubble carries her back after a fall
-  if (p.bubble > 0) { p.bubble -= dt; const ty = groundAt(p.x); const gy = ty === null ? G : ty; p.y += (gy - p.y) * 0.06 * dt; p.vy = 0; if (p.bubble <= 0 || Math.abs(gy - p.y) < 3) { p.bubble = 0; p.y = gy; p.on = true; sfx.pop(); } }
+  if (p.fly > 0) flyUpdate(dt, ax, flapNow);      // round 12: riding the unicorn's wings
+  else if (p.bubble > 0) { p.bubble -= dt; const ty = groundAt(p.x); const gy = ty === null ? G : ty; p.y += (gy - p.y) * 0.06 * dt; p.vy = 0; if (p.bubble <= 0 || Math.abs(gy - p.y) < 3) { p.bubble = 0; p.y = gy; p.on = true; sfx.pop(); } }
   else {
     const py = p.y;
     (L.drafts || []).forEach(d => { if (p.x > d.x && p.x < d.x + d.w && p.y > G - d.h) { p.vy = Math.max(p.vy - 0.95 * dt, -9); if (Math.random() < 0.25) parts.push({ x: p.x + rand(-40, 40), y: p.y - rand(0, 80), vx: 0, vy: 1.5, life: 0.7, c: '#fff', s: rand(3, 6), shape: 'dot', g: 0 }); } });     // the wind lifts her
@@ -985,12 +989,13 @@ function update(dt){
     if (p.vy >= 0) {
       for (const g of terr) if (p.x > g.x0 - 10 && p.x < g.x1 + 10) { const gt = tAt(g, p.x), ramp = g.top1 !== undefined;
         if (py <= gt + (ramp ? 14 : 1) && (p.y >= gt || (ramp && wasOn && gt - p.y < 10))) { if (!landed || gt < landed.top) landed = { top: gt, dx: 0 }; } }
+      if (has('bridge')) for (const gp of L.gaps) if (p.x > gp.x - 10 && p.x < gp.x + gp.w + 10 && bridgeGap(gp)) { const by = bridgeY(gp, p.x); if (py <= by + 2 && p.y >= by) { if (!landed || by < landed.top) landed = { top: by, dx: 0 }; powerUsed('bridge'); } }
       for (const pl of plats) if (p.x > pl.x - 12 && p.x < pl.x + pl.w + 12 && py <= pl.top + 1 && p.y >= pl.top) { if (!landed || pl.top < landed.top) landed = pl; }
       for (const pd of (L.pads || [])) if (p.x > pd.x && p.x < pd.x + pd.w && py <= pd.top + 60 && p.y >= pd.top) {      // walking into the trampoline bounces her too, no jump needed
         p.y = pd.top; p.vy = pd.pw || -19; p.squash = 0.7; pd.sq = 14; sfx.boing(); said.pad = 1; if (pd.st) { const bs = sts.find(o => o.id === pd.st); if (bs && !bs.done) bounceCount(bs); } burst(p.x, pd.top, 10, ['#fff', '#ffe14d'], 'star'); landed = 'pad'; }
       if (landed && landed !== 'pad') { p.y = landed.top; p.vy = 0; p.on = true; if (landed.dx) p.x += landed.dx; }
     }
-    if (p.on && !wasOn) { p.squash = 0.8; if (p.wings) { p.wings = 0; Voice.sayIfFree('pr_09'); } }
+    if (p.on && !wasOn) { p.hop2 = 0; p.squash = 0.8; if (p.wings) { p.wings = 0; Voice.sayIfFree('pr_09'); } }
     if (p.y > G + 260) {      // fell in a gap: never a loss, just a ride back
       if (!L.gaps.length) { p.y = G - 240; p.vy = 0; return; }
       const gs = L.gaps.slice().sort((a, b) => Math.abs(a.x + a.w / 2 - p.x) - Math.abs(b.x + b.w / 2 - p.x)), g = gs[0]; falls++;
@@ -1014,8 +1019,9 @@ function update(dt){
     let nx = Math.min(L.len - 220, p.x + 420), g = groundAt(nx), n = 0; while (g === null && n++ < 8) { nx += 110; g = groundAt(Math.min(nx, L.len - 220)); }
     if (g === null) return; it.x = Math.min(nx, L.len - 220); it.y = g - 100; burst(it.x, it.y, 14, ['#ffe14d', '#fff'], 'star'); tone(660, 0.25, 'sine', 0.1, 990);
     trail = true; hintT = Math.max(hintT, 1200); Voice.say(L.noIns ? 'ins_25' : L.ins); said.back = (said.back || 0) + 1; });
-  items.forEach(it => { it.bob += 0.05 * dt; if (!it.got && !it.hidden && Math.hypot(it.x - cx, it.y - cy) < 72 && !(it.to && pocket.length >= 4)) pickup(it);
+  items.forEach(it => { it.bob += 0.05 * dt; if (has('fetch')) fetchTo(it, cx, cy, dt); if (!it.got && !it.hidden && Math.hypot(it.x - cx, it.y - cy) < 72 && !(it.to && pocket.length >= 4)) pickup(it);
     if (!it.got && !it.hidden && hintT > 2400 && it === items.find(o => !o.got && !o.hidden)) { it.x += Math.sign(cx - it.x) * 1.4 * dt; it.y += Math.sign(cy - it.y) * 1.0 * dt; } });
+  flyCheck(cx, cy, dt); if (has('fetch')) bonus.forEach(b => fetchTo(b, cx, cy, dt, 230));
   bonus.forEach(b => { if (!b.got && Math.hypot(b.x - cx, b.y - cy) < 60) { b.got = true; bonusN++; sfx.star(); burst(b.x, b.y, 6, ['#ffe14d', '#fff'], 'star');
     if (bonusN === L.need) { Voice.say('pr_12'); if (got === items.length && stationsOK()) Voice.say('ins_24'); } else if (bonusN % 10 === 0) praise(); } });
   stars.forEach(st => {
@@ -1068,13 +1074,88 @@ function update(dt){
 
   // parade and particles
   hist.push({ x: p.x, y: p.y, f: p.face }); if (hist.length > 900) hist.shift();
-  followers.forEach(f => { if (f.enter !== undefined && f.enter < 1) f.enter += 0.012 * dt; });
+  followers.forEach(f => { if (f.enter !== undefined && f.enter < 1) f.enter += 0.012 * dt; if (f.flash > 0) f.flash -= dt; });
   parts.forEach(q => { q.x += q.vx * dt; q.y += q.vy * dt; q.vy += q.g * dt; q.life -= 0.02 * dt; });
   parts = parts.filter(q => q.life > 0);
   flowers.forEach(f => f.t += dt);
   camX += (clamp(p.x - VW * 0.36, 0, Math.max(0, L.len - VW)) - camX) * 0.12 * dt;
   camY += (clamp(p.y - 400, -480, 0) - camY) * 0.1 * dt;          // the view rises with her when she climbs up to clouds and branches
 }
+
+/* ---------- round 12 (Ashkeeper, 21 Nov 2026): unicorn flight and friend powers ----------
+   Flight: after the halfway flag a unicorn waits on a little rainbow. Walk into it (or tap it): Bil'am gets wings for about
+   13 s. Hold the green button (or a finger above her) to rise, let go to float down; she drifts forward by herself. A wave of
+   sky stars and three rainbow rings (each ring = one more star) wait ahead. She can never crash: the ground pushes her up.
+   Powers: the friends she picks each help in their own way. fetch = things and stars nearby float to her; hop = a second
+   jump in the air; bridge = a rainbow bridge over gaps (not over a gap a plank bridge station is for). The power icon shows
+   over the friend at the start and whenever it helps, and on the picker card. */
+const POWER = { bird: 'fetch', pitzi: 'fetch', luna: 'fetch', moon: 'fetch', shluli: 'fetch', koko: 'fetch', mamabird: 'fetch',
+  bouncy: 'hop', cloudunicorn: 'hop', anana: 'hop', princess1: 'hop', princess2: 'hop', bunicorn_pink: 'hop', bunicorn_blue: 'hop', bunicorn_mint: 'hop',
+  bilam: 'bridge', armon: 'bridge', rhino: 'bridge', solomon: 'bridge', dad: 'bridge', sheba: 'bridge', camel: 'bridge', riddletree: 'bridge', grandpa: 'bridge', bobo: 'bridge' };
+const POWER_ICON = { fetch: '✨', hop: '⏫', bridge: '\u{1F308}' };
+let flyers = [], rings = [], jumpHeld = false;
+const has = k => followers.some(f => POWER[f.kind] === k);
+function powerUsed(k){ const f = followers.find(o => POWER[o.kind] === k); if (f) f.flash = 50; if (!said['pw_' + k]) { said['pw_' + k] = 1; Voice.sayIfFree('pr_16'); } }
+function fetchTo(o, cx, cy, dt, r){
+  if (o.got || o.hidden || (o.to && pocket.length >= 4)) return;
+  const dx = cx - o.x, dy = cy - o.y, d = Math.hypot(dx, dy);
+  if (d < (r || 280) && d > 20) { const sp = Math.min(d, 7.5 * dt); o.x += dx / d * sp; o.y += dy / d * sp;
+    if (Math.random() < 0.3) parts.push({ x: o.x, y: o.y, vx: rand(-1, 1), vy: rand(-1, 1), life: 0.6, c: '#fff6b8', s: rand(4, 7), shape: 'star', g: 0 }); powerUsed('fetch'); }
+}
+const bridgeGap = gp => !sts.some(s => s.kind === 'bridge' && !s.done && s.x > gp.x - 400 && s.x < gp.x + gp.w + 400);
+function bridgeY(gp, x){ const a = groundAt(gp.x - 2), b = groundAt(gp.x + gp.w + 2), ya = a === null ? G : a, yb = b === null ? G : b; return ya + (yb - ya) * clamp((x - gp.x) / gp.w, 0, 1); }
+function setupFly(){
+  flyers = []; rings = [];
+  if (L.noFly) return;
+  let x = L.rest ? L.rest.x + 260 : Math.round(L.len * 0.45), n = 0;
+  while ((groundAt(x) === null || inGap(x) || inGap(x - 80) || inGap(x + 80) || sts.some(s => Math.abs(s.x - x) < 450 || (s.pts || []).some(q => Math.abs((Array.isArray(q) ? q[0] : q) - x) < 220) || (s.zone && x > s.zone[0] - 200 && x < s.zone[1] + 200)) || (L.meets || []).some(m => Math.abs(m.x - x) < 300) || (L.pads || []).some(pd => x > pd.x - 280 && x < pd.x + pd.w + 300)) && n++ < 160) x += 60;
+  const gy = groundAt(x); if (gy === null) return;
+  flyers.push({ x, y: gy - 95, cd: 0, ride: false });
+  for (let k = 0; k < 13; k++) { const sx = x + 260 + k * 190; if (sx > L.len - 300) break; bonus.push({ x: sx, y: Math.round(G - 250 - 150 * (0.5 + 0.5 * Math.sin(k * 0.8))), got: false, sky: 1 }); }
+  [[760, 430], [1500, 300], [2250, 470]].forEach(([dx, hh]) => { if (x + dx < L.len - 300) rings.push({ x: x + dx, y: G - hh, got: false }); });
+}
+function startFly(fl){
+  if (!fl || p.fly > 0 || fin || p.bubble > 0) return false;
+  fl.ride = true; p.fly = 780; p.on = false; p.vy = -9; p.wings = 1; p.dance = 0; p.hop2 = 0;
+  sfx.sup(); Voice.say('ex_04'); burst(fl.x, fl.y, 30, RB, 'star'); glow('bj'); progress(); return true;
+}
+function tapFly(w){ const f = flyers.find(o => !o.ride && o.cd <= 0 && Math.hypot(w.x - o.x, w.y - o.y) < 120 && Math.abs(p.x - o.x) < 520); return !!(f && p.on && startFly(f)); }
+function flyUpdate(dt, ax, flapNow){
+  p.fly -= dt; p.wings = 1;
+  p.vx = ax ? ax * 6.4 : (ptr.down ? 0 : 2.4); if (p.vx) p.face = p.vx < 0 ? -1 : 1;
+  if (flapNow) { p.vy = Math.min(p.vy, -6.5); if ($('bj').classList.contains('glow')) glow(null); }
+  if (jumpHeld) p.vy -= 0.5 * dt;
+  if (ptr.down) { const w = ptrWorld(); p.vy += clamp((w.y + 60 - p.y) * 0.004, -0.55, 0.55) * dt; }
+  p.vy = clamp((p.vy + 0.16 * dt) * 0.985, -8, 4);
+  p.x = clamp(p.x + p.vx * dt, 60, L.len - 60); p.y += p.vy * dt;
+  const gf = groundAt(p.x), floor = (gf === null ? G : gf) - 60;
+  if (p.y > floor) { p.y += (floor - p.y) * Math.min(1, 0.35 * dt); p.vy = Math.min(p.vy, -2); }
+  if (p.y < G - 640) { p.y = G - 640; p.vy = Math.max(p.vy, 0.5); }
+  p.on = false;
+  if (Math.random() < 0.7) parts.push({ x: p.x - 60 * p.face, y: p.y - 70 + rand(-14, 14), vx: -1.5 * p.face, vy: rand(-0.3, 0.3), life: 0.9, c: RB[Math.floor(T / 3) % 6], s: rand(6, 10), shape: 'dot', g: 0 });
+  if (fin) p.fly = 0;
+  if (p.fly <= 0) { p.fly = 0; p.vy = 0; flyers.forEach(f => { if (f.ride) { f.ride = false; f.cd = 420; } }); Voice.sayIfFree('pr_14'); }
+}
+function flyCheck(cx, cy, dt){
+  flyers.forEach(f => { if (f.cd > 0) f.cd -= dt;
+    if (!f.ride && f.cd <= 0 && !fin && p.on && !(p.dance > 0) && Math.abs(p.x - f.x) < 70 && Math.abs(p.y - (f.y + 95)) < 70) startFly(f); });
+  rings.forEach(r => { if (!r.got && p.fly > 0 && Math.hypot(r.x - cx, r.y - cy) < 85) { r.got = true; bonusN++; sfx.star(); tone(784, 0.35, 'sine', 0.1, 1568); burst(r.x, r.y, 34, RB, 'star'); Voice.sayIfFree('pr_03'); } });
+}
+function drawFly(){
+  if (has('bridge')) (L.gaps || []).forEach(gp => { if (!bridgeGap(gp)) return; const a = bridgeY(gp, gp.x), b = bridgeY(gp, gp.x + gp.w);
+    for (let i = 0; i < 6; i++) { ctx.strokeStyle = RB[i]; ctx.lineWidth = 7; ctx.beginPath(); ctx.moveTo(gp.x - 12, a + 4 + i * 6); ctx.lineTo(gp.x + gp.w + 12, b + 4 + i * 6); ctx.stroke(); } });
+  rings.forEach(r => { if (r.got) return; const s = 1 + Math.sin(T * 0.1 + r.x) * 0.05;
+    for (let i = 0; i < 6; i++) { ctx.strokeStyle = RB[i]; ctx.lineWidth = 6; ctx.beginPath(); ctx.ellipse(r.x, r.y, (52 - i * 5) * s, (76 - i * 5) * s, 0, 0, 7); ctx.stroke(); } });
+  flyers.forEach(f => { if (f.ride || f.cd > 0) return; const y = f.y + Math.sin(T * 0.07) * 10, im = IMG.cloudunicorn_happy || IMG.ufly_happy || IMG.ufly_a;
+    circ(f.x, y, 92 + Math.sin(T * 0.12) * 8, 'rgba(255,255,255,.35)');
+    for (let i = 0; i < 6; i++) { ctx.strokeStyle = RB[i]; ctx.lineWidth = 7; ctx.beginPath(); ctx.arc(f.x, f.y + 95, 100 - i * 7, Math.PI, 2 * Math.PI); ctx.stroke(); }
+    if (im) { const w = 170, hh = w * im.height / im.width; ctx.drawImage(im, f.x - w / 2, y - hh / 2, w, hh); } else star5(f.x, y, 40, '#fff');
+    if (Math.random() < 0.15) parts.push({ x: f.x + rand(-80, 80), y: y + rand(-70, 50), vx: 0, vy: -0.6, life: 0.8, c: '#fff', s: rand(4, 8), shape: 'star', g: 0 }); });
+}
+const FSC = k => Math.min(1, 125 / (FH[k] || 125));      // walking friends at most 125 px tall (Noga on Bil'am is about 195)
+function drawBadge(f, x, y, sc){ const pw = POWER[f.kind]; if (!pw || !(T < 420 || f.flash > 0)) return;
+  const by = y - (FH[f.kind] || 120) * (sc || 1) - 40 + Math.sin(T * 0.15) * 4; circ(x, by, 30, 'rgba(255,255,255,.92)');
+  ctx.font = '34px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#b0409a'; ctx.fillText(POWER_ICON[pw], x, by + 2); }
 
 /* ---------- drawing: small helpers ---------- */
 function circ(x, y, r, c){ ctx.fillStyle = c; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill(); }
@@ -1098,6 +1179,7 @@ function drawFriend(kind, x, y, happy, o){
   ctx.save(); ctx.translate(x, y);
   if (o.face === -1) ctx.scale(-1, 1);
   if (o.bounce) ctx.translate(0, -Math.abs(Math.sin(T * 0.2 + x)) * 14);
+  if (o.scale) ctx.scale(o.scale, o.scale);      // round 12: walking friends are drawn smaller so they never cover Noga or the play
   if (stand) { try { ctx.filter = 'hue-rotate(' + ({ bunicorn_blue: 170, bunicorn_mint: 90, bouncy: 300 }[kind] || 0) + 'deg)'; } catch (e) {} }
   if (im) { const h = FH[kind], w = h * im.width / im.height; ctx.drawImage(im, -w / 2, -h, w, h); ctx.restore(); return; }
   const flap = Math.sin(T * 0.4) * 0.5;
@@ -1502,7 +1584,7 @@ function draw(){
     else if (!((d.kind === 'pitzi' || d.kind === 'camel') && followers.find(f => f.kind === d.kind))) { const hp = d.hap ? !!(sts.find(s => s.id === d.hap) || {}).done : d.happy; drawFriend(d.kind, d.x, d.y || G, hp, { bounce: d.kind === 'pitzi' || d.bounce || (d.hap && hp), face: d.kind === 'camel' ? -1 : 1 }); } });
   meets.forEach(m => { const hy = m.hop > 0 ? Math.abs(Math.sin(m.hop * 0.25)) * 60 : 0; drawFriend(m.kind, m.x, G - hy, m.done, { bounce: m.done, face: p.x < m.x ? -1 : 1 });
     if (!m.done) { const by = G - (FH[m.kind] || 100) - 70 + Math.sin(T * 0.1) * 6; circ(m.x, by, 34, 'rgba(255,255,255,.9)'); ctx.fillStyle = '#ff5fa8'; ctx.font = 'bold 40px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(m.do === 'dance' ? '♪' : '↑', m.x, by + 14); } });
-  plats.forEach(drawPlat);
+  plats.forEach(drawPlat); drawFly();
   drawStations(); drawWishes(); drawTapHints();
   // the friend she is helping
   const fr = L.friend, fy = G - (fr.on || 0);
@@ -1523,11 +1605,11 @@ function draw(){
   // parade
   const circle = fin && L.friend.kind === 'tree';
   followers.forEach((f, i) => {
-    let h = hist[Math.max(0, hist.length - 1 - 26 * (i + 1))] || { x: p.x - 90 * (i + 1), y: G, f: 1 }, x = h.x, y = h.y, fc = h.f;
+    let h = hist[Math.max(0, hist.length - 1 - 32 * (i + 1))] || { x: p.x - 120 * (i + 1), y: G, f: 1 }, x = h.x, y = h.y, fc = h.f;
     if (circle) { const a = fin.t * 0.04 + i * 2.1, k = Math.min(1, fin.t / 60); x += (L.friend.x + Math.cos(a) * 230 - x) * k; y = G; fc = Math.sin(a) > 0 ? -1 : 1; }
     if (f.enter !== undefined && f.enter < 1) x = L.friend.x + 500 - (L.friend.x + 500 - x) * f.enter;
     if (f.kind === 'bird') y -= 150 + Math.sin(T * 0.1) * 14;
-    drawFriend(f.kind, x, y, true, { face: fc, bounce: p.dance > 0 || !!fin });
+    const fsc = FSC(f.kind); drawFriend(f.kind, x, y, true, { face: fc, bounce: p.dance > 0 || !!fin, scale: fsc }); drawBadge(f, x, y, fsc);
   });
   drawHero();
   { const ua = IMG.ufly_a || IMG.cloudunicorn_happy, ub = IMG.ufly_b || ua, uh = IMG.ufly_happy || ua;     // the little unicorn flies above Noga's head (round 3: it took the bird's old place)
@@ -1645,7 +1727,7 @@ function showPick(i){
   const paint = () => [...row.children].forEach(b => b.classList.toggle('sel', pickSel.includes(b.dataset.k)));
   avail.forEach(k => { const b = document.createElement('button'), im = IMG[k + '_happy'];
     b.className = 'fr'; b.dataset.k = k; b.setAttribute('aria-label', k);
-    b.innerHTML = (im && im.src ? '<img alt="" src="' + im.src + '">' : '<span>' + k.charAt(0).toUpperCase() + '</span>') + '<i>✓</i>';
+    b.innerHTML = (im && im.src ? '<img alt="" src="' + im.src + '">' : '<span>' + k.charAt(0).toUpperCase() + '</span>') + '<i>✓</i>' + (POWER[k] ? '<b class="pw">' + POWER_ICON[POWER[k]] + '</b>' : '');
     b.addEventListener('click', () => { ac(); const at = pickSel.indexOf(k); if (at >= 0) pickSel.splice(at, 1); else { pickSel.push(k); if (pickSel.length > MAXPARTY) pickSel.shift(); sfx.pick(); } paint(); });
     row.appendChild(b); });
   paint(); $('pick').classList.remove('hide');
@@ -1701,6 +1783,6 @@ showButtons();
 /* for testing in the browser console */
 window.__g = {
   get s(){ return { mode, li, meets: meets.map(m => m.kind + (m.done ? "!" : "")), x: p && Math.round(p.x), y: p && Math.round(p.y), on: p && p.on, got, total: items.length, meter, fin: !!fin, followers: followers.map(f => f.kind), said: Voice.last, save }; },
-  keys, start: startLevel, finale: () => startFinale(), fx: () => fx, goLevel, pickSel: () => pickSel, P: () => p, sts: () => sts, pocket: () => pocket, goalMet: () => goalMet(), LV: () => L, gnd: groundAt, bonus: () => bonus, plats: () => plats, jump(){ wantJump = true; }, tap: (x, y) => tapWorld({ x, y }), dance(){ wantDance = true; }, sup(){ wantSuper = true; },
+  keys, flyers: () => flyers, rings: () => rings, fly: k => startFly(flyers[k || 0]), held: v => { jumpHeld = !!v; }, start: startLevel, finale: () => startFinale(), fx: () => fx, goLevel, pickSel: () => pickSel, P: () => p, sts: () => sts, pocket: () => pocket, goalMet: () => goalMet(), LV: () => L, gnd: groundAt, bonus: () => bonus, plats: () => plats, jump(){ wantJump = true; }, tap: (x, y) => tapWorld({ x, y }), dance(){ wantDance = true; }, sup(){ wantSuper = true; },
   step(n){ if (mode === 'finale' || (mode === 'end' && fx)) { for (let i = 0; i < n; i++) finaleUpdate(1); drawFinale(); return; } for (let i = 0; i < n; i++) { if (mode === 'finale') { finaleUpdate(1); continue; } update(1); } if (mode === 'finale') drawFinale(); else draw(); }, tp(x){ p.x = x; p.y = G; p.vy = 0; }, dragTok(st, i, tx, ty){ const t = st.tok[i]; if (!dragStart({ x: t.x, y: t.y })) return false; dragMove({ x: tx === undefined ? st.x : tx, y: ty === undefined ? G - 330 : ty }); dragEnd(); return true; }, cam: () => ({ x: camX, y: camY }), items: () => items, meets: () => meets, reset(){ localStorage.removeItem(SAVE_KEY); }
 };

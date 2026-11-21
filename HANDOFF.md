@@ -1,10 +1,10 @@
 # Handoff: Noga and the Unicorn
 
-Top layer: short on purpose. Checked against the code and git on 17 Nov 2026 (Hexweaver). Everything older is in `HISTORY.md` (read a section only when you need to know WHY). How to keep this file honest: `DREAM.md`.
+Top layer: short on purpose. Checked against the code and git on 21 Nov 2026 (Ashkeeper). Everything older is in `HISTORY.md` (read a section only when you need to know WHY). How to keep this file honest: `DREAM.md`.
 
 ## What it is
 Hebrew browser platformer for Noga (5, cannot read). She rides Bil'am the donkey, a unicorn flies above her, friends join a parade. 13 stages + a love-party finale. Oasis rite `noga-unicorn`. Folder `G:\My Drive\Projects\אייל\noga-unicorn`, branch `noga-unicorn-game`.
-- **Live:** https://coldgoblin.github.io/noga-unicorn/ = ColdGoblin/noga-unicorn `main` `ff534eb` (verified with `git ls-remote`). Game code is at repo commit `75b3e19` (Round 9); the notes split is the commit after it (notes only, NOT deployed, so live still lacks these three .md files). Nothing in the game is uncommitted.
+- **Live:** https://coldgoblin.github.io/noga-unicorn/ = ColdGoblin/noga-unicorn `main` `8f9757b` (round 12, verified 21 Nov with `git ls-remote` and the live game.js). Repo branch `noga-unicorn-game` at the notes commit after `cf02cc0`. Older `Live:` remarks in the sections below are history.
 - **Stages:** 1 Garden, 2 Rainbow Road, 3 Forest, 4 Clouds/unicorns, 5 Farm, 6 Shabbat, 7 Night path, 8 Gifts, 9 Sheba's Oasis, 10 Moon Mountain, 11 Princesses' Flower Party (then the finale), 12 Bouncy Castle Land (`LEVELS[11]`, opens on the map after 11), 13 Candy Land (`LEVELS[12]`, round 10, NOT committed or deployed yet). `save.done` has 13 entries.
 - **Media:** all of it exists: 12 stage mp3 + title + finale in `music/` (`MUSIC_ALIAS` is empty), Whisper's Hebrew clips in `voice/he/` (170 files), Ghost's art in `art/`. English has no recordings (browser voice). `VOICE_ALIAS` still maps `pr_05`->`pr_01`, `pr_12`->`pr_03` (Whisper's retakes read wrong words, not used).
 

@@ -228,7 +228,7 @@ const COL = { red: ['#ff5f6e', 'col_01'], blue: ['#5fa8ff', 'col_02'], green: ['
 /* a row of bonus stars along an arc: x0..x1, base height y, bump h (0 = straight line), n stars */
 const arcRow = (x0, x1, y, h, n) => Array.from({ length: n }, (_, i) => { const k = n > 1 ? i / (n - 1) : 0; return { x: Math.round(x0 + (x1 - x0) * k), y: Math.round(y - Math.sin(k * Math.PI) * h) }; });
 const LEVELS = [
-  { name: 'garden', need: 5, len: 5600, sticker: 1, collect: 'feather', ins: 'ins_11', joins: ['bird', 'pitzi', 'luna'],
+  { name: 'garden', need: 5, len: 5600, sticker: 1, collect: 'feather', ins: 'x_find_feathers', joins: ['bird', 'pitzi', 'luna'],
     finSay: ['fr_01', 'l1_c', 'pr_02'], meets: [{ kind: 'pitzi', x: 4400, do: 'dance' }],
     terrain: [{ x0: 0, x1: 700, top: G }, { x0: 700, x1: 900, top: G, top1: G - 120 }, { x0: 900, x1: 1100, top: G - 120 }, { x0: 1100, x1: 1300, top: G - 120, top1: G }, { x0: 1300, x1: 1750, top: G },
               { x0: 1910, x1: 2550, top: G }, { x0: 2550, x1: 2800, top: G - 70 }, { x0: 2800, x1: 3050, top: G - 140 }, { x0: 3050, x1: 3300, top: G - 70 }, { x0: 3300, x1: 3780, top: G },
@@ -244,10 +244,10 @@ const LEVELS = [
             { x: 2860, w: 130, top: G - 250, kind: 'cloud' }, { x: 3040, w: 130, top: G - 360, kind: 'cloud' }, { x: 3220, w: 130, top: G - 470, kind: 'cloud' }],
     pads: [{ x: 3350, w: 170, top: G - 58 }], splash: { x: 1440, w: 150 },
     decos: [{ kind: 'pitzi', x: 300, happy: true }, { kind: 'shluli', x: 1515, happy: true }, { kind: 'dad', x: 470, happy: true }, { kind: 'luna', x: 600, happy: true },{ kind: 'mamabird', x: 5510, y: G - 250, happy: true }],
-    cues: [{ x: 0, say: ['l1_a', 'ins_11', 'ins_10', 'num_05', 'ins_01'], glow: 'br' },{ x: 1330, say: ['ins_06'], glow: 'bd' }, { x: 1560, say: ['ins_02'], glow: 'bj' }, { x: 2100, say: ['ins_05'], glow: 'bj' },
+    cues: [{ x: 0, say: ['l1_a', 'x_find_feathers', 'ins_10', 'num_05', 'ins_01'], glow: 'br' },{ x: 1330, say: ['ins_06'], glow: 'bd' }, { x: 1560, say: ['ins_02'], glow: 'bj' }, { x: 2100, say: ['ins_05'], glow: 'bj' },
            { x: 2650, say: ['l1_b'] }, { x: 3200, say: ['ins_15'] }] },
 
-  { name: 'rainbow', need: 7, len: 6200, sticker: 2, collect: 'bubble', ins: 'ins_12', joins: ['pitzi'], without: ['pitzi'],
+  { name: 'rainbow', need: 7, len: 6200, sticker: 2, collect: 'bubble', ins: 'x_find_bubbles', joins: ['pitzi'], without: ['pitzi'],
     finSay: ['fr_03', 'l2_c', 'pr_02'], meets: [{ kind: 'shluli', x: 4400, do: 'jump' }],
     terrain: [{ x0: 0, x1: 1100, top: G }, { x0: 1400, x1: 2000, top: G }, { x0: 2000, x1: 2250, top: G - 60 }, { x0: 2250, x1: 2500, top: G - 120 }, { x0: 2500, x1: 2750, top: G - 60 }, { x0: 2750, x1: 3050, top: G },
               { x0: 3350, x1: 4000, top: G }, { x0: 4250, x1: 4600, top: G }, { x0: 4600, x1: 4760, top: G - 70 }, { x0: 4760, x1: 4900, top: G - 125 }, { x0: 4900, x1: 5000, top: G - 177 },
@@ -266,9 +266,9 @@ const LEVELS = [
             { x: 5420, w: 130, top: G - 90, kind: 'cloud' }, { x: 5600, w: 130, top: G - 180, kind: 'cloud' }],
     stations: [{ id: 'bubbles', kind: 'count', x: 3700, pts: [[3420, G - 100], [3540, G - 210], [3740, G - 290], [3900, G - 190], [3980, G - 110]], hint: 'x_count', near: 650, say: ['pr_13'] }],
     danceZone: { a: 1450, b: 2000 },
-    cues: [{ x: 0, say: ['fr_02', 'l2_a', 'ins_12', 'ins_10', 'num_07'] }, { x: 940, say: ['ins_13'], glow: 'bj' }, { x: 1500, say: ['ins_06'], glow: 'bd', show: 'dance' }, { x: 2250, say: ['l2_b'] }, { x: 2900, say: ['ins_13'] }] },
+    cues: [{ x: 0, say: ['fr_02', 'l2_a', 'x_find_bubbles', 'ins_10', 'num_07'] }, { x: 940, say: ['ins_13'], glow: 'bj' }, { x: 1500, say: ['ins_06'], glow: 'bd', show: 'dance' }, { x: 2250, say: ['l2_b'] }, { x: 2900, say: ['ins_13'] }] },
 
-  { name: 'forest', need: 10, len: 6600, sticker: 3, collect: 'petal', ins: 'ins_14', joins: ['bilam'], arriveSay: 'l3_b', carry: true,
+  { name: 'forest', need: 10, len: 6600, sticker: 3, collect: 'petal', ins: 'x_find_petals', joins: ['bilam'], arriveSay: 'l3_b', carry: true,
     finSay: ['fr_06', 'l3_c', 'pr_17'], meets: [{ kind: 'luna', x: 4200, do: 'dance' }],
     terrain: [{ x0: 0, x1: 700, top: G }, { x0: 700, x1: 950, top: G, top1: G - 120 }, { x0: 950, x1: 1200, top: G - 120 }, { x0: 1200, x1: 1450, top: G - 120, top1: G }, { x0: 1450, x1: 2300, top: G },
               { x0: 2460, x1: 4300, top: G }, { x0: 4300, x1: 4600, top: G - 70 }, { x0: 4600, x1: 4850, top: G - 130 }, { x0: 4850, x1: 5100, top: G - 70 }, { x0: 5100, x1: 5300, top: G },
@@ -289,10 +289,10 @@ const LEVELS = [
                { id: 'fire', kind: 'fire', x: 3830, need: 1, r: 170, spawn: 'cup', say: ['x_tea_boil', 'fr_14'] }, { id: 'serve', kind: 'table', x: 6000, need: 1, r: 220, show: 'teacup', wish: 'teacup', wy: 440, say: ['x_tea_thanks', 'pr_15'] },
                { id: 'hide', kind: 'seek', what: 'peek', mounds: ['bush_a', 'bush_b', 'bush_c'], peeks: ['pitzi', 'shluli', 'luna'], x: 1650, pts: [1650, 2790, 3850], hint: 'x_hide', near: 600, say: ['pr_13'] },
                { id: 'rain', kind: 'rain', x: 5725, zone: [5500, 5950], need: 6, hint: 'x_rain', near: 700, say: ['pr_13'] }],
-    cues: [{ x: 0, say: ['l3_a', 'ins_14', 'ins_10', 'num_10'] }, { x: 1400, say: ['ins_15'] }, { x: 2450, say: ['x_tea_start'] }, { x: 3150, say: ['ins_15'] }] },
+    cues: [{ x: 0, say: ['l3_a', 'x_find_petals', 'ins_10', 'num_10'] }, { x: 1400, say: ['ins_15'] }, { x: 2450, say: ['x_tea_start'] }, { x: 3150, say: ['ins_15'] }] },
 
   /* ---- levels 4-8 (15 Nov 2026): things she picks up are USED. `to` = the station an item goes to, `stations` = the places that use them (design/STAGES-V2.md) ---- */
-  { name: 'sky', need: 5, len: 5600, sticker: 4, collect: 'steam', ins: 'ins_16', joins: ['cloudunicorn'], carry: true, floaty: true, recover: true, drafts: [{ x: 2050, w: 180, h: 480 }],
+  { name: 'sky', need: 5, len: 5600, sticker: 4, collect: 'steam', ins: 'x_find_steam', joins: ['cloudunicorn'], carry: true, floaty: true, recover: true, drafts: [{ x: 2050, w: 180, h: 480 }],
     finSay: ['fr_08', 'l4_c', 'pr_02'],
     terrain: [{ x0: 0, x1: 900, top: G }, { x0: 900, x1: 1150, top: G - 60 }, { x0: 1150, x1: 1400, top: G - 120 }, { x0: 1400, x1: 1650, top: G - 60 }, { x0: 1650, x1: 2500, top: G },
               { x0: 2650, x1: 3700, top: G }, { x0: 3700, x1: 3950, top: G, top1: G - 130 }, { x0: 3950, x1: 4200, top: G - 130 }, { x0: 4200, x1: 4450, top: G - 130, top1: G }, { x0: 4450, x1: 5600, top: G }],
@@ -303,7 +303,7 @@ const LEVELS = [
     plats: [{ x: 2520, w: 110, top: G - 70, kind: 'cloud' }, { x: 2900, w: 130, top: G - 150, kind: 'cloud' }, { x: 1900, w: 130, top: G - 130, kind: 'cloud' }, { x: 2200, w: 130, top: G - 470, kind: 'cloud' }],
     props: [{ k: 'teapot', x: 640, w: 150 }],
     decos: [{ kind: 'grandpa', x: 500, happy: true }],
-    cues: [{ x: 0, say: ['fr_07', 'l4_a', 'ins_16', 'ins_10', 'num_05'] }, { x: 1950, say: ['x_draft', 'ins_15'] }] },
+    cues: [{ x: 0, say: ['fr_07', 'l4_a', 'x_find_steam', 'ins_10', 'num_05'] }, { x: 1950, say: ['x_draft', 'ins_15'] }] },
 
   { name: 'farm', need: 6, len: 7400, sticker: 5, collect: 'plank', ins: 'ins_17', joins: ['armon', 'anana'], carry: true,
     finSay: ['fr_11', 'l5_c', 'pr_15'],
@@ -316,7 +316,7 @@ const LEVELS = [
             { x: 0, y: 0, kind: 'flour', to: 'fbowl', hid: 'flourm', hidden: true, nochip: true, say: null }, { x: 0, y: 0, kind: 'loaf', to: 'ftable', hid: 'loaf', hidden: true, nochip: true, say: null }],
     stations: [{ id: 'chicks', kind: 'seek', what: 'chick', mound: 'haybale', x: 1500, pts: [1500, 2550, 3050, 4050], hint: 'x_seek_a', near: 600, say: ['pr_13'] },
                { id: 'bridge', kind: 'bridge', x: 5000, need: 5, r: 230, say: ['l5_b', 'pr_12'] }, { id: 'horses', kind: 'horses', x: 5400, need: 2, r: 230, say: ['pr_16'], wish: 'carrot_bunch', wy: 310 },
-               { id: 'mill', kind: 'mill', x: 6100, need: 2, r: 160, spawn: 'flourm', say: ['pr_13'] }, { id: 'fbowl', kind: 'bowl', x: 6330, need: 2, r: 150, arms: 'foven' },
+               { id: 'mill', kind: 'mill', x: 6100, need: 2, r: 160, spawn: 'flourm', say: ['pr_13'] }, { id: 'fbowl', kind: 'bowl', x: 6330, need: 2, r: 150, arms: 'foven', ovenSay: 'x_oven_loaf' },
                { id: 'foven', kind: 'oven', x: 6570, need: 1, auto: true, spawn: 'loaf', say: ['pr_14'] }, { id: 'ftable', kind: 'table', x: 6880, need: 1, r: 220, img: 'prop_farmtable', show: 'loaf', wish: 'loaf', wy: 310, say: ['pr_15'] }],
     mud: [{ x: 1000, w: 300 }, { x: 3400, w: 300 }, { x: 4700, w: 420 }],
     bonus: [].concat(arcRow(200, 700, G - 80, 30, 6), arcRow(1000, 1600, G - 80, 50, 6), arcRow(2500, 3100, G - 80, 40, 6), arcRow(3400, 4200, G - 90, 50, 7), arcRow(4600, 4900, G - 160, 30, 3), arcRow(5700, 6900, G - 90, 40, 8)),
@@ -325,7 +325,7 @@ const LEVELS = [
     decos: [{ kind: 'anana', x: 5650, hap: 'horses' }, { kind: 'grandpa', x: 7130, happy: true }],
     cues: [{ x: 0, say: ['l5_a', 'fr_10', 'ins_17', 'ins_10', 'num_06'] }, { x: 700, say: ['ins_03'] }, { x: 3200, say: ['ins_15'] }] },
 
-  { name: 'shabbat', need: 8, len: 6000, sticker: 6, collect: 'flour', ins: 'ins_18', joins: ['rhino', 'solomon', 'dad'], carry: true, noIns: true,
+  { name: 'shabbat', need: 8, len: 6000, sticker: 6, collect: 'flour', ins: 'ins_18b', joins: ['rhino', 'solomon', 'dad'], carry: true, noIns: true,
     finSay: ['fr_11', 'pr_17'],
     terrain: [{ x0: 0, x1: 1000, top: G }, { x0: 1000, x1: 1250, top: G - 60 }, { x0: 1250, x1: 1500, top: G - 110 }, { x0: 1500, x1: 1750, top: G - 60 }, { x0: 1750, x1: 2700, top: G },
               { x0: 2850, x1: 3900, top: G }, { x0: 4040, x1: 6000, top: G }],
@@ -340,7 +340,7 @@ const LEVELS = [
                { id: 'table', kind: 'table', x: 5450, need: 1, r: 220, say: ['pr_14'] }],
     bonus: [].concat(arcRow(240, 900, G - 80, 40, 6), arcRow(1800, 2600, G - 80, 60, 7), arcRow(2900, 3800, G - 90, 40, 7), arcRow(4100, 5000, G - 80, 30, 7), arcRow(1500, 1750, G - 160, 0, 3)),
     plats: [{ x: 2720, w: 110, kind: 'stone' }, { x: 3910, w: 110, kind: 'stone' }, { x: 2200, w: 120, kind: 'rock' }],
-    cues: [{ x: 0, say: ['l6_a', 'ins_10', 'num_08'] }, { x: 1700, say: ['ins_18'] }, { x: 4950, say: [], glow: 'bd' }] },
+    cues: [{ x: 0, say: ['l6_a', 'ins_10', 'num_08'] }, { x: 1700, say: ['ins_18b'] }, { x: 4950, say: [], glow: 'bd' }] },
 
   { name: 'night', need: 8, len: 6400, sticker: 7, collect: 'ribbon', ins: 'ins_20', joins: ['riddletree'], carry: true, lights: true,
     finSay: ['l7_c', 'pr_08'],
@@ -369,7 +369,7 @@ const LEVELS = [
     decos: [{ kind: 'princess2', x: 8050, happy: true }],
     cues: [{ x: 0, say: ['l8_a', 'ins_23', 'ins_10', 'num_10'] }, { x: 5600, say: ['fr_16'] }] },
   /* ---- stage 9 (round 4): the Queen of Sheba's oasis. Water drops to the well, gems in the sand, a wind draft up to a high drop ---- */
-  { name: 'oasis', need: 13, len: 7500, sticker: 9, collect: 'water_drop', ins: 'x_find_water', joins: ['sheba', 'camel'], carry: true, drafts: [{ x: 3100, w: 180, h: 590 }],
+  { name: 'oasis', need: 13, len: 7500, sticker: 9, collect: 'water_drop', ins: 'x_find_water2', joins: ['sheba', 'camel'], carry: true, drafts: [{ x: 3100, w: 180, h: 590 }],
     finSay: ['l9_c', 'l9_d', 'pr_17'],
     terrain: [{ x0: 0, x1: 900, top: G }, { x0: 900, x1: 1150, top: G - 60 }, { x0: 1150, x1: 1400, top: G - 110 }, { x0: 1400, x1: 1650, top: G - 60 }, { x0: 1650, x1: 2500, top: G },
               { x0: 2660, x1: 3600, top: G }, { x0: 3600, x1: 3850, top: G - 70 }, { x0: 3850, x1: 4100, top: G - 130 }, { x0: 4100, x1: 4350, top: G - 70 }, { x0: 4350, x1: 5300, top: G },
@@ -378,7 +378,7 @@ const LEVELS = [
     items: [{ x: 600, y: G - 50, to: 'well' }, { x: 1275, y: G - 200, to: 'well' }, { x: 3200, y: G - 560, to: 'well' },
             { x: 4800, y: G - 50, kind: 'flour', to: 'bowl', say: null }, { x: 5100, y: G - 50, kind: 'eggs', to: 'bowl', say: null }, { x: 5720, y: G - 50, kind: 'honey', to: 'bowl', say: null },
             { x: 0, y: 0, kind: 'challah', to: 'table', hid: 'challah', hidden: true }],
-    stations: [{ id: 'gems', kind: 'seek', what: 'gem', mound: 'sandmound', x: 1700, pts: [1700, 2150, 2950, 5000], hint: 'x_seek_b', near: 600, say: ['pr_13'] },
+    stations: [{ id: 'gems', kind: 'seek', what: 'gem', mound: 'sandmound', x: 1700, pts: [1700, 2150, 2950, 4000], hint: 'x_seek_b', near: 600, say: ['pr_13'] },
                { id: 'well', kind: 'well', x: 4600, need: 3, r: 220, hint: 'x_well', say: ['l9_b'] },
                { id: 'bowl', kind: 'bowl', x: 5900, need: 3, r: 150 }, { id: 'oven', kind: 'oven', x: 6150, need: 1, auto: true, spawn: 'challah', say: ['fr_13'] }, { id: 'table', kind: 'table', x: 6500, need: 1, r: 200, wish: 'challah', wy: 310, say: ['pr_16'] }],
     bonus: [].concat(arcRow(240, 820, G - 80, 40, 6), arcRow(930, 1370, G - 190, 50, 6), arcRow(1450, 1900, G - 80, 40, 5), arcRow(2000, 2450, G - 90, 70, 5), arcRow(2760, 3050, G - 80, 30, 4),
@@ -386,10 +386,10 @@ const LEVELS = [
     plats: [{ x: 3270, w: 130, top: G - 470, kind: 'cloud' }, { x: 5320, w: 150, top: G - 50, kind: 'cloud', move: { a: 5310, b: 5420, sp: 0.012 } }],
     props: [300, 1950, 3000, 4950, 6800, 7300].map(x => ({ k: 'palm', x, w: 300 })),
     decos: [{ kind: 'camel', x: 7080, hap: 'well' }],
-    cues: [{ x: 0, say: ['l9_a', 'x_find_water', 'ins_10'] }, { x: 2950, say: ['x_draft', 'ins_15'] }] },
+    cues: [{ x: 0, say: ['l9_a', 'x_find_water2', 'ins_10'] }, { x: 2950, say: ['x_draft', 'ins_15'] }] },
 
   /* ---- stage 10 (round 4): the Moon Mountain, the last stage. Count the cloud stairs, wind up to a star, light the lanterns, dance in rhythm with the Moon ---- */
-  { name: 'moon', need: 15, len: 8200, sticker: 10, collect: 'moonstar', ins: 'x_find_moon', joins: ['moon'], drafts: [{ x: 3500, w: 180, h: 590 }],
+  { name: 'moon', need: 15, len: 8200, sticker: 10, collect: 'moonstar', ins: 'x_find_moon2', joins: ['moon'], drafts: [{ x: 3500, w: 180, h: 590 }],
     finSay: ['l10_c', 'l10_d', 'pr_20'],
     terrain: [{ x0: 0, x1: 2900, top: G }, { x0: 3050, x1: 3700, top: G }, { x0: 3700, x1: 3950, top: G - 70 }, { x0: 3950, x1: 4200, top: G - 130 }, { x0: 4200, x1: 4450, top: G - 70 },
               { x0: 4450, x1: 5000, top: G }, { x0: 5160, x1: 5800, top: G }, { x0: 5800, x1: 8200, top: G }],
@@ -401,7 +401,7 @@ const LEVELS = [
     bonus: [].concat(arcRow(240, 1300, G - 80, 40, 8), arcRow(1480, 2350, G - 200, 40, 5), arcRow(2720, 2880, G - 100, 50, 3), arcRow(3100, 3450, G - 80, 30, 4), arcRow(3720, 4400, G - 190, 50, 6),
       arcRow(4500, 4950, G - 80, 30, 4), arcRow(5030, 5130, G - 130, 60, 2), arcRow(5300, 5780, G - 80, 30, 4), arcRow(5900, 6700, G - 80, 40, 7)),
     plats: [0, 1, 2, 3, 4].map(i => ({ x: 1500 + i * 200, w: 130, top: G - 90 * (i + 1), kind: 'cloud' })).concat([{ x: 2480, w: 130, top: G - 540, kind: 'cloud' }]),
-    cues: [{ x: 0, say: ['l10_a', 'x_find_moon', 'ins_10'] }, { x: 3300, say: ['x_draft', 'ins_15'] }] },
+    cues: [{ x: 0, say: ['l10_a', 'x_find_moon2', 'ins_10'] }, { x: 3300, say: ['x_draft', 'ins_15'] }] },
 
   /* ---- stage 11 (round 6): the Princesses' Flower Party, the last stage. Bake the challah, make the tea, set the table, dance with everyone. The two friends she chose walk with her. ---- */
   { name: 'party', need: 12, len: 7700, sticker: 11, collect: 'flour', ins: 'ins_10', joins: [], without: ['princess1', 'princess2'], carry: true, noIns: true, fireworks: true, finale: true,
@@ -470,10 +470,10 @@ LEVELS.push(
     terrain: [{ x0: 0, x1: 2000, top: G }, { x0: 2000, x1: 2200, top: G, top1: G - 70 }, { x0: 2200, x1: 2700, top: G - 70 }, { x0: 2700, x1: 2900, top: G - 70, top1: G }, { x0: 2900, x1: 7600, top: G }],
     friend: { kind: 'jumbo', x: 7100 },
     items: [],
-    stations: [{ id: 'hideA', kind: 'seek', what: 'peek', mounds: ['bush_a', 'bush_b', 'bush_c'], peeks: ['parrot', 'tiger', 'frog'], x: 1500, pts: [1250, 1500, 1750], hint: 'x_hide', near: 600, say: ['pr_13'] },
+    stations: [{ id: 'hideA', kind: 'seek', what: 'peek', secret: true, mounds: ['bush_a', 'bush_b', 'bush_c'], peeks: ['parrot', 'tiger', 'frog'], x: 1500, pts: [1250, 1500, 1750], hint: 'x_hide', near: 600, say: ['pr_13'] },
                { id: 'rainJ', kind: 'rain', x: 3500, zone: [3250, 3750], need: 6, hint: 'x_rain', near: 700, say: ['pr_13'] },
-               { id: 'hideB', kind: 'seek', what: 'peek', mounds: ['bush_a', 'bush_b', 'bush_c'], peeks: ['frog', 'parrot', 'tiger'], x: 4700, pts: [4450, 4700, 4950], hint: 'x_hide', near: 600, say: ['pr_13'] },
-               { id: 'hideC', kind: 'seek', what: 'peek', mounds: ['bush_a', 'bush_b', 'bush_c'], peeks: ['tiger', 'frog', 'parrot'], x: 6000, pts: [5750, 6000, 6250], hint: 'x_hide', near: 600, say: ['pr_13'] }],
+               { id: 'hideB', kind: 'seek', what: 'peek', secret: true, mounds: ['bush_a', 'bush_b', 'bush_c'], peeks: ['frog', 'parrot', 'tiger'], x: 4700, pts: [4450, 4700, 4950], hint: 'x_hide', near: 600, say: ['pr_13'] },
+               { id: 'hideC', kind: 'seek', what: 'peek', secret: true, mounds: ['bush_a', 'bush_b', 'bush_c'], peeks: ['tiger', 'frog', 'parrot'], x: 6000, pts: [5750, 6000, 6250], hint: 'x_hide', near: 600, say: ['pr_13'] }],
     bonus: [].concat(arcRow(300, 900, G - 80, 40, 5), arcRow(2000, 2700, G - 190, 40, 5), arcRow(3900, 4300, G - 90, 40, 4), arcRow(5100, 5600, G - 90, 40, 4), arcRow(6400, 6900, G - 90, 40, 4)),
     plats: [{ x: 3000, w: 110, kind: 'rock' }, { x: 5300, w: 116, kind: 'stump' }],
     cues: [{ x: 0, say: ['x_hide', 'ins_10', 'num_10'] }, { x: 3200, say: ['x_rain'] }] },
@@ -615,7 +615,7 @@ addB(4, 7500, 7500, B => {
   B.deco({ kind: 'anana', x: 12550, hap: 'horses2' });
   B.item({ x: 12600, y: G - 50, kind: 'milk', to: 'fbowl2', say: null }); B.item({ x: 12700, y: G - 50, kind: 'wheat', grp: 'wheat', to: 'mill2', say: null }); B.item({ x: 12820, y: G - 50, kind: 'wheat', grp: 'wheat', to: 'mill2', say: null });
   B.item({ x: 0, y: 0, kind: 'flour', to: 'fbowl2', hid: 'flour2', hidden: true, nochip: true, say: null }); B.item({ x: 0, y: 0, kind: 'loaf', to: 'ftable2', hid: 'loaf2', hidden: true, nochip: true, say: null });
-  B.station({ id: 'mill2', kind: 'mill', x: 13100, need: 2, r: 160, spawn: 'flour2', say: ['pr_13'] }); B.station({ id: 'fbowl2', kind: 'bowl', x: 13330, need: 2, r: 150, arms: 'foven2' });
+  B.station({ id: 'mill2', kind: 'mill', x: 13100, need: 2, r: 160, spawn: 'flour2', say: ['pr_13'] }); B.station({ id: 'fbowl2', kind: 'bowl', x: 13330, need: 2, r: 150, arms: 'foven2', ovenSay: 'x_oven_loaf' });
   B.station({ id: 'foven2', kind: 'oven', x: 13570, need: 1, auto: true, spawn: 'loaf2', say: ['pr_14'] }); B.station({ id: 'ftable2', kind: 'table', x: 13880, need: 1, r: 220, img: 'prop_farmtable', show: 'loaf', wish: 'loaf', wy: 310, say: ['pr_15'] });
   B.station({ id: 'haycount', kind: 'count', x: 14480, pts: [[14200, G - 100], [14340, G - 190], [14480, G - 110], [14620, G - 200], [14760, G - 120]], hint: 'x_count', near: 650, say: ['pr_13'] });
   B.stars(7700, 8150, G - 80, 40, 5); B.stars(8350, 9300, G - 90, 50, 8); B.stars(9650, 10000, G - 80, 30, 4); B.stars(10250, 10650, G - 90, 40, 5); B.stars(11100, 11900, G - 200, 70, 7); B.stars(12000, 12500, G - 90, 40, 5); B.stars(13950, 14150, G - 80, 20, 3); B.stars(14900, 15000, G - 80, 0, 2);
@@ -677,6 +677,7 @@ addB(7, 5700, 8900, B => {
 /* ---------- 21 Nov batch D/E: stages 9, 10, 11 and 12 get their second half ---------- */
 /* stage 9, Oasis: flag; a second well with three more drops, a second treasure hunt in the sand, drops to count, a second challah (bowl, oven, table) */
 addB(8, 5600, 7500, B => {
+  { const fl = LEVELS[8].items.find(o => o.kind === 'flour' && o.to === 'bowl'); if (fl) fl.x = 13000; }       // Keeper 22 Nov: the first recipe's flour was left at 5400 while eggs, honey and bowl are at 13200+ (carried 28 s): flour now sits next to the eggs
   B.need(19, null, null); B.rest(5720, ['pr_14']);
   [6300, 6520, 6740].forEach(x => B.item({ x, y: G - 50, to: 'well2' }));
   B.station({ id: 'well2', kind: 'well', x: 7300, need: 3, r: 220, hint: 'x_well', say: ['pr_13'] });
@@ -850,7 +851,7 @@ function complete(st){
   st.done = true; st.t = 0; progress(); sfx.win && st.kind !== 'plate' ? sfx.star() : sfx.pick(); burst(st.x, G - 120, st.kind === 'plate' ? 10 : 26, RB, 'star');
   if (!st.finish) (st.say || []).forEach(id => Voice.say(id));
   if (st.spawn) items.filter(o => o.hid === st.spawn).forEach(it => { it.hidden = false; it.x = st.x + 10 + (it.dx || 0); it.y = G - 90 - (it.dy || 0); burst(it.x, it.y, 20, ['#ffe14d', '#fff'], 'star'); });
-  if (st.kind === 'bowl') { const ov = sts.find(s => s.id === (st.arms || 'oven')); if (ov) ov.armed = 110; Voice.say('x_oven'); }
+  if (st.kind === 'bowl') { const ov = sts.find(s => s.id === (st.arms || 'oven')); if (ov) ov.armed = 110; Voice.say(st.ovenSay || 'x_oven'); }
   if (st.kind === 'riddle') st.objs.forEach(o => burst(o.x, G - 70, 8, RB, 'star'));
   if (st.finish) { finish(); return; }
   if (got === items.length && starsOK() && stationsOK() && !sts.some(o => o.finish)) Voice.say('ins_24');
@@ -1609,8 +1610,8 @@ function drawStations(){
     else if (k === 'rain') st.drops.forEach(d => { const sk = st.skin === 'choc' ? 'chocstar' : 'shootingstar', im = IMG['item_' + sk]; ctx.save(); ctx.translate(d.x, d.y); circ(0, 0, 40, st.skin === 'choc' ? 'rgba(170,110,70,.3)' : 'rgba(255,240,150,.3)'); if (im) fit(im, 0, 0, 100); else drawItem(sk, 0, 0, null, 0); ctx.restore(); });
     else if (k === 'seek' && st.what === 'peek') st.pts.forEach((x, i) => { const pk = IMG['peek_' + st.peeks[i % st.peeks.length]], bi = IMG['prop_' + st.mounds[i % st.mounds.length]], up = st.rev[i] ? Math.min(1, st.rev[i] / 18) : 0;     // hide and seek: a friend peeks out of a bush, touch the bush
       if (st.rev[i]) st.rev[i] += 1;
-      if (pk) { const by = G - 118 - 70 * up - (st.rev[i] ? Math.abs(Math.sin(st.rev[i] * 0.12)) * 14 : Math.sin(T * 0.08 + i) * 4); fit(pk, x + (st.rev[i] ? 20 : 0), by, st.rev[i] ? 170 : 150); }
-      if (bi) pic(bi, x, G + 6, 215); else { ell(x, G - 50, 100, 55, '#6fbf5e'); ell(x - 35, G - 70, 50, 38, '#86d06f'); }
+      if (pk && (!st.secret || st.rev[i])) { const by = G - 118 - 70 * up - (st.rev[i] ? Math.abs(Math.sin(st.rev[i] * 0.12)) * 14 : Math.sin(T * 0.08 + i) * 4); fit(pk, x + (st.rev[i] ? 20 : 0), by, st.rev[i] ? 170 : 150); }
+      if (bi) pic(bi, x + (st.secret && !st.rev[i] && Math.abs(p.x - x) < 520 ? Math.sin(T * 0.6 + i) * 2.5 : 0), G + 6, 215); else { ell(x, G - 50, 100, 55, '#6fbf5e'); ell(x - 35, G - 70, 50, 38, '#86d06f'); }
       if (!st.rev[i] && Math.abs(p.x - x) < 700) { const tw = (Math.sin(T * 0.12 + i) + 1) / 2; star5(x + 70, G - 150 - tw * 6, 7 + tw * 4, 'rgba(255,255,255,.9)'); } });
     else if (k === 'seek') st.pts.forEach((x, i) => { const mi = IMG['prop_' + st.mound]; if (mi) pic(mi, x, G + 6, st.mound === 'haybale' ? 140 : 190); else if (st.mound === 'haybale') { ell(x, G - 34, 66, 38, '#e6c35a'); ctx.strokeStyle = '#c9a23c'; ctx.lineWidth = 3; for (let j = -2; j <= 2; j++) { ctx.beginPath(); ctx.moveTo(x + j * 22, G - 62); ctx.lineTo(x + j * 26, G - 6); ctx.stroke(); } } else ell(x, G - 22, 84, 30, '#e8c27a');
       if (st.rev[i]) { st.rev[i] += 1; const up = Math.min(1, st.rev[i] / 18); drawItem(st.what, x + 30 + Math.sin(st.rev[i] * 0.1) * 4, G - 36 - 60 * up - Math.abs(Math.sin(st.rev[i] * 0.12)) * 10, null, T * 0.05); }

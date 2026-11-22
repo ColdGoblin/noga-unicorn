@@ -286,7 +286,7 @@ const LEVELS = [
             { x: 3650, w: 230, top: G - 320, kind: 'branch' },
             { x: 2180, w: 200, top: G - 430, kind: 'branch' }, { x: 2420, w: 200, top: G - 540, kind: 'branch' }, { x: 3930, w: 200, top: G - 430, kind: 'branch' }, { x: 4170, w: 200, top: G - 540, kind: 'branch' },{ x: 4020, w: 110, kind: 'stump' }, { x: 5600, w: 116, kind: 'rock' }, { x: 5800, w: 110, kind: 'stump' }],
     stations: [{ id: 'pot', kind: 'pot', x: 3560, need: 4, r: 160, spawn: 'pot', hint: 'x_tea_pot', near: 420, say: ['x_tea_fire'] },
-               { id: 'fire', kind: 'fire', x: 3830, need: 1, r: 170, spawn: 'cup', say: ['x_tea_boil', 'fr_14'] }, { id: 'serve', kind: 'table', x: 6000, need: 1, r: 220, show: 'teacup', wish: 'teacup', wy: 440, say: ['x_tea_thanks', 'pr_15'] },
+               { id: 'fire', kind: 'fire', x: 3830, need: 1, r: 170, spawn: 'cup', say: ['x_tea_boil', 'fr_14'] }, { id: 'serve', kind: 'table', x: 5200, need: 1, r: 220, show: 'teacup', wish: 'teacup', wy: 440, say: ['x_tea_thanks', 'pr_15'] },
                { id: 'hide', kind: 'seek', what: 'peek', mounds: ['bush_a', 'bush_b', 'bush_c'], peeks: ['pitzi', 'shluli', 'luna'], x: 1650, pts: [1650, 2790, 3850], hint: 'x_hide', near: 600, say: ['pr_13'] },
                { id: 'rain', kind: 'rain', x: 5725, zone: [5500, 5950], need: 6, hint: 'x_rain', near: 700, say: ['pr_13'] }],
     cues: [{ x: 0, say: ['l3_a', 'x_find_petals', 'ins_10', 'num_10'] }, { x: 1400, say: ['ins_15'] }, { x: 2450, say: ['x_tea_start'] }, { x: 3150, say: ['ins_15'] }] },
@@ -746,7 +746,9 @@ let fx = null;      // the love party after the last stage
 let mode = 'title', li = 0, L = null, p = null, camX = 0, camY = 0, T = 0;     // camY: how far the view has moved up (0 = ground level, negative = looking up at clouds and treetops)
 let bonus = [], bonusN = 0, meets = [];
 let terr = [], items = [], stars = [], plats = [], followers = [], parts = [], hist = [], flowers = [];
-let pocket = [], sts = [];          // pocket: things she carries (up to 4); sts: the places that use them (bowl, oven, nest, plates ...)
+let pocket = [], sts = [];          // pocket: things she carries (up to 4 KINDS, any number of each: Keeper 22 Nov); sts: the places that use them (bowl, oven, nest, plates ...)
+const pocketKey = o => (o.kind || L.collect) + '|' + (o.col || '');
+const pocketRoom = o => pocket.some(q => pocketKey(q) === pocketKey(o)) || new Set(pocket.map(pocketKey)).size < 4;
 let restDone = false, got = 0, meter = 0, fin = null, arrived = false, hintT = 0, maxX = 0, danceN = 0, said = {}, falls = 0, trail = false;
 
 const MAXPARTY = 2;
@@ -850,7 +852,9 @@ function pickup(it){
 function complete(st){
   st.done = true; st.t = 0; progress(); sfx.win && st.kind !== 'plate' ? sfx.star() : sfx.pick(); burst(st.x, G - 120, st.kind === 'plate' ? 10 : 26, RB, 'star');
   if (!st.finish) (st.say || []).forEach(id => Voice.say(id));
-  if (st.spawn) items.filter(o => o.hid === st.spawn).forEach(it => { it.hidden = false; it.x = st.x + 10 + (it.dx || 0); it.y = G - 90 - (it.dy || 0); burst(it.x, it.y, 20, ['#ffe14d', '#fff'], 'star'); });
+  if (st.spawn) items.filter(o => o.hid === st.spawn).forEach(it => { it.hidden = false; it.x = st.x + 10 + (it.dx || 0); it.y = G - 90 - (it.dy || 0);
+    if (it.to && p.x > it.x + 24 && pocketRoom(it)) { it.x = p.x; it.y = p.y - 62; }      // Keeper 22 Nov: she already walked on (teapot 85 px, loaf 256 px behind): the product appears with her and goes straight into the pocket
+    burst(it.x, it.y, 20, ['#ffe14d', '#fff'], 'star'); });
   if (st.kind === 'bowl') { const ov = sts.find(s => s.id === (st.arms || 'oven')); if (ov) ov.armed = 110; Voice.say(st.ovenSay || 'x_oven'); }
   if (st.kind === 'riddle') st.objs.forEach(o => burst(o.x, G - 70, 8, RB, 'star'));
   if (st.finish) { finish(); return; }
@@ -1100,7 +1104,7 @@ function update(dt){
     let nx = Math.min(L.len - 220, p.x + 420), g = groundAt(nx), n = 0; while (g === null && n++ < 8) { nx += 110; g = groundAt(Math.min(nx, L.len - 220)); }
     if (g === null) return; it.x = Math.min(nx, L.len - 220); it.y = g - 100; burst(it.x, it.y, 14, ['#ffe14d', '#fff'], 'star'); tone(660, 0.25, 'sine', 0.1, 990);
     trail = true; hintT = Math.max(hintT, 1200); Voice.say(L.noIns ? 'ins_25' : L.ins); said.back = (said.back || 0) + 1; });
-  items.forEach(it => { it.bob += 0.05 * dt; if (has('fetch')) fetchTo(it, cx, cy, dt); if (!it.got && !it.hidden && Math.hypot(it.x - cx, it.y - cy) < 72 && !(it.to && pocket.length >= 4)) pickup(it);
+  items.forEach(it => { it.bob += 0.05 * dt; if (has('fetch')) fetchTo(it, cx, cy, dt); if (!it.got && !it.hidden && Math.hypot(it.x - cx, it.y - cy) < 72 && !(it.to && !pocketRoom(it))) pickup(it);
     if (!it.got && !it.hidden && hintT > 2400 && it === items.find(o => !o.got && !o.hidden)) { it.x += Math.sign(cx - it.x) * 1.4 * dt; it.y += Math.sign(cy - it.y) * 1.0 * dt; } });
   flyCheck(cx, cy, dt); if (has('fetch')) bonus.forEach(b => fetchTo(b, cx, cy, dt, 230));
   bonus.forEach(b => { if (!b.got && Math.hypot(b.x - cx, b.y - cy) < 60) { b.got = true; bonusN++; sfx.star(); burst(b.x, b.y, 6, ['#ffe14d', '#fff'], 'star');
@@ -1178,7 +1182,7 @@ let flyers = [], rings = [], jumpHeld = false;
 const has = k => followers.some(f => POWER[f.kind] === k);
 function powerUsed(k){ const f = followers.find(o => POWER[o.kind] === k); if (f) f.flash = 50; if (!said['pw_' + k]) { said['pw_' + k] = 1; Voice.sayIfFree('pr_16'); } }
 function fetchTo(o, cx, cy, dt, r){
-  if (o.got || o.hidden || (o.to && pocket.length >= 4)) return;
+  if (o.got || o.hidden || (o.to && !pocketRoom(o))) return;
   const dx = cx - o.x, dy = cy - o.y, d = Math.hypot(dx, dy);
   if (d < (r || 280) && d > 20) { const sp = Math.min(d, 7.5 * dt); o.x += dx / d * sp; o.y += dy / d * sp;
     if (Math.random() < 0.3) parts.push({ x: o.x, y: o.y, vx: rand(-1, 1), vy: rand(-1, 1), life: 0.6, c: '#fff6b8', s: rand(4, 7), shape: 'star', g: 0 }); powerUsed('fetch'); }
@@ -1642,7 +1646,9 @@ function drawPocket(){
   rr(x0, y0, w, 54, 27, 'rgba(255,255,255,.78)');
   for (let i = 0; i < 4; i++) circ(x0 + 78 + i * 56, y0 + 27, 22, 'rgba(176,64,154,.14)');
   ctx.fillStyle = '#b0409a'; ctx.font = 'bold 26px "Comic Sans MS", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('\u{1F392}', x0 + 28, y0 + 29);
-  pocket.forEach((it, i) => { ctx.save(); ctx.translate(x0 + 78 + i * 56, y0 + 27 + Math.sin(T * 0.1 + i) * 2); ctx.scale(0.44, 0.44); drawItem(it.kind || L.collect, 0, 0, it.col, 0); ctx.restore(); });
+  const grp = []; pocket.forEach(it => { const g0 = grp.find(q => pocketKey(q.it) === pocketKey(it)); if (g0) g0.n++; else grp.push({ it, n: 1 }); });      // same kind = one slot with a small count dot
+  grp.forEach((q, i) => { const it = q.it; ctx.save(); ctx.translate(x0 + 78 + i * 56, y0 + 27 + Math.sin(T * 0.1 + i) * 2); ctx.save(); ctx.scale(0.44, 0.44); drawItem(it.kind || L.collect, 0, 0, it.col, 0); ctx.restore();
+    if (q.n > 1) { circ(15, 14, 11, '#b0409a'); ctx.fillStyle = '#fff'; ctx.font = 'bold 15px "Comic Sans MS", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(String(q.n), 15, 15); } ctx.restore(); });
 }
 
 /* round 13: picture goals. Noga cannot read numbers, so every counter is a picture: up to 6 dots that light up one by one, or a tube that fills with gold; green with a tick when done */

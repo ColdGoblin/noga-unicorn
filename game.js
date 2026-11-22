@@ -920,7 +920,7 @@ function miniUpdate(st, dt){
         if (q >= 1) { t.s = 'gone'; st.n++; sfx.pick(); burst(h.x, h.y, 14, ['#ffd84d', '#ff8fc7', '#7fc4ff'], 'star'); progress(); if (st.rc) recipeAdd(st, t); else if (st.n < st.need) Voice.say(NUMV(st.n)); else { st.phase = 'run'; st.run = 0; sfx.win(); } } } });
     if (st.rc) recipeTick(st, dt);
     const idle = st.rc ? recipeNeed(st) : st.tok.find(t => t.s === 'idle');
-    if (st.phase === 'fill' && idle && !busy && p.on && Math.abs(p.x - st.x) < 260) { st.dw += dt; if (st.dw > 180) { st.dw = 0; sendTok(st, idle); } } else if (!busy) st.dw = 0;
+    if (st.phase === 'fill' && idle && !busy && p.on && Math.abs(p.x - st.x) < 260) { st.dw += dt; if (st.dw > (st.rc ? 480 : 180)) { st.dw = 0; sendTok(st, idle); } } else if (!busy) st.dw = 0;
     if (st.phase === 'run') { const r0 = st.run; st.run += dt; if (Math.floor(r0 / 18) !== Math.floor(st.run / 18)) { tone(300 + (Math.floor(st.run / 18) % 4) * 90, 0.12, 'triangle', 0.1); burst(st.x + 120, G - 110, 3, ['#ffd84d', '#ff8fc7', '#7fc4ff'], 'dot'); }
       if (st.run > 110) { st.phase = 'done'; burst(st.x + 130, G - 130, 34, ['#ffd84d', '#ff8fc7', '#7fc4ff', '#fff'], 'star'); complete(st); } } }
   else if (k === 'rhythm') {     // dance on the beat: a ring shrinks to the target, press Dance when it closes

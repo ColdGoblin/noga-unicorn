@@ -20,6 +20,6 @@ for (const k of ['sugar', 'strawberry', 'chocbar']) { const i = tokIdx(k), t = s
 out.push('after tap-tap: n ' + st.n + ' phase ' + st.phase + ' seq ' + st.seq.join('>')); step(260);
 out.push('target made: done ' + st.done + ' made items ' + g.items().filter(o => o.hid === 'made' && !o.hidden).length);
 // 6. fallback by standing: second machine, nothing touched
-g.reset(); g.start(12); const P2 = g.P(); const m2 = g.sts().find(s => s.id === 'machine2'); P2.x = m2.x - 150; P2.y = G; P2.vy = 0; step(5); P2.x = m2.x - 150; step(260);
+g.reset(); g.start(12); const P2 = g.P(); const m2 = g.sts().find(s => s.id === 'machine2'); P2.x = m2.x - 150; P2.y = G; P2.vy = 0; step(5); P2.x = m2.x - 150; step(200); out.push('after 3.3 s standing: n ' + m2.n); P2.x = m2.x - 150; step(300);
 out.push('stand fallback m2: seq ' + m2.seq.join('>') + ' n ' + m2.n);
 return out;

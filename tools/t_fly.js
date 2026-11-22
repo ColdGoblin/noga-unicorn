@@ -2,7 +2,7 @@
 // tools/runtest.sh tools/t_fly.js [shot.png]   (SHOTLVL = stage for the screenshot, mid-flight)
 const g = __g, G = 560, out = [], bad = [];
 g.reset();
-for (let i = 0; i < 13; i++) {
+for (let i = 0; i < 15; i++) {
   g.start(i, ['luna', 'bouncy']); const P = g.P(), f = g.flyers()[0];
   if (!f) { bad.push('L' + (i + 1) + ' no flyer'); continue; }
   P.x = f.x - 200; P.y = g.gnd(P.x) ?? G; P.vy = 0; P.on = true; g.keys.right = true; g.step(60); g.keys.right = false;
@@ -20,7 +20,7 @@ for (let i = 0; i < 13; i++) {
   g.start(0, ['rhino']); const Q = g.P(); Q.x = 600; g.step(5); g.jump(); g.step(12); g.jump(); g.step(2); if (Q.hop2) bad.push('double jump without a hop friend'); }
 // bridge: walk over every gap of every stage with rhino (bridge), never falls; without it the stage still has its gaps
 let gaps = 0, crossed = 0;
-for (let i = 0; i < 13; i++) { g.start(i, ['rhino']); const P = g.P(), L = g.LV();
+for (let i = 0; i < 15; i++) { g.start(i, ['rhino']); const P = g.P(), L = g.LV();
   for (const gp of L.gaps) { if (g.sts().some(s => s.kind === 'bridge' && !s.done && s.x > gp.x - 400 && s.x < gp.x + gp.w + 400)) continue;
     const gy = g.gnd(gp.x - 40); if (gy === null) continue; gaps++;
     P.x = gp.x - 40; P.y = gy; P.vy = 0; P.on = true; P.bubble = 0; P.fly = 0; g.keys.right = true;

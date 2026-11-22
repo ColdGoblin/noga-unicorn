@@ -1184,19 +1184,19 @@ function fetchTo(o, cx, cy, dt, r){
 }
 const bridgeGap = gp => !sts.some(s => s.kind === 'bridge' && !s.done && s.x > gp.x - 400 && s.x < gp.x + gp.w + 400);
 function bridgeY(gp, x){ const a = groundAt(gp.x - 2), b = groundAt(gp.x + gp.w + 2), ya = a === null ? G : a, yb = b === null ? G : b; return ya + (yb - ya) * clamp((x - gp.x) / gp.w, 0, 1); }
-function setupFly(){
-  flyers = []; rings = [];
+function setupFly(from){
+  if (from === undefined) { flyers = []; rings = []; }
   if (L.noFly) return;
-  let x = L.rest ? L.rest.x + 260 : Math.round(L.len * 0.45), n = 0;
+  let x = from !== undefined ? from : L.rest ? L.rest.x + 260 : Math.round(L.len * 0.45), n = 0;      // Keeper 22 Nov: `from` = a second unicorn further on when the first one was walked past
   while ((groundAt(x) === null || inGap(x) || inGap(x - 80) || inGap(x + 80) || sts.some(s => Math.abs(s.x - x) < 450 || (s.pts || []).some(q => Math.abs((Array.isArray(q) ? q[0] : q) - x) < 220) || (s.zone && x > s.zone[0] - 200 && x < s.zone[1] + 200)) || (L.meets || []).some(m => Math.abs(m.x - x) < 300) || (L.pads || []).some(pd => x > pd.x - 280 && x < pd.x + pd.w + 300)) && n++ < 160) x += 60;
   const gy = groundAt(x); if (gy === null) return;
-  flyers.push({ x, y: gy - 95, cd: 0, ride: false });
+  flyers.push({ x, y: gy - 95, cd: 0, ride: false, used: false });
   for (let k = 0; k < 13; k++) { const sx = x + 260 + k * 190; if (sx > L.len - 300) break; bonus.push({ x: sx, y: Math.round(G - 250 - 150 * (0.5 + 0.5 * Math.sin(k * 0.8))), got: false, sky: 1 }); }
   [[760, 430], [1500, 300], [2250, 470]].forEach(([dx, hh]) => { if (x + dx < L.len - 300) rings.push({ x: x + dx, y: G - hh, got: false }); });
 }
 function startFly(fl){
   if (!fl || p.fly > 0 || fin || p.bubble > 0) return false;
-  fl.ride = true; p.fly = 780; p.on = false; p.vy = -9; p.wings = 1; p.dance = 0; p.hop2 = 0;
+  fl.ride = true; fl.used = true; p.fly = 780; p.on = false; p.vy = -9; p.wings = 1; p.dance = 0; p.hop2 = 0;
   sfx.sup(); Voice.say('ex_04'); burst(fl.x, fl.y, 30, RB, 'star'); glow('bj'); progress(); return true;
 }
 function tapFly(w){ const f = flyers.find(o => !o.ride && o.cd <= 0 && Math.hypot(w.x - o.x, w.y - o.y) < 120 && Math.abs(p.x - o.x) < 520); return !!(f && p.on && startFly(f)); }
@@ -1217,6 +1217,7 @@ function flyUpdate(dt, ax, flapNow){
   if (p.fly <= 0) { p.fly = 0; p.vy = 0; flyers.forEach(f => { if (f.ride) { f.ride = false; f.cd = 420; } }); Voice.sayIfFree('pr_14'); }
 }
 function flyCheck(cx, cy, dt){
+  if (flyers.length === 1 && !flyers[0].used && !flyers[0].ride && !(p.fly > 0) && !fin && p.x > flyers[0].x + 900 && L.len - p.x > 3400) setupFly(Math.round(p.x + 700));      // she walked past the unicorn: another one waits ahead, with its own stars and rings, so the flight is never lost
   flyers.forEach(f => { if (f.cd > 0) f.cd -= dt;
     if (!f.ride && f.cd <= 0 && !fin && p.on && !(p.dance > 0) && Math.abs(p.x - f.x) < 70 && Math.abs(p.y - (f.y + 95)) < 70) startFly(f); });
   rings.forEach(r => { if (!r.got && p.fly > 0 && Math.hypot(r.x - cx, r.y - cy) < 85) { r.got = true; bonusN++; sfx.star(); tone(784, 0.35, 'sine', 0.1, 1568); burst(r.x, r.y, 34, RB, 'star'); Voice.sayIfFree('pr_03'); } });

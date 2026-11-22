@@ -18,14 +18,16 @@ out.push('pot ' + pot.x + ' fire ' + fire.x + ' serve ' + serve.x + ' (fire to t
 items.filter(o => o.to === 'pot').forEach(o => { P.x = o.x; P.y = G0(o); P.vy = 0; step(4); });
 function G0(o) { return o.y + 62; }
 out.push('pocket for the pot ' + pk.length);
-P.x = pot.x - 150; P.y = 560; P.vy = 0; step(3); g.keys.right = true; let n = 0; while (!pot.done && n++ < 200) step(1); const dPot = n; g.keys.right = false;
+P.x = pot.x + 300; P.y = 560; P.vy = 0; step(3); for (let i = 0; i < 4; i++) g.tap(pot.x, 440); step(3); const dPot = 0;
 const teapot = items.find(o => o.kind === 'teapot');
-step(3);
-out.push('pot done after ' + dPot + ' frames, she at x ' + Math.round(P.x) + ', teapot at ' + Math.round(teapot.x) + ' hidden ' + !!teapot.hidden + ' got ' + teapot.got);
-// (b) stage 5 bread: walk straight through mill, bowl, oven, table without stopping: the loaf must come to her and reach the table
-g.reset(); g.start(4); P = g.P(); items = g.items(); pk = g.pocket();
-['milk', 'wheat'].forEach(k => items.filter(o => o.kind === k).forEach(o => { P.x = o.x; P.y = o.y + 62; P.vy = 0; step(4); }));
-P.x = 5950; P.y = 560; P.vy = 0; step(3); g.keys.right = true; n = 0; const tb = g.sts().find(s => s.id === 'ftable'), loaf = items.find(o => o.kind === 'loaf'); let loafSeen = null;
-while (!tb.done && n++ < 900) { step(1); if (loaf.got && loafSeen === null) loafSeen = 'picked at frame ' + n + ' she x ' + Math.round(P.x) + ' loaf x ' + Math.round(loaf.x); } g.keys.right = false;
-out.push('stage 5 straight walk: loaf ' + loafSeen + '; table done ' + tb.done + ' after ' + n + ' frames, she x ' + Math.round(P.x));
+out.push('pot tapped from 300 px ahead of it: she at x ' + Math.round(P.x) + ', teapot at ' + Math.round(teapot.x) + ' hidden ' + !!teapot.hidden + ' got ' + teapot.got);
+// (b) stage 5 bread (taps since slice d1): tap the mill and the bowl, tap the oven, then run on past it: the loaf must come to her and reach the table
+g.reset(); g.start(4); P = g.P(); items = g.items(); pk = g.pocket(); const S5 = id => g.sts().find(s => s.id === id), at5 = (x, y) => { P.x = x; P.y = y || 560; P.vy = 0; };
+['milk', 'wheat'].forEach(k => items.filter(o => o.kind === k).forEach(o => { at5(o.x, o.y + 62); step(4); }));
+at5(S5('mill').x - 100); step(2); g.tap(S5('mill').x, 440); g.tap(S5('mill').x, 440); step(3);
+const fl = items.find(o => o.kind === 'flour' && o.to === 'fbowl'); at5(fl.x, fl.y + 62); step(3);
+at5(S5('fbowl').x - 100); step(2); g.tap(S5('fbowl').x, 440); g.tap(S5('fbowl').x, 440); step(3);
+const ov5 = S5('foven'); at5(ov5.x - 60); step(2); g.tap(ov5.x, 440); g.keys.right = true; n = 0; const tb = S5('ftable'), loaf = items.find(o => o.kind === 'loaf'); let loafSeen = null;
+while (!tb.done && n++ < 900) { step(1); if (loaf.got && loafSeen === null) loafSeen = 'picked at frame ' + n + ' she x ' + Math.round(P.x) + ' oven x ' + ov5.x + ' loaf x ' + Math.round(loaf.x); } g.keys.right = false;
+out.push('stage 5 taps then run on: loaf ' + loafSeen + '; table done ' + tb.done + ' after ' + n + ' frames, she x ' + Math.round(P.x));
 return out;

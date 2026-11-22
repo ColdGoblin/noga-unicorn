@@ -194,6 +194,7 @@ function ptrWorld(){ const r = cv.getBoundingClientRect(); return { x: (ptr.cx -
 cv.addEventListener('pointerdown', e => {
   if (mode !== 'play' || !p) return; ac(); ptr.cx = e.clientX; ptr.cy = e.clientY; const w = ptrWorld();
   if (dragStart(w)) { try { cv.setPointerCapture(e.pointerId); } catch (x) {} return; }
+  { const r = cv.getBoundingClientRect(); if (tapPocket((ptr.cx - r.left) / r.width * VW, (ptr.cy - r.top) / r.height * VH)) return; }
   if (tapFly(w)) return;
   if (tapWorld(w)) return;
   if (save.dance && Math.abs(w.x - p.x) < 90 && w.y > p.y - 200 && w.y < p.y + 12) { wantDance = true; return; }
@@ -749,6 +750,17 @@ let terr = [], items = [], stars = [], plats = [], followers = [], parts = [], h
 let pocket = [], sts = [];          // pocket: things she carries (up to 4 KINDS, any number of each: Keeper 22 Nov); sts: the places that use them (bowl, oven, nest, plates ...)
 const pocketKey = o => (o.kind || L.collect) + '|' + (o.col || '');
 const pocketRoom = o => pocket.some(q => pocketKey(q) === pocketKey(o)) || new Set(pocket.map(pocketKey)).size < 4;
+/* Keeper 22 Nov (phase 2 slice d1): the cooking chains (mill, bowl, tea pot, camp fire, oven) are no longer filled by just walking past. She TAPS the place (or the item in her bag) to put things in and TAPS the oven to bake;
+   no failure and nobody can get stuck: standing next to it for 6 s does the same step for her, and every step is the same as before (same items, same results). */
+const COOK_PUT = { mill: 1, bowl: 1, pot: 1, fire: 1 };
+const cookPut = (st, i) => { pocket.splice(i, 1); st.have++; st.cd = 16; st.dwc = 0; sfx.pop(); burst(st.x, G - 110, 10, RB, 'star'); if (st.have >= st.need) complete(st); else if (Math.random() < 0.4) praise(); };
+const pocketGroups = () => { const grp = []; pocket.forEach(it => { const g0 = grp.find(q => pocketKey(q.it) === pocketKey(it)); if (g0) g0.n++; else grp.push({ it, n: 1 }); }); return grp; };
+const cookStation = it => sts.find(s => !s.done && COOK_PUT[s.kind] && s.id === it.to && Math.abs(p.x - s.x) < 800);
+function bake(st){ st.ready = false; st.armed = 110; st.rdy = 0; sfx.pop(); burst(st.x, G - 140, 14, ['#ffd84d', '#ff9f43', '#fff'], 'star'); Voice.say(st.bakeSay || 'x_oven'); }
+function tapPocket(sx, sy){      // the bag at the top left: tap a picture to put that thing into the place it belongs to (when she is near it)
+  if (!L.carry || !p) return false; const x0 = bonus.length ? 220 : 18, y0 = 98, grp = pocketGroups();
+  for (let i = 0; i < grp.length; i++) if (Math.hypot(sx - (x0 + 78 + i * 56), sy - (y0 + 27)) < 34) { const st = cookStation(grp[i].it); if (st) { const k = pocket.findIndex(o => o.to === st.id && pocketKey(o) === pocketKey(grp[i].it)); if (k >= 0) { cookPut(st, k); return true; } } }
+  return false; }
 let restDone = false, got = 0, meter = 0, fin = null, arrived = false, hintT = 0, maxX = 0, danceN = 0, said = {}, falls = 0, trail = false;
 
 const MAXPARTY = 2;
@@ -808,6 +820,7 @@ function stPos(st){        // where the sparkle trail and the hints should point
 const readyFr = () => got === items.length && starsOK() && sts.every(s => s.done || s.dance);     // only dance stations (the candles) are left: dancing at the friend lights them
 const goalMet = () => got === items.length && starsOK() && stationsOK();       // to finish a level: all the things (and each one put to use) AND enough gold stars
 function target(){ const it = items.find(o => !o.got && !o.hidden);
+  { const rd = sts.find(s => s.ready && !s.done); if (rd) return { x: rd.x, y: G - 60 }; }
   if (pocket.length) { const st = sts.find(s => s.id === pocket[0].to); if (st) return { x: st.x, y: G - 60 }; }
   if (it) return { x: it.x, y: it.y };
   { const st = sts.find(s => !s.done && !s.auto && !s.dance); if (st && got >= items.length - items.filter(o => o.hidden).length) return stPos(st); }
@@ -855,7 +868,7 @@ function complete(st){
   if (st.spawn) items.filter(o => o.hid === st.spawn).forEach(it => { it.hidden = false; it.x = st.x + 10 + (it.dx || 0); it.y = G - 90 - (it.dy || 0);
     if (it.to && p.x > it.x + 24 && pocketRoom(it)) { it.x = p.x; it.y = p.y - 62; }      // Keeper 22 Nov: she already walked on (teapot 85 px, loaf 256 px behind): the product appears with her and goes straight into the pocket
     burst(it.x, it.y, 20, ['#ffe14d', '#fff'], 'star'); });
-  if (st.kind === 'bowl') { const ov = sts.find(s => s.id === (st.arms || 'oven')); if (ov) ov.armed = 110; Voice.say(st.ovenSay || 'x_oven'); }
+  if (st.kind === 'bowl') { const ov = sts.find(s => s.id === (st.arms || 'oven')); if (ov) { ov.ready = true; ov.rdy = 0; ov.rmind = 0; ov.bakeSay = st.ovenSay || 'x_oven'; } Voice.say('x_oven_tap'); }
   if (st.kind === 'riddle') st.objs.forEach(o => burst(o.x, G - 70, 8, RB, 'star'));
   if (st.finish) { finish(); return; }
   if (got === items.length && starsOK() && stationsOK() && !sts.some(o => o.finish)) Voice.say('ins_24');
@@ -993,6 +1006,8 @@ function revealSeek(st, i){ const x = st.pts[i]; st.rev[i] = 1; st.n++; sfx.pick
 /* a tap or click on the picture (world position w): the numbered bubbles and the hiding places react to it. Returns true if the tap was used. */
 function tapWorld(w){
   for (const st of sts) { if (st.done) continue;
+    if (COOK_PUT[st.kind] && Math.abs(w.x - st.x) < 160 && w.y > G - 340 && w.y < G + 40 && Math.abs(p.x - st.x) < 800) { const i = pocket.findIndex(o => o.to === st.id); if (i >= 0) { cookPut(st, i); return true; } }
+    else if (st.kind === 'oven' && st.ready && Math.abs(w.x - st.x) < 170 && w.y > G - 360 && w.y < G + 40 && Math.abs(p.x - st.x) < 900) { bake(st); return true; }
     if (st.kind === 'count') { for (let i = st.n; i < st.pts.length; i++) { const q = st.pts[i]; if (Math.hypot(q[0] - w.x, q[1] - w.y) < 84) {
         if (i === st.n) popCount(st); else { st.wob[i] = 50; sfx.boing(); if (st.cd <= 0) { st.cd = 420; Voice.say('x_count'); } } return true; } } }
     else if (st.kind === 'seek') { for (let i = 0; i < st.pts.length; i++) if (!st.rev[i] && Math.abs(w.x - st.pts[i]) < 125 && w.y > G - 300 && w.y < G + 30) { revealSeek(st, i); return true; } }
@@ -1119,7 +1134,9 @@ function update(dt){
   sts.forEach(st => { st.cd -= dt; st.t += dt;
     if (st.done) return;
     if (st.hint && !st.intro && Math.abs(p.x - stPos(st).x) < (st.near || 520) && (!st.carryHint || pocket.some(o => o.to === st.id))) { st.intro = 1; Voice.say(st.hint); if (st.kind === 'rhythm') glow('bd'); }
-    if (st.auto) { if (st.armed > 0) { st.armed -= dt; if (st.armed <= 0) complete(st); } return; }
+    if (st.auto) { if (st.armed > 0) { st.armed -= dt; if (st.armed <= 0) complete(st); }
+      else if (st.ready) { if (Math.abs(p.x - st.x) < 520) { st.rdy += dt; if (st.rdy > 360) bake(st); } else st.rdy = 0; st.rmind = (st.rmind || 0) + dt; if (st.rmind > 700 && Voice.idle() && Math.abs(p.x - st.x) < 700) { st.rmind = 0; Voice.say('x_oven_tap'); } }
+      return; }
     if (st.dance) return;
     if (MINI[st.kind]) { miniUpdate(st, dt); return; }
     if (st.kind === 'riddle') {
@@ -1127,6 +1144,9 @@ function update(dt){
       if (st.asked) st.objs.forEach(o => { o.wob = Math.max(0, o.wob - dt);
         if (!st.done && Math.abs(p.x - o.x) < 80 && p.y > G - 130 && o.wob <= 0) {
           if (o.col === st.want) complete(st); else { o.wob = 60; sfx.boing(); if (st.cd <= 0) { st.cd = 300; Voice.say(st.want === 'red' ? 'ins_21' : 'ins_22'); } } } });
+      return; }
+    if (COOK_PUT[st.kind]) { const i = pocket.findIndex(o => o.to === st.id);
+      if (i >= 0 && p.on && Math.abs(p.x - st.x) < (st.r || 140)) { if (!st.toldPut) { st.toldPut = 1; Voice.say('x_tap_put'); } st.dwc = (st.dwc || 0) + dt; if (st.dwc > 360 && st.cd <= 0) cookPut(st, i); } else st.dwc = 0;
       return; }
     if (st.cd <= 0 && Math.abs(p.x - st.x) < (st.r || 140)) { const i = pocket.findIndex(o => o.to === st.id);
       if (i >= 0) { pocket.splice(i, 1); st.have++; st.cd = 16; sfx.pop(); burst(st.x, G - 110, 10, RB, 'star'); if (st.have >= st.need) complete(st); else if (Math.random() < 0.4) praise(); } } });
@@ -1567,6 +1587,7 @@ function drawWishes(){
 }
 function drawStations(){
   sts.forEach(st => { const x = st.x, k = st.kind;
+    if (COOK_PUT[k] && !st.done && Math.abs(p.x - x) < 800 && pocket.some(o => o.to === st.id)) { ctx.strokeStyle = 'rgba(255,240,120,.9)'; ctx.lineWidth = 7; ctx.beginPath(); ctx.arc(x, G - 110, 88 + Math.sin(T * 0.3) * 7, 0, 7); ctx.stroke(); }      // tap me
     if (k === 'cloud') { const im = IMG.prop_cotton_candy_platform, w = 640, top = G - 340; if (im) pic(im, x, top + 210, w); else ell(x, top + 110, 300, 90, '#ffb3d9');
       for (let i = 0; i < 3; i++) { const ux = x + (i - 1) * 200;
         if (i < st.have) drawFriend('cloudunicorn', ux, top + 70 + Math.sin(T * 0.06 + i * 2) * 8, true, { bounce: true });
@@ -1582,7 +1603,7 @@ function drawStations(){
       for (let i = 0; i < 7; i++) { const a = i / 7 * 6.283; circ(x + Math.cos(a) * 56, G - 14 + Math.sin(a) * 9, 17, i % 2 ? '#8e8a98' : '#a9a4b4'); }
       for (let i = 0; i < 3; i++) { const fh = 70 + Math.sin(T * 0.3 + i * 2) * 14 - Math.abs(i - 1) * 18, fx = x + (i - 1) * 24; ctx.fillStyle = i === 1 ? '#ffd028' : '#ff8a3d'; ctx.beginPath(); ctx.moveTo(fx - 20, G - 14); ctx.quadraticCurveTo(fx - 12, G - 14 - fh * 0.6, fx + Math.sin(T * 0.2 + i) * 6, G - 14 - fh); ctx.quadraticCurveTo(fx + 12, G - 14 - fh * 0.6, fx + 20, G - 14); ctx.fill(); }
       if (st.done) { const im = IMG.prop_teapot; if (im) pic(im, x, G - 52, 170); else ell(x, G - 120, 60, 44, '#ff9fc7'); for (let i = 0; i < 3; i++) circ(x - 20 + i * 20, G - 215 - ((T * 1.4 + i * 25) % 70), 9, 'rgba(255,255,255,.75)'); } }
-    else if (k === 'oven') { const im = IMG[st.done ? 'prop_oven_lit' : 'prop_oven']; if (im) pic(im, x, G + 4, 270); if (st.armed > 0) for (let i = 0; i < 3; i++) circ(x - 20 + i * 20, G - 250 - ((T * 1.5 + i * 25) % 70), 10, 'rgba(255,255,255,.7)'); }
+    else if (k === 'oven') { const im = IMG[st.done ? 'prop_oven_lit' : 'prop_oven']; if (im) pic(im, x, G + 4, 270); if (st.ready) { ctx.strokeStyle = 'rgba(255,240,120,.95)'; ctx.lineWidth = 8; ctx.beginPath(); ctx.arc(x, G - 120, 96 + Math.sin(T * 0.3) * 8, 0, 7); ctx.stroke(); } if (st.armed > 0) for (let i = 0; i < 3; i++) circ(x - 20 + i * 20, G - 250 - ((T * 1.5 + i * 25) % 70), 10, 'rgba(255,255,255,.7)'); }
     else if (k === 'candles') { const im = IMG[st.done ? 'prop_candle_lit' : 'prop_candle_unlit']; if (im) pic(im, x, G + 2, 150);
       for (let i = 0; i < 2; i++) { const sx = st.done ? x - 26 + i * 52 : x + Math.cos(T * 0.03 + i * 3.1) * 180, sy = st.done ? G - 140 : G - 200 + Math.sin(T * 0.05 + i * 2) * 60; drawItem('spark', sx, sy, null, T * 0.1 + i); } }
     else if (k === 'table') { const im = IMG[st.img || 'prop_plank_bridge']; if (im) pic(im, x, G + 6, st.img ? 380 : 420); else rr(x - 200, G - 110, 400, 40, 8, '#c58a4a'); const sh = [].concat(st.show || 'challah'); if (st.done) sh.forEach((k2, i) => drawItem(k2, x + (i - (sh.length - 1) / 2) * 110, G - 170, null, T * 0.04 + i)); else for (let i = 0; i < st.need; i++) circ(x - (st.need - 1) * 15 + i * 30, G - 240, 9, i < st.have ? '#ffd028' : 'rgba(255,255,255,.7)'); }
@@ -1646,7 +1667,7 @@ function drawPocket(){
   rr(x0, y0, w, 54, 27, 'rgba(255,255,255,.78)');
   for (let i = 0; i < 4; i++) circ(x0 + 78 + i * 56, y0 + 27, 22, 'rgba(176,64,154,.14)');
   ctx.fillStyle = '#b0409a'; ctx.font = 'bold 26px "Comic Sans MS", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('\u{1F392}', x0 + 28, y0 + 29);
-  const grp = []; pocket.forEach(it => { const g0 = grp.find(q => pocketKey(q.it) === pocketKey(it)); if (g0) g0.n++; else grp.push({ it, n: 1 }); });      // same kind = one slot with a small count dot
+  const grp = pocketGroups();      // same kind = one slot with a small count dot
   grp.forEach((q, i) => { const it = q.it; ctx.save(); ctx.translate(x0 + 78 + i * 56, y0 + 27 + Math.sin(T * 0.1 + i) * 2); ctx.save(); ctx.scale(0.44, 0.44); drawItem(it.kind || L.collect, 0, 0, it.col, 0); ctx.restore();
     if (q.n > 1) { circ(15, 14, 11, '#b0409a'); ctx.fillStyle = '#fff'; ctx.font = 'bold 15px "Comic Sans MS", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(String(q.n), 15, 15); } ctx.restore(); });
 }
@@ -1880,6 +1901,6 @@ showButtons();
 /* for testing in the browser console */
 window.__g = {
   get s(){ return { mode, li, meets: meets.map(m => m.kind + (m.done ? "!" : "")), x: p && Math.round(p.x), y: p && Math.round(p.y), on: p && p.on, got, total: items.length, meter, fin: !!fin, followers: followers.map(f => f.kind), said: Voice.last, save }; },
-  keys, flyers: () => flyers, rings: () => rings, fly: k => startFly(flyers[k || 0]), held: v => { jumpHeld = !!v; }, start: startLevel, finale: () => startFinale(), fx: () => fx, goLevel, pickSel: () => pickSel, P: () => p, sts: () => sts, pocket: () => pocket, goalMet: () => goalMet(), LV: () => L, gnd: groundAt, bonus: () => bonus, plats: () => plats, jump(){ wantJump = true; }, tap: (x, y) => tapWorld({ x, y }), dance(){ wantDance = true; }, sup(){ wantSuper = true; },
+  keys, flyers: () => flyers, rings: () => rings, fly: k => startFly(flyers[k || 0]), held: v => { jumpHeld = !!v; }, start: startLevel, finale: () => startFinale(), fx: () => fx, goLevel, pickSel: () => pickSel, P: () => p, sts: () => sts, pocket: () => pocket, goalMet: () => goalMet(), LV: () => L, gnd: groundAt, bonus: () => bonus, plats: () => plats, jump(){ wantJump = true; }, tapPocket, tap: (x, y) => tapWorld({ x, y }), dance(){ wantDance = true; }, sup(){ wantSuper = true; },
   step(n){ if (mode === 'finale' || (mode === 'end' && fx)) { for (let i = 0; i < n; i++) finaleUpdate(1); drawFinale(); return; } for (let i = 0; i < n; i++) { if (mode === 'finale') { finaleUpdate(1); continue; } update(1); } if (mode === 'finale') drawFinale(); else draw(); }, tp(x){ p.x = x; p.y = G; p.vy = 0; }, dragTok(st, i, tx, ty){ const t = st.tok[i]; if (!dragStart({ x: t.x, y: t.y })) return false; dragMove({ x: tx === undefined ? st.x : tx, y: ty === undefined ? G - 330 : ty }); dragEnd(); return true; }, cam: () => ({ x: camX, y: camY }), items: () => items, meets: () => meets, reset(){ localStorage.removeItem(SAVE_KEY); }
 };

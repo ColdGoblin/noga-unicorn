@@ -4,7 +4,7 @@ const g = __g; g.reset(); g.start(LVL); const P = g.P(), L = g.LV(), out = [L.na
 const step = n => g.step(n);
 const at = (x, y) => { P.x = x; P.y = y; P.vy = 0; };
 const lanternX = (st, i) => st.x + (i - 1.5) * 150;
-function deliver() { let guard = 0; while (g.pocket().length && guard++ < 12) { const it = g.pocket()[0], st = g.sts().find(s => s.id === it.to); if (!st) break; const n0 = g.pocket().length + g.pocket().map(o => o.kind).join(); at(st.x, G); step(40); if (g.pocket().length + g.pocket().map(o => o.kind).join() === n0) { out.push('STUCK deliver ' + it.to); break; } } }
+function deliver() { let guard = 0; while (g.pocket().length && guard++ < 12) { const it = g.pocket()[0], st = g.sts().find(s => s.id === it.to); if (!st) break; const n0 = g.pocket().length + g.pocket().map(o => o.kind).join(); at(st.x, G); g.tap(st.x, G - 120); step(40); if (g.pocket().length + g.pocket().map(o => o.kind).join() === n0) { out.push('STUCK deliver ' + it.to); break; } } }
 function collect() {
   for (let pass = 0; pass < 4; pass++) for (const it of g.items()) { if (it.got || it.hidden) continue;
     if (it.to && g.pocket().length >= 4) deliver();
@@ -39,7 +39,7 @@ function doStation(st) {
   else if (k === 'riddle') { step(1); at(st.x - 300, G); step(5); const o = st.objs.find(o => o.col === st.want); at(o.x, G); step(5); }
   else if (k === 'bounce') { const pd = g.LV().pads.find(q => q.st === st.id); let n = 0; while (!st.done && n++ < 20) { P.x = pd.x + pd.w / 2; P.y = pd.top + 2; P.vy = 3; P.on = false; step(3); } out.push('bounces ' + st.n); }
   else if (st.dance) { at(st.x, G); g.dance(); step(3); step(150); }
-  else if (st.auto) { step(250); }
+  else if (st.auto) { at(st.x - 150, G); step(2); if (st.ready) g.tap(st.x, G - 120); step(250); }
   else { at(st.x, G); step(80); }
 }
 collect();

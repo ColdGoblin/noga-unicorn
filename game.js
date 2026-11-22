@@ -622,6 +622,11 @@ addB(4, 7500, 7500, B => {
   B.stars(7700, 8150, G - 80, 40, 5); B.stars(8350, 9300, G - 90, 50, 8); B.stars(9650, 10000, G - 80, 30, 4); B.stars(10250, 10650, G - 90, 40, 5); B.stars(11100, 11900, G - 200, 70, 7); B.stars(12000, 12500, G - 90, 40, 5); B.stars(13950, 14150, G - 80, 20, 3); B.stars(14900, 15000, G - 80, 0, 2);
 });
 /* stage 6, Shabbat (round 11 batch C): after the table a flag; then numbered bubbles, a second row of lanterns, carrots for Bil'am over a hill, honey on a mushroom, a second challah (bowl, oven, table), a shower of stars, a stone over a gap, a friend to dance for */
+/* Keeper 22 Nov (phase 2 slice d2): stage 5 bread. Eggs and honey lie up high near the mill (optional, they never count toward the goal). With both in the bowl the oven bakes a challah, without them a loaf. Pushed after every addB so older saved indices stay valid. */
+{ const lv = LEVELS[4], mill = lv.stations.find(s => s.id === 'mill'), bowl = lv.stations.find(s => s.id === 'fbowl'), oven = lv.stations.find(s => s.id === 'foven'), tb = lv.stations.find(s => s.id === 'ftable');
+  lv.items.push({ x: mill.x - 380, y: G - 200, kind: 'eggs', to: 'fbowl', opt: true, nochip: true, say: null }, { x: mill.x - 160, y: G - 200, kind: 'honey', to: 'fbowl', opt: true, nochip: true, say: null },
+    { x: 0, y: 0, kind: 'challah', to: 'ftable', hid: 'challahF', hidden: true, nochip: true, opt: true, say: null });
+  bowl.opts = ['eggs', 'honey']; bowl.altSpawn = 'challahF'; bowl.tab = 'ftable'; oven.spawn0 = 'loaf'; tb.altShow = true; }
 addB(5, 6400, 7000, B => {
   B.need(10, 'num_08', 'num_10'); B.rest(6520, ['pr_14', 'ins_10', 'num_10']);
   B.hole(12500, 12650);
@@ -753,7 +758,12 @@ const pocketRoom = o => pocket.some(q => pocketKey(q) === pocketKey(o)) || new S
 /* Keeper 22 Nov (phase 2 slice d1): the cooking chains (mill, bowl, tea pot, camp fire, oven) are no longer filled by just walking past. She TAPS the place (or the item in her bag) to put things in and TAPS the oven to bake;
    no failure and nobody can get stuck: standing next to it for 6 s does the same step for her, and every step is the same as before (same items, same results). */
 const COOK_PUT = { mill: 1, bowl: 1, pot: 1, fire: 1 };
-const cookPut = (st, i) => { pocket.splice(i, 1); st.have++; st.cd = 16; st.dwc = 0; sfx.pop(); burst(st.x, G - 110, 10, RB, 'star'); if (st.have >= st.need) complete(st); else if (Math.random() < 0.4) praise(); };
+const cookPut = (st, i) => { const it = pocket.splice(i, 1)[0]; st.cd = 16; st.dwc = 0; sfx.pop(); burst(st.x, G - 110, 10, RB, 'star');
+  if (st.opts && st.opts.includes(it.kind)) { st.extra = (st.extra || 0) + 1; return; }      // d2: optional extras (eggs, honey) go in but do not count toward what the bowl needs
+  if (st.kind === 'pot' && !st.tea && /^flower_\d$/.test(it.kind)) st.tea = 'tea' + it.kind.slice(-1);      // d2: the first flower decides the colour of the tea
+  if (st.kind === 'fire' && /^tea\d$/.test(it.col || '')) st.tea = it.col;
+  st.have++; if (st.have >= st.need) complete(st); else if (Math.random() < 0.4) praise(); };
+const putFirst = st => { const k = st.opts ? pocket.findIndex(o => o.to === st.id && st.opts.includes(o.kind)) : -1; return k >= 0 ? k : pocket.findIndex(o => o.to === st.id); };      // tapping the bowl itself puts the extras in first
 const pocketGroups = () => { const grp = []; pocket.forEach(it => { const g0 = grp.find(q => pocketKey(q.it) === pocketKey(it)); if (g0) g0.n++; else grp.push({ it, n: 1 }); }); return grp; };
 const cookStation = it => sts.find(s => !s.done && COOK_PUT[s.kind] && s.id === it.to && Math.abs(p.x - s.x) < 800);
 function bake(st){ st.ready = false; st.armed = 110; st.rdy = 0; sfx.pop(); burst(st.x, G - 140, 14, ['#ffd84d', '#ff9f43', '#fff'], 'star'); Voice.say(st.bakeSay || 'x_oven'); }
@@ -794,7 +804,7 @@ function startLevel(i, party, resume){
   L.cues.forEach(c => c.done = false);
   followers = (party || paradeFor(i).slice(-MAXPARTY)).map(k => ({ kind: k }));      // at most two friends walk with her (she picks them before the stage)
   setupFly();
-  parts = []; hist = []; flowers = []; got = 0; meter = 0; fin = null; arrived = false; hintT = 0; maxX = 0; said = {}; falls = 0; trail = false; camX = 0; camY = 0;
+  parts = []; hist = []; flowers = []; got = items.filter(o => o.opt).length; meter = 0; fin = null; arrived = false; hintT = 0; maxX = 0; said = {}; falls = 0; trail = false; camX = 0; camY = 0;
   L.friend.happy = false; L.friend.bloom = 0; L.friend.fly = 0;
   ['title', 'map', 'end', 'pick'].forEach(s => $(s).classList.add('hide'));
   restDone = false; Voice.hush(); showButtons(); glow(null); startMusic(i);
@@ -819,7 +829,7 @@ function stPos(st){        // where the sparkle trail and the hints should point
 }
 const readyFr = () => got === items.length && starsOK() && sts.every(s => s.done || s.dance);     // only dance stations (the candles) are left: dancing at the friend lights them
 const goalMet = () => got === items.length && starsOK() && stationsOK();       // to finish a level: all the things (and each one put to use) AND enough gold stars
-function target(){ const it = items.find(o => !o.got && !o.hidden);
+function target(){ const it = items.find(o => !o.got && !o.hidden && !o.opt);
   { const rd = sts.find(s => s.ready && !s.done); if (rd) return { x: rd.x, y: G - 60 }; }
   if (pocket.length) { const st = sts.find(s => s.id === pocket[0].to); if (st) return { x: st.x, y: G - 60 }; }
   if (it) return { x: it.x, y: it.y };
@@ -828,7 +838,7 @@ function target(){ const it = items.find(o => !o.got && !o.hidden);
   if (!starsOK()) { const b = bonus.filter(o => !o.got).sort((a, c) => Math.abs(a.x - p.x) - Math.abs(c.x - p.x))[0]; if (b) return { x: b.x, y: b.y }; }
   return { x: L.friend.x, y: G - 60 }; }
 function curIns(){
-  if (got < items.length) { const nx = items.find(o => !o.got && !o.hidden); if (nx) return nx.say !== undefined ? nx.say : L.noIns ? null : L.ins; if (!L.hintStations) return null; }
+  if (got < items.length) { const nx = items.find(o => !o.got && !o.hidden && !o.opt); if (nx) return nx.say !== undefined ? nx.say : L.noIns ? null : L.ins; if (!L.hintStations) return null; }
   if (!starsOK()) return 'ins_10';
   if (!stationsOK() || got < items.length) { const s = sts.find(o => !o.done && o.hint && (o.kind !== 'rhythm' || !o.finish || restOK(o)) && (!o.dance || sts.every(z => z === o || z.done || z.dance))); return s ? s.hint : null; }
   if (Math.abs(p.x - L.friend.x) > 190) return 'ins_24';
@@ -844,16 +854,17 @@ function reachRest(){
 }
 function resumeHalf(){
   const h = save.half[li], rx = L.rest.x;
-  (h.it || []).forEach(k => { const it = items[k]; if (it && !it.got) { it.got = true; got++; const dst = it.to && sts.find(o => o.id === it.to); if (dst && dst.x >= rx) pocket.push(it); } });
+  (h.it || []).forEach(k => { const it = items[k]; if (it && !it.got) { it.got = true; if (!it.opt) got++; const dst = it.to && sts.find(o => o.id === it.to); if (dst && dst.x >= rx) pocket.push(it); } });
   bonus.forEach(b => { if (b.x < rx) b.got = true; }); bonusN = h.bn || 0;
   sts.forEach(st => { if (st.x < rx) st.done = true; }); meets.forEach(m => { if (m.x < rx) m.done = true; }); L.cues.forEach(c => { if (c.x < rx) c.done = true; });
   p.x = rx + 40; maxX = p.x; restDone = true; camX = clamp(p.x - VW * 0.36, 0, Math.max(0, L.len - VW)); Voice.say('pr_05');
 }
 
 function pickup(it){
-  it.got = true; got++; progress(); sfx.pick();
+  it.got = true; if (!it.opt) got++; progress(); sfx.pick();
   burst(it.x, it.y, 12, RB, 'star');
   if (it.to) pocket.push(it);
+  if (it.opt) { Voice.say('x_extra_got'); return; }      // optional extras never count toward the goal
   if (got <= 10) Voice.say('num_' + (got < 10 ? '0' : '') + got);
   if (L.collect === 'candy') Voice.say('x_candy_got');      // round 9: "sweet!" for each candy instead of the colour word
   else if (it.col && COL[it.col]) Voice.say(COL[it.col][1]);
@@ -865,10 +876,13 @@ function pickup(it){
 function complete(st){
   st.done = true; st.t = 0; progress(); sfx.win && st.kind !== 'plate' ? sfx.star() : sfx.pick(); burst(st.x, G - 120, st.kind === 'plate' ? 10 : 26, RB, 'star');
   if (!st.finish) (st.say || []).forEach(id => Voice.say(id));
-  if (st.spawn) items.filter(o => o.hid === st.spawn).forEach(it => { it.hidden = false; it.x = st.x + 10 + (it.dx || 0); it.y = G - 90 - (it.dy || 0);
+  if (st.spawn) items.filter(o => o.hid === st.spawn).forEach(it => { it.hidden = false; it.x = st.x + 10 + (it.dx || 0); it.y = G - 90 - (it.dy || 0); if (st.tea) it.col = st.tea;
     if (it.to && p.x > it.x + 24 && pocketRoom(it)) { it.x = p.x; it.y = p.y - 62; }      // Keeper 22 Nov: she already walked on (teapot 85 px, loaf 256 px behind): the product appears with her and goes straight into the pocket
     burst(it.x, it.y, 20, ['#ffe14d', '#fff'], 'star'); });
-  if (st.kind === 'bowl') { const ov = sts.find(s => s.id === (st.arms || 'oven')); if (ov) { ov.ready = true; ov.rdy = 0; ov.rmind = 0; ov.bakeSay = st.ovenSay || 'x_oven'; } Voice.say('x_oven_tap'); }
+  if (st.kind === 'bowl') { const ov = sts.find(s => s.id === (st.arms || 'oven')); if (ov) { ov.ready = true; ov.rdy = 0; ov.rmind = 0; ov.bakeSay = st.ovenSay || 'x_oven'; }
+    if (st.opts) { for (let k = pocket.length - 1; k >= 0; k--) if (pocket[k].to === st.id && st.opts.includes(pocket[k].kind)) pocket.splice(k, 1);      // d2: eggs and honey left in the bag are put away; with both in, the oven bakes a challah instead of a loaf
+      if (ov && (st.extra || 0) >= st.opts.length) { ov.spawn = st.altSpawn; ov.bakeSay = 'x_oven'; const sw = items.find(o => o.hid === ov.spawn0 && !o.got); if (sw) { sw.got = true; got++; } const tb = sts.find(o => o.id === st.tab); if (tb) tb.wish = 'challah'; } }
+    Voice.say('x_oven_tap'); }
   if (st.kind === 'riddle') st.objs.forEach(o => burst(o.x, G - 70, 8, RB, 'star'));
   if (st.finish) { finish(); return; }
   if (got === items.length && starsOK() && stationsOK() && !sts.some(o => o.finish)) Voice.say('ins_24');
@@ -1006,7 +1020,7 @@ function revealSeek(st, i){ const x = st.pts[i]; st.rev[i] = 1; st.n++; sfx.pick
 /* a tap or click on the picture (world position w): the numbered bubbles and the hiding places react to it. Returns true if the tap was used. */
 function tapWorld(w){
   for (const st of sts) { if (st.done) continue;
-    if (COOK_PUT[st.kind] && Math.abs(w.x - st.x) < 160 && w.y > G - 340 && w.y < G + 40 && Math.abs(p.x - st.x) < 800) { const i = pocket.findIndex(o => o.to === st.id); if (i >= 0) { cookPut(st, i); return true; } }
+    if (COOK_PUT[st.kind] && Math.abs(w.x - st.x) < 160 && w.y > G - 340 && w.y < G + 40 && Math.abs(p.x - st.x) < 800) { const i = putFirst(st); if (i >= 0) { cookPut(st, i); return true; } }
     else if (st.kind === 'oven' && st.ready && Math.abs(w.x - st.x) < 170 && w.y > G - 360 && w.y < G + 40 && Math.abs(p.x - st.x) < 900) { bake(st); return true; }
     if (st.kind === 'count') { for (let i = st.n; i < st.pts.length; i++) { const q = st.pts[i]; if (Math.hypot(q[0] - w.x, q[1] - w.y) < 84) {
         if (i === st.n) popCount(st); else { st.wob[i] = 50; sfx.boing(); if (st.cd <= 0) { st.cd = 420; Voice.say('x_count'); } } return true; } } }
@@ -1145,11 +1159,11 @@ function update(dt){
         if (!st.done && Math.abs(p.x - o.x) < 80 && p.y > G - 130 && o.wob <= 0) {
           if (o.col === st.want) complete(st); else { o.wob = 60; sfx.boing(); if (st.cd <= 0) { st.cd = 300; Voice.say(st.want === 'red' ? 'ins_21' : 'ins_22'); } } } });
       return; }
-    if (COOK_PUT[st.kind]) { const i = pocket.findIndex(o => o.to === st.id);
+    if (COOK_PUT[st.kind]) { const i = putFirst(st);
       if (i >= 0 && p.on && Math.abs(p.x - st.x) < (st.r || 140)) { if (!st.toldPut) { st.toldPut = 1; Voice.say('x_tap_put'); } st.dwc = (st.dwc || 0) + dt; if (st.dwc > 360 && st.cd <= 0) cookPut(st, i); } else st.dwc = 0;
       return; }
     if (st.cd <= 0 && Math.abs(p.x - st.x) < (st.r || 140)) { const i = pocket.findIndex(o => o.to === st.id);
-      if (i >= 0) { pocket.splice(i, 1); st.have++; st.cd = 16; sfx.pop(); burst(st.x, G - 110, 10, RB, 'star'); if (st.have >= st.need) complete(st); else if (Math.random() < 0.4) praise(); } } });
+      if (i >= 0) { const o = pocket.splice(i, 1)[0]; st.last = o.kind; if (/^tea\d$/.test(o.col || '')) st.tea = o.col; st.have++; st.cd = 16; sfx.pop(); burst(st.x, G - 110, 10, RB, 'star'); if (st.have >= st.need) complete(st); else if (Math.random() < 0.4) praise(); } } });
 
   // friends she meets on the way: say what to do when she comes close, glow the button
   meets.forEach(m => { if (m.hop > 0) m.hop -= dt; if (!m.done && !m.seen && !fin && Math.abs(p.x - m.x) < 520) { m.seen = true; Voice.say(m.do === 'dance' ? 'ins_06' : 'ins_02'); glow(m.do === 'dance' ? 'bd' : 'bj'); } });
@@ -1425,10 +1439,11 @@ function drawHero(){
 /* draw a picture centred at (cx, cy) inside a box of size `box`, keeping its shape (the new pictures are not all square) */
 function fit(im, cx, cy, box){ const a = im.width / im.height, w = a >= 1 ? box : box * a, h = a >= 1 ? box / a : box; ctx.drawImage(im, cx - w / 2, cy - h / 2, w, h); }
 function drawItem(kind, x, y, col, t){
+  let tea = null; if ((kind === 'teacup' || kind === 'teapot') && /^tea\d$/.test(col || '')) { tea = col; col = null; }      // d2: tea colour = colour of the first flower
   const im = IMG['item_' + kind + (col ? '_' + col : '')] || (kind === 'teapot' ? IMG.prop_teapot : null);
   ctx.save(); ctx.translate(x, y + Math.sin(t) * 7);
   circ(0, 0, 40, 'rgba(255,255,255,.28)');
-  if (im) { if (kind === 'feather') ctx.rotate(Math.sin(t * 0.6) * 0.18); fit(im, 0, 0, 88); ctx.restore(); return; }
+  if (im) { if (kind === 'feather') ctx.rotate(Math.sin(t * 0.6) * 0.18); fit(im, 0, 0, 88); if (tea) { const tc = { tea1: '#ff8fa0', tea2: '#ffd84d', tea3: '#c8a2ff' }[tea]; ell(0, 34, 30, 8, tc); for (let q = 0; q < 3; q++) circ(-14 + q * 14, -48 - ((T * 1.2 + q * 12) % 34), 7, tc); } ctx.restore(); return; }
   if (kind === 'feather') { ctx.rotate(-0.6); RB.forEach((c, i) => ell(0, -24 + i * 9, 13 - Math.abs(i - 2.5) * 2.4, 8, c)); ctx.strokeStyle = '#fff'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(0, -34); ctx.lineTo(0, 40); ctx.stroke(); }
   else if (kind === 'bubble') { circ(0, 0, 30, COL[col][0]); circ(0, 0, 30, 'rgba(255,255,255,.25)'); ell(-11, -12, 9, 5, 'rgba(255,255,255,.85)', -0.6); ctx.strokeStyle = '#fff'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, 0, 30, 0, 7); ctx.stroke(); }
   else if (kind === 'gem') { ctx.fillStyle = '#7fd8ff'; ctx.beginPath(); ctx.moveTo(-26, -8); ctx.lineTo(-14, -26); ctx.lineTo(14, -26); ctx.lineTo(26, -8); ctx.lineTo(0, 28); ctx.closePath(); ctx.fill(); ctx.fillStyle = '#ff9fd0'; ctx.beginPath(); ctx.moveTo(-26, -8); ctx.lineTo(0, -8); ctx.lineTo(0, 28); ctx.closePath(); ctx.fill(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(-26, -8); ctx.lineTo(26, -8); ctx.moveTo(-14, -26); ctx.lineTo(0, -8); ctx.lineTo(14, -26); ctx.stroke(); }
@@ -1606,7 +1621,7 @@ function drawStations(){
     else if (k === 'oven') { const im = IMG[st.done ? 'prop_oven_lit' : 'prop_oven']; if (im) pic(im, x, G + 4, 270); if (st.ready) { ctx.strokeStyle = 'rgba(255,240,120,.95)'; ctx.lineWidth = 8; ctx.beginPath(); ctx.arc(x, G - 120, 96 + Math.sin(T * 0.3) * 8, 0, 7); ctx.stroke(); } if (st.armed > 0) for (let i = 0; i < 3; i++) circ(x - 20 + i * 20, G - 250 - ((T * 1.5 + i * 25) % 70), 10, 'rgba(255,255,255,.7)'); }
     else if (k === 'candles') { const im = IMG[st.done ? 'prop_candle_lit' : 'prop_candle_unlit']; if (im) pic(im, x, G + 2, 150);
       for (let i = 0; i < 2; i++) { const sx = st.done ? x - 26 + i * 52 : x + Math.cos(T * 0.03 + i * 3.1) * 180, sy = st.done ? G - 140 : G - 200 + Math.sin(T * 0.05 + i * 2) * 60; drawItem('spark', sx, sy, null, T * 0.1 + i); } }
-    else if (k === 'table') { const im = IMG[st.img || 'prop_plank_bridge']; if (im) pic(im, x, G + 6, st.img ? 380 : 420); else rr(x - 200, G - 110, 400, 40, 8, '#c58a4a'); const sh = [].concat(st.show || 'challah'); if (st.done) sh.forEach((k2, i) => drawItem(k2, x + (i - (sh.length - 1) / 2) * 110, G - 170, null, T * 0.04 + i)); else for (let i = 0; i < st.need; i++) circ(x - (st.need - 1) * 15 + i * 30, G - 240, 9, i < st.have ? '#ffd028' : 'rgba(255,255,255,.7)'); }
+    else if (k === 'table') { const im = IMG[st.img || 'prop_plank_bridge']; if (im) pic(im, x, G + 6, st.img ? 380 : 420); else rr(x - 200, G - 110, 400, 40, 8, '#c58a4a'); const sh = [].concat(st.altShow && st.last ? st.last : st.show || 'challah'); if (st.done) sh.forEach((k2, i) => drawItem(k2, x + (i - (sh.length - 1) / 2) * 110, G - 170, k2 === 'teacup' ? st.tea : null, T * 0.04 + i)); else for (let i = 0; i < st.need; i++) circ(x - (st.need - 1) * 15 + i * 30, G - 240, 9, i < st.have ? '#ffd028' : 'rgba(255,255,255,.7)'); }
     else if (k === 'bilam') { drawFriend('bilam', x, G, st.done, { face: -1, bounce: st.done }); for (let i = 0; i < st.need; i++) circ(x - 45 + i * 30, G - 210, 9, i < st.have ? '#ff9f43' : 'rgba(255,255,255,.7)'); }
     else if (k === 'plate') { const im = IMG.item_gift_plate; if (im) pic(im, x, G - 8, 82); else ell(x, G - 30, 40, 14, '#fff'); const ic = IMG['item_' + st.icon]; ctx.globalAlpha = st.done ? 1 : 0.32; if (ic) ctx.drawImage(ic, x - 24, G - 66, 48, 48); ctx.globalAlpha = 1; if (st.done) circ(x, G - 80, 6 + Math.sin(T * 0.2 + x) * 2, '#ffe14d'); }
     else if (k === 'bounce') { for (let i = 0; i < st.need; i++) circ(x - (st.need - 1) * 17 + i * 34, G - 200, 10, i < st.n ? '#ffd028' : 'rgba(255,255,255,.7)'); }

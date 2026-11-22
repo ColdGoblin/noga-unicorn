@@ -1,0 +1,44 @@
+[
+ {
+  "key": "shoshi",
+  "file": "art/new14-15/shoshi.webp",
+  "bytes": 65484,
+  "sha256": "4fde096d7b7023b9c6a24ea34a6c2f112e4742116af9a6b000fa25f51bb67922"
+ },
+ {
+  "key": "parrot",
+  "file": "art/new14-15/parrot.webp",
+  "bytes": 24874,
+  "sha256": "b3366b2c0af2033759a0157d7a14917f4fbd4a1f1c729df4b40307d2ad0c7bac"
+ },
+ {
+  "key": "tiger",
+  "file": "art/new14-15/tiger.webp",
+  "bytes": 29914,
+  "sha256": "2047b9b3a539ae06a94df9767df4191374919347d4c9af97110743b69bba8eb6"
+ },
+ {
+  "key": "frog",
+  "file": "art/new14-15/frog.webp",
+  "bytes": 32822,
+  "sha256": "958acf1391f2dbe63368607abee7babff74db7a3e25f2dca56dc87d16cfc406d"
+ },
+ {
+  "key": "jumbo",
+  "file": "art/new14-15/jumbo.webp",
+  "bytes": 23558,
+  "sha256": "6624272083435709b9aac7ef3654a4c2a0b01fca430c09aef002a428da8e9ea0"
+ },
+ {
+  "key": "bgj",
+  "file": "art/new14-15/bgj.jpg",
+  "bytes": 398331,
+  "sha256": "0ba25c4946817b4513a81cdaa19a2c88aff34fa1c81503f07f48827e2c26cd0e"
+ },
+ {
+  "key": "bgd",
+  "file": "art/new14-15/bgd.jpg",
+  "bytes": 300264,
+  "sha256": "c0a830fe26adeb4d60097413dc9644c44c2478c46b04c6d2a6d848c0f6b6719a"
+ }
+]

@@ -8,6 +8,10 @@ const ev = (type, x, y) => { const el = type === 'pointerdown' ? document.elemen
 const h = { x: st.x, y: 560 - 330 };
 function dragTo(i, tx, ty) { const t = st.tok[i], a = scr(t.x, t.y), b = scr(tx, ty); const hit = ev('pointerdown', a[0], a[1]); const held = t.s; for (let k = 1; k <= 6; k++) { ev('pointermove', a[0] + (b[0] - a[0]) * k / 6, a[1] + (b[1] - a[1]) * k / 6); g.step(2); } ev('pointerup', b[0], b[1]); return hit + '/' + held; }
 out.push('wrong drop: ' + dragTo(0, st.x - 800, 560 - 100)); g.step(60); out.push('token0 ' + st.tok[0].s + ' n=' + st.n);
-for (let i = 0; i < 3; i++) { out.push('drag ' + i + ': ' + dragTo(i, h.x, h.y)); g.step(40); }
+const order = st.rc ? st.rc.target.map(k => st.tok.findIndex(t => t.kind === k)) : [0, 1, 2];
+function tapTok(i) { const t = st.tok[i], a = scr(t.x, t.y); const hit = ev('pointerdown', a[0], a[1]); ev('pointerup', a[0], a[1]); return hit + '/sel=' + (st.sel === t); }
+function tapMachine() { const a = scr(st.x, 560 - 200); const hit = ev('pointerdown', a[0], a[1]); ev('pointerup', a[0], a[1]); return hit; }
+if (st.rc) { out.push('real tap select ' + tapTok(order[0]) + ' then machine ' + tapMachine()); g.step(40); out.push('tap-sent seq ' + st.seq.join('>')); }
+for (let m = st.rc ? 1 : 0; m < 3; m++) { const i = order[m]; out.push('drag ' + i + ': ' + dragTo(i, h.x, h.y)); g.step(40); }
 out.push('n=' + st.n + ' phase ' + st.phase); g.step(200); out.push('done ' + st.done + ' walkingMoved ' + (g.s.x === Math.round(st.x - 330)));
 return out.join(' | ');

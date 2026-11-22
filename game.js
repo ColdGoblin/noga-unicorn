@@ -22,9 +22,9 @@ const RB = ['#ff5f7e', '#ffa64d', '#ffe14d', '#6fdc8c', '#5fb8ff', '#b98cff'];
 /* ---------- save ---------- */
 const SAVE_KEY = 'nogaUnicorn2';       // new key = everybody starts from zero (progress reset, 14 Nov)
 try { localStorage.removeItem('nogaUnicorn1'); } catch (e) {}
-let save = { done: [false, false, false, false, false, false, false, false, false, false, false, false, false], dance: false, sup: false, half: {} };
+let save = { done: [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false], dance: false, sup: false, half: {} };
 try { const o = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null');
-  if (o && Array.isArray(o.done)) { save.done = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(i => !!o.done[i]); save.sup = !!o.sup; if (o.half && typeof o.half === 'object') Object.keys(o.half).forEach(k => { const h = o.half[k]; if (+k >= 0 && +k < 13 && h && Array.isArray(h.it)) save.half[k] = { it: h.it.filter(Number.isInteger).slice(0, 60), bn: Math.max(0, h.bn | 0) }; }); if (Array.isArray(o.party)) save.party = o.party.filter(k => typeof k === 'string').slice(0, 2); } } catch (e) {}
+  if (o && Array.isArray(o.done)) { save.done = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14].map(i => !!o.done[i]); save.sup = !!o.sup; if (o.half && typeof o.half === 'object') Object.keys(o.half).forEach(k => { const h = o.half[k]; if (+k >= 0 && +k < 13 && h && Array.isArray(h.it)) save.half[k] = { it: h.it.filter(Number.isInteger).slice(0, 60), bn: Math.max(0, h.bn | 0) }; }); if (Array.isArray(o.party)) save.party = o.party.filter(k => typeof k === 'string').slice(0, 2); } } catch (e) {}
 /* one-time progress reset, 21 Nov 2026 (owner request, after the stage expansion and the bigger Love Party): everyone starts the stages from the beginning ONCE. The flag below is stored in the browser, so later visits keep their progress. Friends she picked (save.party), music and language are kept. */
 const RESET_FLAG = 'nogaReset20261121';
 try { if (!localStorage.getItem(RESET_FLAG)) { save.done = save.done.map(() => false); save.half = {}; save.sup = false; localStorage.setItem(RESET_FLAG, '1'); localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } } catch (e) {}
@@ -35,6 +35,11 @@ function persist(){ try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); 
 const IMG = {};
 function load(key, src, onload){ const im = new Image(); im.onload = () => { IMG[key] = im; if (onload) onload(); }; im.onerror = () => {}; im.src = src; }
 load('body', 'art/standin/uni_body2.png'); load('legA', 'art/standin/uni_legA.png'); load('legB', 'art/standin/uni_legB.png');
+/* 22 Nov 2026 (Keeper): two more stages (14 jungle hide and seek, 15 deep sea with Shoshi), ported by diff from the 21 Nov 15-stage review candidate onto the current build. Pictures are real files under art/new14-15/ (they were data URIs in the candidate). */
+const NEWART = { shoshi: 'art/new14-15/shoshi.webp', parrot: 'art/new14-15/parrot.webp', tiger: 'art/new14-15/tiger.webp', frog: 'art/new14-15/frog.webp', jumbo: 'art/new14-15/jumbo.webp', bgj: 'art/new14-15/bgj.jpg', bgd: 'art/new14-15/bgd.jpg' };
+load('bg_jungle', NEWART.bgj); load('bg_deepsea', NEWART.bgd);
+['shoshi_happy', 'shoshi_sad'].forEach(k => load(k, NEWART.shoshi)); ['jumbo_happy', 'jumbo_sad'].forEach(k => load(k, NEWART.jumbo));
+['parrot', 'tiger', 'frog'].forEach(k => load('peek_' + k, NEWART[k]));
 load('map10', 'art/ui/map10.jpg', refreshMapArtwork);
 load('map11', 'art/ui/map11.jpg', refreshMapArtwork);
 load('map12', 'art/ui/map12.jpg', refreshMapArtwork);
@@ -449,13 +454,42 @@ const LEVELS = [
     stations: [{ id: 'feed1', kind: 'feed', who: 'bunicorn_pink', x: 2050, need: 1, r: 200, wish: 'lollipop', wy: 250, say: ['x_eat_done', 'pr_15'] },
                { id: 'choc', kind: 'rain', skin: 'choc', x: 2900, zone: [2600, 3250], need: 6, hint: 'x_choc', near: 800, say: ['pr_13'] },
                { id: 'feed2', kind: 'feed', who: 'bunicorn_blue', x: 5350, need: 1, r: 200, wish: 'candycane', wy: 250, say: ['x_eat_done', 'pr_16'] },
-               { id: 'machine', kind: 'machine', x: 7000, need: 3, hint: 'x_machine', near: 800, spawn: 'made', say: ['x_machine_done'] },
+               { id: 'machine', kind: 'machine', x: 7000, need: 3, hint: 'x_machine', near: 800, spawn: 'made', say: ['x_machine_done'],
+                 recipes: { pic: ['candy', '1'], target: ['sugar', 'strawberry', 'chocbar'], alts: [{ seq: ['chocbar', 'sugar', 'strawberry'], out: 'lollipop' }, { seq: ['strawberry', 'chocbar', 'sugar'], out: 'candycane' }] } },
                { id: 'feast', kind: 'table', x: 7750, need: 3, r: 230, img: 'prop_table', show: ['candy', 'lollipop', 'candycane'], hint: 'x_table', near: 560, say: ['pr_17'] }],
     bonus: [].concat(arcRow(250, 480, G - 80, 0, 3), arcRow(700, 1060, G - 260, 100, 5), arcRow(1650, 2250, G - 120, 60, 6), arcRow(2600, 3250, G - 380, 120, 6), arcRow(3400, 3650, G - 80, 0, 3), arcRow(5000, 5500, G - 300, 100, 5), arcRow(6200, 6600, G - 80, 30, 4), arcRow(7050, 7650, G - 150, 60, 5), arcRow(7850, 8200, G - 80, 30, 4)),
     props: [{ k: 'lollipop_a', x: 330, w: 150 }, { k: 'candycane', x: 1700, w: 130 }, { k: 'lollipop_b', x: 2250, w: 150 }, { k: 'gumdrop', x: 3000, w: 150 }, { k: 'cotton_castle', x: 4360, w: 1250 }, { k: 'candycane', x: 5200, w: 130 }, { k: 'choc_fall', x: 5900, w: 520 }, { k: 'lollipop_a', x: 6350, w: 150 }, { k: 'gumdrop', x: 7500, w: 150 }, { k: 'lollipop_b', x: 8050, w: 150 }],
     decos: [{ kind: 'bunicorn_pink', x: 7560, hap: 'feast' }, { kind: 'bunicorn_blue', x: 7940, hap: 'feast' }],
     cues: [{ x: 0, say: ['l13_a', 'x_candy', 'ins_10', 'num_10'] }, { x: 450, say: ['x_pad'] }, { x: 700, say: ['x_lolli'] }, { x: 3300, say: ['l13_b'] }, { x: 5450, say: ['x_fall'] }] }
 ];
+/* ---------- 21 Nov 2026: two new stages after Candy Land ---------- */
+LEVELS.push(
+  /* stage 14: Jungle hide and seek. Animals hide in the bushes; touch the bush to find them. A big elephant waits at the end. */
+  { name: 'jungle', need: 10, len: 7600, sticker: 13, collect: 'petal', ins: 'x_hide', joins: [], carry: true, hintStations: true,
+    finSay: ['pr_20'],
+    terrain: [{ x0: 0, x1: 2000, top: G }, { x0: 2000, x1: 2200, top: G, top1: G - 70 }, { x0: 2200, x1: 2700, top: G - 70 }, { x0: 2700, x1: 2900, top: G - 70, top1: G }, { x0: 2900, x1: 7600, top: G }],
+    friend: { kind: 'jumbo', x: 7100 },
+    items: [],
+    stations: [{ id: 'hideA', kind: 'seek', what: 'peek', mounds: ['bush_a', 'bush_b', 'bush_c'], peeks: ['parrot', 'tiger', 'frog'], x: 1500, pts: [1250, 1500, 1750], hint: 'x_hide', near: 600, say: ['pr_13'] },
+               { id: 'rainJ', kind: 'rain', x: 3500, zone: [3250, 3750], need: 6, hint: 'x_rain', near: 700, say: ['pr_13'] },
+               { id: 'hideB', kind: 'seek', what: 'peek', mounds: ['bush_a', 'bush_b', 'bush_c'], peeks: ['frog', 'parrot', 'tiger'], x: 4700, pts: [4450, 4700, 4950], hint: 'x_hide', near: 600, say: ['pr_13'] },
+               { id: 'hideC', kind: 'seek', what: 'peek', mounds: ['bush_a', 'bush_b', 'bush_c'], peeks: ['tiger', 'frog', 'parrot'], x: 6000, pts: [5750, 6000, 6250], hint: 'x_hide', near: 600, say: ['pr_13'] }],
+    bonus: [].concat(arcRow(300, 900, G - 80, 40, 5), arcRow(2000, 2700, G - 190, 40, 5), arcRow(3900, 4300, G - 90, 40, 4), arcRow(5100, 5600, G - 90, 40, 4), arcRow(6400, 6900, G - 90, 40, 4)),
+    plats: [{ x: 3000, w: 110, kind: 'rock' }, { x: 5300, w: 116, kind: 'stump' }],
+    cues: [{ x: 0, say: ['x_hide', 'ins_10', 'num_10'] }, { x: 3200, say: ['x_rain'] }] },
+  /* stage 15: Deep sea with Shoshi the mermaid. Treasures hide under the sand, stars sink down, Shoshi waits at the end. */
+  { name: 'deepsea', need: 10, len: 7600, sticker: 13, collect: 'petal', ins: 'x_seek_b', joins: [], carry: true, hintStations: true,
+    finSay: ['pr_20'],
+    terrain: [{ x0: 0, x1: 7600, top: G }],
+    friend: { kind: 'shoshi', x: 7100 },
+    items: [],
+    stations: [{ id: 'gemsS1', kind: 'seek', what: 'gem', mound: 'sandmound', x: 1700, pts: [1400, 1700, 2000], hint: 'x_seek_b', near: 600, say: ['pr_13'] },
+               { id: 'rainS', kind: 'rain', x: 3600, zone: [3350, 3850], need: 6, hint: 'x_rain', near: 700, say: ['pr_13'] },
+               { id: 'gemsS2', kind: 'seek', what: 'gem', mound: 'sandmound', x: 5200, pts: [4900, 5200, 5500, 5800], hint: 'x_seek_b', near: 600, say: ['pr_13'] }],
+    bonus: [].concat(arcRow(300, 900, G - 80, 40, 5), arcRow(2300, 3000, G - 100, 60, 5), arcRow(2800, 3000, G - 250, 0, 2), arcRow(4100, 4700, G - 100, 40, 4), arcRow(6100, 6900, G - 100, 40, 5)),
+    plats: [{ x: 2750, w: 116, kind: 'rock' }, { x: 6400, w: 116, kind: 'rock' }],
+    cues: [{ x: 0, say: ['x_seek_b', 'ins_10', 'num_10'] }, { x: 3300, say: ['x_rain'] }] }
+);
 /* ---------- round 8: longer stages. Each stage gets a flat stretch inserted at `at` (everything after it moves right by `by`), with one more thing to do in it ---------- */
 function stretch(lv, at, by, pad){
   lv.len += by;
@@ -556,7 +590,8 @@ addB(12, 8000, 2800, B => {
   B.pad({ x: 8100, w: 170, top: G - 58, kind: 'candy', pw: -19 });
   [[8330, 110], [8530, 215], [8730, 320]].forEach(([x, h]) => { B.plat({ x, w: 150, top: G - h, kind: 'marsh' }); B.star(x, G - h - 70); });
   B.item({ x: 8730, y: G - 382, col: '2' });
-  B.station({ id: 'machine2', kind: 'machine', x: 9300, need: 3, tokens: ['honey', 'milk', 'chocstar'], th: [[-520, 260], [-330, 150], [-170, 270]], hint: 'x_machine', near: 800, spawn: 'made2', say: ['x_machine_done'] });
+  B.station({ id: 'machine2', kind: 'machine', x: 9300, need: 3, tokens: ['honey', 'milk', 'chocstar'], th: [[-520, 260], [-330, 150], [-170, 270]], hint: 'x_machine', near: 800, spawn: 'made2', say: ['x_machine_done'],
+    recipes: { pic: ['candy', '2'], target: ['honey', 'milk', 'chocstar'], alts: [{ seq: ['milk', 'honey', 'chocstar'], out: 'candy', col: '3' }, { seq: ['chocstar', 'honey', 'milk'], out: 'chocstar' }] } });
   B.item({ x: 0, y: 0, kind: 'lollipop', to: 'feast2', hid: 'made2', hidden: true, nochip: true, dx: 150 });
   B.item({ x: 0, y: 0, kind: 'candycane', to: 'feast2', hid: 'made2', hidden: true, nochip: true, dx: 260 });
   B.item({ x: 0, y: 0, kind: 'chocstar', to: 'feast2', hid: 'made2', hidden: true, nochip: true, dx: 370 });
@@ -734,7 +769,8 @@ function startLevel(i, party, resume){
     else if (k === 'simon') { st.seq = [0, 1, 2, 3].sort(() => Math.random() - 0.5).slice(0, 3); st.phase = 'wait'; st.k = 0; st.t2 = 0; st.lit = [0, 0, 0, 0]; st.on = [false, false, false, false]; st.stand = 0; st.ign = -2; st.prev = -1; st.idle = 0; st.shake = 0; }
     else if (k === 'rhythm') { st.active = false; st.clock = 0; st.hits = 0; st.fb = 0; st.r = st.r || 300; }
     else if (k === 'machine') { st.n = 0; st.phase = 'fill'; st.run = 0; st.dw = 0;      // round 10: the ingredients float next to the machine, she drags them in
-      const th = st.th || [[-470, 130], [-330, 235], [-190, 140]]; st.tok = (st.tokens || ['sugar', 'chocbar', 'strawberry']).map((kind, i) => ({ kind, hx: st.x + th[i][0], hy: G - th[i][1], x: st.x + th[i][0], y: G - th[i][1], s: 'idle', t: 0, ph: i * 2 })); } });
+      const th = st.th || [[-470, 130], [-330, 235], [-190, 140]]; st.tok = (st.tokens || ['sugar', 'chocbar', 'strawberry']).map((kind, i) => ({ kind, hx: st.x + th[i][0], hy: G - th[i][1], x: st.x + th[i][0], y: G - th[i][1], s: 'idle', t: 0, ph: i * 2 }));
+      st.rc = st.recipes || null; st.seq = []; st.miss = 0; st.shelf = []; st.sel = null; st.demo = 0; st.res = null; st.fbk = null; } });      // Keeper 22 Nov: recipes = ordered ingredients, different orders give different candies
   drag = null;
   stars = (L.stars || []).map(o => ({ ...o, y: G - 70, got: false, back: 0 }));
   bonus = (L.bonus || []).map(o => ({ ...o, got: false })); bonusN = 0;
@@ -865,7 +901,7 @@ function miniUpdate(st, dt){
     if (st.phase === 'wait') { if (Math.abs(p.x - st.x) < 560) { st.phase = 'show'; st.t2 = 0; Voice.say('x_simon'); } return; }
     if (st.phase === 'show') { st.t2 += dt;
       for (let j = 0; j < 3; j++) { const t0 = 170 + j * 85; if (st.t2 >= t0 && st.t2 - dt < t0) { st.lit[st.seq[j]] = 55; tone(SIMON_TONE[st.seq[j]], 0.4, 'triangle', 0.14); } }
-      if (st.t2 > 170 + 3 * 85 + 30) { st.phase = 'input'; st.k = 0; st.stand = 0; st.idle = 0; st.ign = c; st.prev = c; st.on = [false, false, false, false]; Voice.say('x_now'); }
+      if (st.t2 > 170 + 3 * 85 + 30) { st.phase = 'input'; st.k = 0; st.stand = 0; st.idle = 0; st.ign = c === st.seq[0] ? -2 : c; st.prev = c;      /* Keeper 22 Nov: standing already on the RIGHT first lantern counts (before it was ignored until she stepped off and on); a wrong one is still ignored so the show does not loop */ st.on = [false, false, false, false]; Voice.say('x_now'); }
       return; }
     st.idle += dt;
     if (c !== st.prev) { st.prev = c; st.stand = 0; if (c !== st.ign) st.ign = -2; }
@@ -881,8 +917,9 @@ function miniUpdate(st, dt){
       if (t.s === 'idle') { t.x = t.hx; t.y = t.hy + Math.sin(t.ph) * 8; }
       else if (t.s === 'back') { t.x += (t.hx - t.x) * 0.2 * dt; t.y += (t.hy - t.y) * 0.2 * dt; if (Math.hypot(t.hx - t.x, t.hy - t.y) < 6) t.s = 'idle'; }
       else if (t.s === 'in') { t.t += dt; const q = Math.min(1, t.t / 22); t.x = t.x0 + (h.x - t.x0) * q; t.y = t.y0 + (h.y - t.y0) * q - Math.sin(q * Math.PI) * 90;
-        if (q >= 1) { t.s = 'gone'; st.n++; sfx.pick(); burst(h.x, h.y, 14, ['#ffd84d', '#ff8fc7', '#7fc4ff'], 'star'); progress(); if (st.n < st.need) Voice.say(NUMV(st.n)); else { st.phase = 'run'; st.run = 0; sfx.win(); } } } });
-    const idle = st.tok.find(t => t.s === 'idle');
+        if (q >= 1) { t.s = 'gone'; st.n++; sfx.pick(); burst(h.x, h.y, 14, ['#ffd84d', '#ff8fc7', '#7fc4ff'], 'star'); progress(); if (st.rc) recipeAdd(st, t); else if (st.n < st.need) Voice.say(NUMV(st.n)); else { st.phase = 'run'; st.run = 0; sfx.win(); } } } });
+    if (st.rc) recipeTick(st, dt);
+    const idle = st.rc ? recipeNeed(st) : st.tok.find(t => t.s === 'idle');
     if (st.phase === 'fill' && idle && !busy && p.on && Math.abs(p.x - st.x) < 260) { st.dw += dt; if (st.dw > 180) { st.dw = 0; sendTok(st, idle); } } else if (!busy) st.dw = 0;
     if (st.phase === 'run') { const r0 = st.run; st.run += dt; if (Math.floor(r0 / 18) !== Math.floor(st.run / 18)) { tone(300 + (Math.floor(st.run / 18) % 4) * 90, 0.12, 'triangle', 0.1); burst(st.x + 120, G - 110, 3, ['#ffd84d', '#ff8fc7', '#7fc4ff'], 'dot'); }
       if (st.run > 110) { st.phase = 'done'; burst(st.x + 130, G - 130, 34, ['#ffd84d', '#ff8fc7', '#7fc4ff', '#fff'], 'star'); complete(st); } } }
@@ -893,15 +930,55 @@ function miniUpdate(st, dt){
 /* round 10: press and drag an ingredient into the candy machine (Candy Land). A token let go near the hopper flies in; let go anywhere else it floats back. Standing next to the machine for 3 s also sends the next one in (never stuck). */
 let drag = null;
 const hopperOf = st => ({ x: st.x, y: G - 330 });
-function sendTok(st, t){ t.s = 'in'; t.t = 0; t.x0 = t.x; t.y0 = t.y; sfx.pop(); }
+function sendTok(st, t){ t.s = 'in'; t.t = 0; t.x0 = t.x; t.y0 = t.y; if (st.sel === t) st.sel = null; sfx.pop(); }
+/* ---- Keeper 22 Nov: the shared RECIPE interaction (candy machines). A picture card shows the target candy and its ingredients in order. She drags an ingredient into the hopper, or taps it and then taps the machine
+   (tapping a selected ingredient again also sends it). The right order makes the target candy (the station completes). Another valid order makes a DIFFERENT candy that is shown on the shelf (an intended alternate, no penalty).
+   Anything else makes a harmless fizzy mix. Ingredients always come back, nothing is lost, nothing can fail. After two off-target tries the next right ingredient glows; standing by the machine 3 s still sends the next right one. ---- */
+function recipeNeed(st){ const k = st.rc.target[st.seq.length]; return st.tok.find(t => t.s === 'idle' && t.kind === k) || null; }
+function recipeAdd(st, t){
+  const rc = st.rc; st.seq.push(t.kind); const i = st.seq.length - 1, on = st.seq.every((k, j) => k === rc.target[j]);
+  st.fbk = { i, ok: on, t: 70 }; if (on) tone(520 + i * 130, 0.25, 'triangle', 0.14); else { tone(250, 0.22, 'sine', 0.08); sfx.boing(); }
+  if (st.seq.length < rc.target.length) return;
+  const alt = rc.alts.find(a => a.seq.every((k, j) => k === st.seq[j]));
+  if (on) { st.phase = 'run'; st.run = 0; sfx.win(); Voice.say('x_rc_ok'); }
+  else { st.phase = 'alt'; st.run = 0; st.res = alt || null; st.miss++; }
+}
+function recipeReset(st){ const h = hopperOf(st); st.tok.forEach(t => { t.s = 'back'; t.x = h.x; t.y = h.y; }); st.seq = []; st.n = 0; st.sel = null; st.phase = 'fill'; st.fbk = null; }
+function recipeTick(st, dt){
+  if (!st.told && st.phase === 'fill' && p && Math.abs(p.x - st.x) < 650) { st.told = 1; Voice.say('x_rc_target'); }
+  if (st.fbk) { st.fbk.t -= dt; if (st.fbk.t <= 0) st.fbk = null; }
+  if (st.demo > 0) { st.demo += dt; if (st.demo > st.rc.target.length * 50 + 40) st.demo = 0; }
+  if (st.phase === 'alt') { const r0 = st.run; st.run += dt; if (Math.floor(r0 / 16) !== Math.floor(st.run / 16)) { tone(280 + (Math.floor(st.run / 16) % 4) * 70, 0.1, 'triangle', 0.08); burst(st.x + 100, G - 120, 3, ['#ffd84d', '#ff8fc7', '#7fc4ff'], 'dot'); }
+    if (st.run > 72) { const a = st.res;
+      if (a) { st.shelf.push({ kind: a.out, col: a.col || null, x: st.x + 150 + (st.shelf.length % 3) * 52, y: G - 80 - Math.floor(st.shelf.length / 3) * 54 }); burst(st.x + 130, G - 110, 22, ['#ffd84d', '#ff8fc7', '#7fc4ff', '#fff'], 'star'); sfx.star(); Voice.say('x_rc_alt'); }
+      else { burst(st.x + 120, G - 120, 14, ['#c8a2ff', '#9be7b0', '#fff'], 'dot'); sfx.boing(); Voice.say('x_rc_mix'); }
+      recipeReset(st); if (st.miss >= 2 && !st.helped) { st.helped = 1; Voice.say('x_rc_help'); } } } }
+function recipeDraw(st){
+  const rc = st.rc, x = st.x, y = G - 478, n = rc.target.length, w = 150 + n * 100;
+  ctx.save(); rr(x - w / 2, y - 54, w, 108, 32, 'rgba(255,255,255,.9)'); rr(x - w / 2 + 6, y - 48, w - 12, 96, 27, 'rgba(255,214,236,.55)');
+  ctx.save(); ctx.translate(x - w / 2 + 62, y); ctx.scale(1.05, 1.05); drawItem(rc.pic[0], 0, 0, rc.pic[1] || null, 0); ctx.restore();
+  ctx.strokeStyle = '#b0409a'; ctx.lineWidth = 7; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(x - w / 2 + 112, y - 9); ctx.lineTo(x - w / 2 + 132, y - 9); ctx.moveTo(x - w / 2 + 112, y + 9); ctx.lineTo(x - w / 2 + 132, y + 9); ctx.stroke();      // the = sign
+  for (let i = 0; i < n; i++) { const sx = x - w / 2 + 190 + i * 100, done = i < st.seq.length, ok = done && st.seq.slice(0, i + 1).every((k, j) => k === rc.target[j]);
+    if (i === st.seq.length && st.phase === 'fill') circ(sx, y, 44 + Math.sin(T * 0.2) * 4, 'rgba(255,240,120,.8)');
+    ctx.save(); ctx.translate(sx, y); ctx.scale(0.95, 0.95); drawItem(rc.target[i], 0, 0, null, T * 0.04); ctx.restore();
+    if (done) { if (ok) tick(sx + 28, y + 26); else circ(sx + 28, y + 26, 13, '#ffb347'); }
+    if (i < n - 1) { ctx.strokeStyle = '#b0409a'; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(sx + 46, y); ctx.lineTo(sx + 58, y); ctx.moveTo(sx + 52, y - 7); ctx.lineTo(sx + 58, y); ctx.lineTo(sx + 52, y + 7); ctx.stroke(); } }
+  ctx.restore();
+  if (st.phase === 'fill' && st.sel) { const t = st.sel, h = hopperOf(st); ctx.strokeStyle = 'rgba(255,255,160,.95)'; ctx.lineWidth = 8; ctx.beginPath(); ctx.arc(t.x, t.y, 64 + Math.sin(T * 0.3) * 5, 0, 7); ctx.stroke(); ctx.beginPath(); ctx.arc(h.x, h.y, 74 + Math.sin(T * 0.3) * 8, 0, 7); ctx.stroke(); }
+  else if (st.phase === 'fill' && st.miss >= 2) { const t = recipeNeed(st); if (t) { ctx.strokeStyle = 'rgba(255,240,120,.9)'; ctx.lineWidth = 7; ctx.beginPath(); ctx.arc(t.x, t.y, 62 + Math.sin(T * 0.25) * 6, 0, 7); ctx.stroke(); } }
+  if (st.demo > 0) { const h = hopperOf(st), s = Math.floor(st.demo / 50); for (let i = 0; i <= Math.min(s, n - 1); i++) { const t = st.tok.find(o => o.kind === rc.target[i]); if (!t) continue; const q = i < s ? 1 : Math.min(1, (st.demo - i * 50) / 36); ctx.save(); ctx.globalAlpha = i < s ? 0.28 : 0.85; ctx.translate(t.hx + (h.x - t.hx) * q, t.hy + (h.y - t.hy) * q - Math.sin(q * Math.PI) * 80); drawItem(t.kind, 0, 0, null, 0); ctx.restore(); } }
+  st.shelf.forEach(o => { ctx.save(); ctx.translate(o.x, o.y); ctx.scale(0.8, 0.8); drawItem(o.kind, 0, 0, o.col, 0); ctx.restore(); });
+  if (st.phase === 'alt') { const m = st.res ? ['#ffd84d', '#ff8fc7'] : ['#c8a2ff', '#9be7b0']; for (let i = 0; i < 4; i++) circ(x + 110 + i * 22, G - 150 - ((T * 1.8 + i * 20) % 70), 9, m[i % 2]); }
+}
 function dragStart(w){
   for (const st of sts) { if (st.kind !== 'machine' || st.done || st.phase !== 'fill') continue;
-    for (const t of st.tok) if ((t.s === 'idle' || t.s === 'back') && Math.hypot(t.x - w.x, t.y - w.y) < 100) { t.s = 'held'; t.x = w.x; t.y = w.y; drag = { st, t }; sfx.pop(); if (!said.drag) { said.drag = 1; } return true; } }
+    for (const t of st.tok) if ((t.s === 'idle' || t.s === 'back') && Math.hypot(t.x - w.x, t.y - w.y) < 100) { t.s = 'held'; t.x = w.x; t.y = w.y; drag = { st, t }; sfx.pop(); if (!said.drag) { said.drag = 1; } drag.sx = w.x; drag.sy = w.y; drag.moved = false; return true; } }
   return false;
 }
-function dragMove(w){ if (drag) { drag.t.x = w.x; drag.t.y = w.y; } }
+function dragMove(w){ if (drag) { if (Math.hypot(w.x - drag.sx, w.y - drag.sy) > 36) drag.moved = true; drag.t.x = w.x; drag.t.y = w.y; } }
 function dragEnd(){
-  if (!drag) return; const { st, t } = drag; drag = null; const h = hopperOf(st);
+  if (!drag) return; const { st, t, moved } = drag; drag = null; const h = hopperOf(st);
+  if (st.rc && !moved) { if (st.sel === t) { sendTok(st, t); } else { st.sel = t; t.s = 'back'; sfx.pop(); } return; }      // a tap, not a drag: select it (tap it again or tap the machine to send it)
   if (Math.hypot(t.x - h.x, t.y - h.y) < 180) sendTok(st, t); else { t.s = 'back'; sfx.boing(); if (st.cd <= 0) { st.cd = 480; Voice.say('x_machine'); } }
 }
 function bounceCount(st){ st.n = (st.n || 0) + 1; progress(); burst(st.x, G - 200, 10, RB, 'star'); if (st.n <= 10) Voice.say(NUMV(st.n)); if (st.n >= st.need) { burst(st.x, G - 260, 40, RB, 'star'); complete(st); } }
@@ -913,7 +990,10 @@ function tapWorld(w){
   for (const st of sts) { if (st.done) continue;
     if (st.kind === 'count') { for (let i = st.n; i < st.pts.length; i++) { const q = st.pts[i]; if (Math.hypot(q[0] - w.x, q[1] - w.y) < 84) {
         if (i === st.n) popCount(st); else { st.wob[i] = 50; sfx.boing(); if (st.cd <= 0) { st.cd = 420; Voice.say('x_count'); } } return true; } } }
-    else if (st.kind === 'seek') { for (let i = 0; i < st.pts.length; i++) if (!st.rev[i] && Math.abs(w.x - st.pts[i]) < 125 && w.y > G - 300 && w.y < G + 30) { revealSeek(st, i); return true; } } }
+    else if (st.kind === 'seek') { for (let i = 0; i < st.pts.length; i++) if (!st.rev[i] && Math.abs(w.x - st.pts[i]) < 125 && w.y > G - 300 && w.y < G + 30) { revealSeek(st, i); return true; } }
+    else if (st.kind === 'machine' && st.rc && st.phase === 'fill') {
+      const cw = 150 + st.rc.target.length * 100; if (Math.abs(w.x - st.x) < cw / 2 && Math.abs(w.y - (G - 478)) < 66 && st.demo <= 0) { st.demo = 1; sfx.pop(); return true; }      // tap the picture card: a ghost shows the order (it does not play the turn)
+      if (st.sel && Math.abs(w.x - st.x) < 210 && w.y > G - 450 && w.y < G + 20) { sendTok(st, st.sel); return true; } } }
   return false;
 }
 function rhythmPress(st){
@@ -1172,7 +1252,7 @@ function face(x, y, s, happy, closed){
 function star5(x, y, r, c){ ctx.fillStyle = c; ctx.beginPath(); for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, q = i % 2 ? r * 0.45 : r; ctx.lineTo(x + Math.cos(a) * q, y + Math.sin(a) * q); } ctx.closePath(); ctx.fill(); }
 
 /* ---------- drawing: friends (stand-ins; x,y = feet) ---------- */
-const FH = { pitzi: 150, bird: 84, mamabird: 115, bobo: 135, dad: 250, shluli: 105, tree: 370, bilam: 168, koko: 170, armon: 230, anana: 230, rhino: 280, luna: 110, solomon: 260, riddletree: 330, princess1: 250, princess2: 250, grandpa: 250, cloudunicorn: 200, sheba: 250, camel: 230, moon: 330, bouncy: 240, bunicorn_pink: 170, bunicorn_blue: 170, bunicorn_mint: 170 };   // height of the whole picture frame, feet at the bottom
+const FH = { pitzi: 150, bird: 84, mamabird: 115, bobo: 135, dad: 250, shluli: 105, tree: 370, bilam: 168, koko: 170, armon: 230, anana: 230, rhino: 280, luna: 110, solomon: 260, riddletree: 330, princess1: 250, princess2: 250, grandpa: 250, cloudunicorn: 200, sheba: 250, camel: 230, moon: 330, bouncy: 240, bunicorn_pink: 170, bunicorn_blue: 170, bunicorn_mint: 170, shoshi: 250, jumbo: 240 };   // height of the whole picture frame, feet at the bottom
 function drawFriend(kind, x, y, happy, o){
   o = o || {};
   const im0 = IMG[kind + (happy ? '_happy' : '_sad')] || IMG[kind], stand = !im0 && (kind === 'bouncy' || kind.indexOf('bunicorn') === 0), im = im0 || (stand ? IMG.cloudunicorn_happy : null);      // round 9: until Ghost's unicorns exist the little cloud unicorn, tinted, stands in
@@ -1365,7 +1445,7 @@ function drawPlat(pl){
 function hills(par, base, amp, c, f){ ctx.fillStyle = c; ctx.beginPath(); ctx.moveTo(0, VH); for (let sx = 0; sx <= VW + 40; sx += 40) { const wx = sx + camX * par; ctx.lineTo(sx, base - Math.sin(wx * f) * amp - Math.sin(wx * f * 2.3 + 1) * amp * 0.4); } ctx.lineTo(VW, VH); ctx.fill(); }
 function drawWorld(){
   const n = L.name, im = (fx && IMG.bg_finale) || IMG['bg_' + n] || (n === 'party' ? IMG.bg_party_fallback : null);
-  const sky = { garden: ['#bfe9ff', '#eafff0'], rainbow: ['#ffdff3', '#e6dcff'], forest: ['#cdeccf', '#f4ffd9'], sky: ['#ffb78a', '#f6c7ee'], bouncy: ['#ffd9f0', '#cfe9ff'], candy: ['#ffd6ec', '#d8f3ff'], farm: ['#bfe3ff', '#f1ffe0'], shabbat: ['#ffe2a6', '#fff3d6'], night: ['#1f2a5e', '#4b5fa8'], castle: ['#bfe9ff', '#ffe8f6'], party: ['#bfe9ff', '#ffe8f6'], oasis: ['#ff9f7a', '#ffe9b8'], moon: ['#150f46', '#4a3a9a'] }[n] || ['#bfe9ff', '#eafff0'];
+  const sky = { garden: ['#bfe9ff', '#eafff0'], rainbow: ['#ffdff3', '#e6dcff'], forest: ['#cdeccf', '#f4ffd9'], sky: ['#ffb78a', '#f6c7ee'], bouncy: ['#ffd9f0', '#cfe9ff'], candy: ['#ffd6ec', '#d8f3ff'], jungle: ['#cfeeb0', '#f4ffd9'], deepsea: ['#2a8fcf', '#0f5fa8'], farm: ['#bfe3ff', '#f1ffe0'], shabbat: ['#ffe2a6', '#fff3d6'], night: ['#1f2a5e', '#4b5fa8'], castle: ['#bfe9ff', '#ffe8f6'], party: ['#bfe9ff', '#ffe8f6'], oasis: ['#ff9f7a', '#ffe9b8'], moon: ['#150f46', '#4a3a9a'] }[n] || ['#bfe9ff', '#eafff0'];
   const gr = ctx.createLinearGradient(0, 0, 0, VH); gr.addColorStop(0, sky[0]); gr.addColorStop(1, sky[1]); ctx.fillStyle = gr; ctx.fillRect(0, 0, VW, VH);
   if (im) { const h = VH, w = h * im.width / im.height, off = -((camX * 0.4) % w), by = -camY * 0.4;
     for (let x = off; x < VW; x += w) { if (by > 0) ctx.drawImage(im, 0, 0, im.width, 6, x, 0, w, by + 2); ctx.drawImage(im, x, by, w, h); } }
@@ -1407,11 +1487,11 @@ function drawWorld(){
   terr.forEach(sg => { if (sg.slide && !sg.base) return; const x0 = sg.x0, x1 = sg.x1, top = sg.top;
     if (n === 'rainbow') { RB.forEach((c, i) => rr(x0, top + i * 12, x1 - x0, 14, i ? 0 : 7, c)); rr(x0, top + 72, x1 - x0, VH, 0, '#fff');
       for (let x = x0 + 40; x < x1; x += 90) circ(x, top + 84, 46, '#fff'); }
-    else { const c = { garden: ['#7fd58a', '#63bd72', '#c59a6d'], sky: ['#ffd1ec', '#f6b0da', '#d58fbf'], bouncy: ['#ffe3f3', '#ffc2e4', '#ff9fd0'], candy: ['#ff9fcf', '#ffd0e8', '#b87a5a'], farm: ['#8ccf6a', '#6fb556', '#7a5a3c'], shabbat: ['#e6c866', '#d1a84d', '#a8794a'], night: ['#5a78bc', '#4562a6', '#2c3f78'], castle: ['#8fdc8a', '#6fc873', '#9a7a56'], party: ['#8fdc8a', '#6fc873', '#9a7a56'], oasis: ['#f2d391', '#e3b96a', '#c99a52'], moon: ['#9d8ae0', '#7c69c8', '#4a3a9a'] }[n] || ['#5fae68', '#4c9657', '#8f6d4b'];
+    else { const c = { garden: ['#7fd58a', '#63bd72', '#c59a6d'], sky: ['#ffd1ec', '#f6b0da', '#d58fbf'], bouncy: ['#ffe3f3', '#ffc2e4', '#ff9fd0'], candy: ['#ff9fcf', '#ffd0e8', '#b87a5a'], jungle: ['#8cc75a', '#6aa84a', '#6b4a2e'], deepsea: ['#f2d9a0', '#e3c27e', '#c9a35c'], farm: ['#8ccf6a', '#6fb556', '#7a5a3c'], shabbat: ['#e6c866', '#d1a84d', '#a8794a'], night: ['#5a78bc', '#4562a6', '#2c3f78'], castle: ['#8fdc8a', '#6fc873', '#9a7a56'], party: ['#8fdc8a', '#6fc873', '#9a7a56'], oasis: ['#f2d391', '#e3b96a', '#c99a52'], moon: ['#9d8ae0', '#7c69c8', '#4a3a9a'] }[n] || ['#5fae68', '#4c9657', '#8f6d4b'];
       if (sg.top1 !== undefined) { const t1 = sg.top1, poly = (a, b, col) => { ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(x0, top + a); ctx.lineTo(x1, t1 + a); ctx.lineTo(x1, t1 + b); ctx.lineTo(x0, top + b); ctx.fill(); };
         poly(0, VH, c[2]); poly(-4, 36, c[0]); poly(22, 36, c[1]); }
       else { rr(x0, top, x1 - x0, VH, 0, c[2]); rr(x0, top - 4, x1 - x0, 40, 10, c[0]); rr(x0, top + 22, x1 - x0, 14, 0, c[1]); }
-      if (n !== 'oasis' && n !== 'moon') for (let x = Math.ceil(x0 / 130) * 130 + 40; x < x1 - 20; x += 130) { const k = (x * 7) % 5; ctx.fillStyle = '#4c9657'; { const fy = tAt(sg, x); ctx.fillRect(x - 1, fy - 22, 3, 20); circ(x, fy - 26, 8, RB[k]); circ(x, fy - 26, 3.5, '#fff7c4'); } } }
+      if (n !== 'oasis' && n !== 'moon' && n !== 'deepsea') for (let x = Math.ceil(x0 / 130) * 130 + 40; x < x1 - 20; x += 130) { const k = (x * 7) % 5; ctx.fillStyle = '#4c9657'; { const fy = tAt(sg, x); ctx.fillRect(x - 1, fy - 22, 3, 20); circ(x, fy - 26, 8, RB[k]); circ(x, fy - 26, 3.5, '#fff7c4'); } } }
   });
   ctx.restore();
 }
@@ -1469,7 +1549,7 @@ function drawProps(){
 function drawTapHints(){      // a little pointing hand over the thing to tap (the next numbered bubble, the nearest hiding place)
   sts.forEach(st => { if (st.done) return; let t = null;
     if (st.kind === 'count') { const q = st.pts[st.n]; if (q && Math.abs(q[0] - p.x) < 800) t = [q[0] + 26, q[1] + 78]; }
-    else if (st.kind === 'machine' && st.phase === 'fill') { const tk = st.tok.filter(o => o.s === 'idle' && Math.abs(o.hx - p.x) < 900).sort((a, b) => Math.abs(a.hx - p.x) - Math.abs(b.hx - p.x))[0]; if (tk && !drag) { const h = hopperOf(st), q = (T % 110) / 110, e = q < 0.2 ? 0 : q > 0.8 ? 1 : (q - 0.2) / 0.6; t = [tk.x + (h.x - tk.x) * e + 26, tk.y + (h.y - tk.y) * e + 78]; } }
+    else if (st.kind === 'machine' && st.phase === 'fill') { const tk = (st.rc && st.miss >= 2 ? [recipeNeed(st)].filter(o => o && Math.abs(o.hx - p.x) < 900) : st.tok.filter(o => o.s === 'idle' && Math.abs(o.hx - p.x) < 900)).sort((a, b) => Math.abs(a.hx - p.x) - Math.abs(b.hx - p.x))[0]; if (tk && !drag) { const h = hopperOf(st), q = (T % 110) / 110, e = q < 0.2 ? 0 : q > 0.8 ? 1 : (q - 0.2) / 0.6; t = [tk.x + (h.x - tk.x) * e + 26, tk.y + (h.y - tk.y) * e + 78]; } }
     else if (st.kind === 'seek') { const o = st.pts.filter((x, i) => !st.rev[i] && Math.abs(x - p.x) < 800).sort((a, b) => Math.abs(a - p.x) - Math.abs(b - p.x))[0]; if (o !== undefined) t = [o + 40, G - 215]; }
     if (!t) return; ctx.save(); ctx.font = '60px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.translate(t[0], t[1] + Math.sin(T * 0.14) * 9); ctx.rotate(-0.25); if (IMG.icon_tap) fit(IMG.icon_tap, 0, 0, 90); else ctx.fillText('👆', 0, 0); ctx.restore(); });
 }
@@ -1516,7 +1596,7 @@ function drawStations(){
       if (run > 0) for (let i = 0; i < 3; i++) circ(x - 20 + i * 24, G - 350 - ((T * 1.6 + i * 24) % 70), 10, 'rgba(255,255,255,.75)');
       if (drag && drag.st === st) { ctx.strokeStyle = 'rgba(255,255,160,.95)'; ctx.lineWidth = 8; ctx.beginPath(); ctx.arc(hx, hy, 74 + Math.sin(T * 0.3) * 8, 0, 7); ctx.stroke(); }
       for (let i = 0; i < st.need; i++) circ(x - (st.need - 1) * 15 + i * 30, G - 392, 9, i < st.n ? '#ffd028' : 'rgba(255,255,255,.7)');
-      st.tok.forEach(t => { if (t.s === 'gone') return; ctx.save(); ctx.translate(t.x, t.y); const sc = (t.s === 'held' ? 1.25 : 1) * (t.s === 'in' ? 1 - Math.min(1, t.t / 22) * 0.5 : 1); ctx.scale(sc, sc); if (t.s === 'idle' || t.s === 'back') circ(0, 0, 54, 'rgba(255,255,255,.25)'); drawItem(t.kind, 0, 0, null, T * 0.05); ctx.restore(); }); }
+      st.tok.forEach(t => { if (t.s === 'gone') return; ctx.save(); ctx.translate(t.x, t.y); const sc = (t.s === 'held' ? 1.25 : 1) * (t.s === 'in' ? 1 - Math.min(1, t.t / 22) * 0.5 : 1); ctx.scale(sc, sc); if (t.s === 'idle' || t.s === 'back') circ(0, 0, 54, 'rgba(255,255,255,.25)'); drawItem(t.kind, 0, 0, null, T * 0.05); ctx.restore(); }); if (st.rc) recipeDraw(st); }
     else if (k === 'grow') { const im = IMG.prop_vegetable_bed; if (im) pic(im, x, G + 6, 380); else rr(x - 170, G - 40, 340, 44, 12, '#8a6a46');
       for (let i = 0; i < st.need; i++) { const gx = x - 80 + i * 160, on = i < st.have, sw = Math.sin(T * 0.08 + i) * 4;
         if (on && IMG['prop_sprout_' + Math.min(3, st.done ? 3 : 1 + Math.floor(st.have / st.need * 2))]) pic(IMG['prop_sprout_' + Math.min(3, st.done ? 3 : 1 + Math.floor(st.have / st.need * 2))], gx, G - 30, 110); else if (on) { ctx.strokeStyle = '#4fae5a'; ctx.lineWidth = 6; ctx.lineCap = 'round'; [-22, 0, 22].forEach(o => { ctx.beginPath(); ctx.moveTo(gx, G - 44); ctx.quadraticCurveTo(gx + o * 0.5 + sw, G - 84, gx + o + sw, G - 116 + Math.abs(o) * 0.5); ctx.stroke(); }); if (st.done) drawItem('carrot', gx, G - 62, null, T * 0.05); }
@@ -1722,7 +1802,7 @@ function drawFinale(){
 
 /* ---------- title, map, end screens ---------- */
 const MAP10_POS = [[11, 27], [30, 27], [46, 27], [68, 27], [88, 27], [88, 69], [68, 69], [49.5, 69], [30, 69], [10.5, 69], [50, 48], [24, 48], [73, 47]];   // the ten stops on art/ui/map10.jpg (Ghost's ten-stop map), in percent
-const MAP_POS = [[13, 25], [37.5, 24], [62, 25], [86, 27], [86, 70], [60.5, 69], [36.5, 70], [12, 72], [30, 47], [60, 47], [46, 47], [14, 47], [74, 47]];   // the ten stops on art/ui/map.jpg, in percent (9 and 10 sit in the empty middle band until Ghost's map10.jpg arrives)
+const MAP_POS = [[13, 25], [37.5, 24], [62, 25], [86, 27], [86, 70], [60.5, 69], [36.5, 70], [12, 72], [30, 47], [60, 47], [46, 47], [14, 47], [74, 47], [10, 47], [90, 47]];   // the ten stops on art/ui/map.jpg, in percent (9 and 10 sit in the empty middle band until Ghost's map10.jpg arrives)
 /* choose who comes along: pictures only, at most two; with two or fewer friends to pick from she just goes */
 function goLevel(i){ if (paradeFor(i).length > MAXPARTY) showPick(i); else startLevel(i, paradeFor(i), true); }
 let pickSel = [];
@@ -1749,6 +1829,7 @@ function refreshMapArtwork(){
   box.classList.toggle('map-twelve', !!IMG.map12);
   box.style.backgroundImage = mapImage ? 'url("' + mapImage.src + '")' : '';
   const stops = mapImage ? MAP10_POS.slice() : MAP_POS;
+  stops[13] = [10, 47]; stops[14] = [90, 47];      // the jungle and the deep sea: free spots on the map
   if (IMG.map12) stops[11] = [30.5, 47];      // stop 12 (the Bouncy Castle bubble) on art/ui/map12.jpg, measured on the picture
   Array.from(box.children).forEach((button, i) => {
     button.style.left = stops[i][0] + '%';

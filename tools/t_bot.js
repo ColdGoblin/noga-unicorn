@@ -33,6 +33,7 @@ function doStation(st) {
     let n = 0; while (!st.done && n++ < 40) { let m = 0; while ((Math.round(st.clock) % 64) !== 0 && m++ < 200) step(1); g.dance(); step(1); step(2); }
     out.push('rhythm hits ' + st.hits + ' done ' + st.done);
   }
+  else if (k === 'machine' && st.rc) { at(st.x - 300, G); step(5); const ord = k2 => st.tok.findIndex(t => t.kind === k2); st.rc.alts[0].seq.forEach(k2 => { g.dragTok(st, ord(k2)); step(40); }); step(120); out.push('recipe alt -> shelf ' + st.shelf.length); st.rc.target.forEach(k2 => { g.dragTok(st, ord(k2)); step(40); }); out.push('recipe n=' + st.n + ' phase ' + st.phase); step(200); out.push('machine done ' + st.done); }
   else if (k === 'machine') { at(st.x - 300, G); step(5); const w0 = st.tok[0].s; g.dragTok(st, 0, st.x - 900, G - 100); out.push('machine wrong drop ' + w0 + '->' + st.tok[0].s); step(60); out.push('token back ' + st.tok[0].s + ' n=' + st.n);
     for (let i = 0; i < st.tok.length; i++) { g.dragTok(st, i); step(40); } out.push('machine n=' + st.n + ' phase ' + st.phase); step(200); out.push('machine done ' + st.done); }
   else if (k === 'riddle') { step(1); at(st.x - 300, G); step(5); const o = st.objs.find(o => o.col === st.want); at(o.x, G); step(5); }

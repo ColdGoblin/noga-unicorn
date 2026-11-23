@@ -479,7 +479,7 @@ LEVELS.push(
     plats: [{ x: 3000, w: 110, kind: 'rock' }, { x: 5300, w: 116, kind: 'stump' }],
     cues: [{ x: 0, say: ['x_hide', 'ins_10', 'num_10'] }, { x: 3200, say: ['x_rain'] }] },
   /* stage 15: Deep sea with Shoshi the mermaid. Treasures hide under the sand, stars sink down, Shoshi waits at the end. */
-  { name: 'deepsea', need: 10, len: 7600, sticker: 13, collect: 'petal', ins: 'x_seek_b', joins: [], carry: true, hintStations: true,
+  { name: 'deepsea', need: 10, len: 7600, sticker: 13, collect: 'petal', ins: 'x_seek_b', joins: [], carry: true, hintStations: true, floaty: true,      // Keeper 23 Nov: floaty = the sea feel (stage 4 already has it)
     finSay: ['pr_20'],
     terrain: [{ x0: 0, x1: 7600, top: G }],
     friend: { kind: 'shoshi', x: 7100 },
@@ -622,11 +622,6 @@ addB(4, 7500, 7500, B => {
   B.stars(7700, 8150, G - 80, 40, 5); B.stars(8350, 9300, G - 90, 50, 8); B.stars(9650, 10000, G - 80, 30, 4); B.stars(10250, 10650, G - 90, 40, 5); B.stars(11100, 11900, G - 200, 70, 7); B.stars(12000, 12500, G - 90, 40, 5); B.stars(13950, 14150, G - 80, 20, 3); B.stars(14900, 15000, G - 80, 0, 2);
 });
 /* stage 6, Shabbat (round 11 batch C): after the table a flag; then numbered bubbles, a second row of lanterns, carrots for Bil'am over a hill, honey on a mushroom, a second challah (bowl, oven, table), a shower of stars, a stone over a gap, a friend to dance for */
-/* Keeper 22 Nov (phase 2 slice d2): stage 5 bread. Eggs and honey lie up high near the mill (optional, they never count toward the goal). With both in the bowl the oven bakes a challah, without them a loaf. Pushed after every addB so older saved indices stay valid. */
-{ const lv = LEVELS[4], mill = lv.stations.find(s => s.id === 'mill'), bowl = lv.stations.find(s => s.id === 'fbowl'), oven = lv.stations.find(s => s.id === 'foven'), tb = lv.stations.find(s => s.id === 'ftable');
-  lv.items.push({ x: mill.x - 380, y: G - 200, kind: 'eggs', to: 'fbowl', opt: true, nochip: true, say: null }, { x: mill.x - 160, y: G - 200, kind: 'honey', to: 'fbowl', opt: true, nochip: true, say: null },
-    { x: 0, y: 0, kind: 'challah', to: 'ftable', hid: 'challahF', hidden: true, nochip: true, opt: true, say: null });
-  bowl.opts = ['eggs', 'honey']; bowl.altSpawn = 'challahF'; bowl.tab = 'ftable'; oven.spawn0 = 'loaf'; tb.altShow = true; }
 addB(5, 6400, 7000, B => {
   B.need(10, 'num_08', 'num_10'); B.rest(6520, ['pr_14', 'ins_10', 'num_10']);
   B.hole(12500, 12650);
@@ -736,6 +731,19 @@ addB(11, 4000, 6500, B => {
 });
 /* keep the order of things along the ground, so the sparkle trail and the hints always lead to the NEXT thing and never skip one she walked past */
 [4, 5, 6, 7, 8, 9, 10, 11].forEach(n => { const lv = LEVELS[n]; lv.stations.sort((a, b) => a.x - b.x); lv.items.sort((a, b) => (a.hidden ? -1 : a.x) - (b.hidden ? -1 : b.x)); (lv.meets || []).sort((a, b) => a.x - b.x); });
+/* Keeper 22 Nov (phase 2 slice d2): stage 5 bread. Eggs and honey lie up high near the mill (optional, they never count toward the goal). With both in the bowl the oven bakes a challah, without them a loaf. Pushed AFTER the x-sort below the addB calls, so every older saved index (save.half) still points at the same item. */
+{ const lv = LEVELS[4], mill = lv.stations.find(s => s.id === 'mill'), bowl = lv.stations.find(s => s.id === 'fbowl'), oven = lv.stations.find(s => s.id === 'foven'), tb = lv.stations.find(s => s.id === 'ftable');
+  lv.items.push({ x: mill.x - 380, y: G - 200, kind: 'eggs', to: 'fbowl', opt: true, nochip: true, say: null }, { x: mill.x - 160, y: G - 200, kind: 'honey', to: 'fbowl', opt: true, nochip: true, say: null },
+    { x: 0, y: 0, kind: 'challah', to: 'ftable', hid: 'challahF', hidden: true, nochip: true, opt: true, say: null });
+  bowl.opts = ['eggs', 'honey']; bowl.altSpawn = 'challahF'; bowl.tab = 'ftable'; oven.spawn0 = 'loaf'; tb.altShow = true; }
+/* Keeper 23 Nov (phase 2 part 4a): the three-ingredient bowls (challah: flour, eggs, honey) get an ORDERED PICTURE CARD. The order on the card makes a challah; any other order makes a loaf (also fine, no failure, the table takes it). The alternate loaf is
+   an optional hidden item (never counts toward the goal); the challah is then silently counted as done so the goal stays reachable. Appended after the sort: old saved indices unchanged. */
+[5, 8, 10].forEach(n => { const lv = LEVELS[n];
+  lv.stations.filter(b => b.kind === 'bowl' && !b.opts && b.need === 3).forEach(b => {
+    const ov = lv.stations.find(o => o.id === (b.arms || 'oven')), mine = lv.items.filter(o => o.to === b.id).sort((a, c) => a.x - c.x), kinds = mine.map(o => o.kind), prod = ov && lv.items.find(o => o.hid === ov.spawn);
+    if (!ov || !prod || new Set(kinds).size !== 3 || !['flour', 'eggs', 'honey'].every(k => kinds.includes(k))) return;
+    b.card = { seq: ['flour', 'eggs', 'honey'] }; ov.spawn0 = ov.spawn; ov.altSpawn = ov.spawn + 'A';
+    lv.items.push({ x: 0, y: 0, kind: 'loaf', to: prod.to, hid: ov.altSpawn, hidden: true, nochip: true, opt: true, say: null }); }); });
 const REST_W = 1.25;        // picture is a bit wider than the part you stand on
 function prepLevel(lv){
   lv.gaps = []; for (let i = 0; i + 1 < lv.terrain.length; i++) if (lv.terrain[i + 1].x0 > lv.terrain[i].x1) lv.gaps.push({ x: lv.terrain[i].x1, w: lv.terrain[i + 1].x0 - lv.terrain[i].x1 });
@@ -762,7 +770,10 @@ const cookPut = (st, i) => { const it = pocket.splice(i, 1)[0]; st.cd = 16; st.d
   if (st.opts && st.opts.includes(it.kind)) { st.extra = (st.extra || 0) + 1; return; }      // d2: optional extras (eggs, honey) go in but do not count toward what the bowl needs
   if (st.kind === 'pot' && !st.tea && /^flower_\d$/.test(it.kind)) st.tea = 'tea' + it.kind.slice(-1);      // d2: the first flower decides the colour of the tea
   if (st.kind === 'fire' && /^tea\d$/.test(it.col || '')) st.tea = it.col;
-  st.have++; if (st.have >= st.need) complete(st); else if (Math.random() < 0.4) praise(); };
+  if (st.kind === 'bowl') (st.seq = st.seq || []).push(it.kind);
+  st.have++;
+  if (st.have >= st.need) { if (st.kind === 'bowl') { st.stirring = 3; Voice.say('x_stir'); } else complete(st); } else if (Math.random() < 0.4) praise(); };
+const stirTap = st => { st.stirring--; st.swirl = 26; sfx.pop(); burst(st.x, G - 120, 8, ['#fff3c4', '#ffd84d'], 'dot'); if (st.stirring <= 0) complete(st); };      // part 4a: the dough is stirred with three taps (or 6 s of standing by)
 const putFirst = st => { const k = st.opts ? pocket.findIndex(o => o.to === st.id && st.opts.includes(o.kind)) : -1; return k >= 0 ? k : pocket.findIndex(o => o.to === st.id); };      // tapping the bowl itself puts the extras in first
 const pocketGroups = () => { const grp = []; pocket.forEach(it => { const g0 = grp.find(q => pocketKey(q.it) === pocketKey(it)); if (g0) g0.n++; else grp.push({ it, n: 1 }); }); return grp; };
 const cookStation = it => sts.find(s => !s.done && COOK_PUT[s.kind] && s.id === it.to && Math.abs(p.x - s.x) < 800);
@@ -880,6 +891,8 @@ function complete(st){
     if (it.to && p.x > it.x + 24 && pocketRoom(it)) { it.x = p.x; it.y = p.y - 62; }      // Keeper 22 Nov: she already walked on (teapot 85 px, loaf 256 px behind): the product appears with her and goes straight into the pocket
     burst(it.x, it.y, 20, ['#ffe14d', '#fff'], 'star'); });
   if (st.kind === 'bowl') { const ov = sts.find(s => s.id === (st.arms || 'oven')); if (ov) { ov.ready = true; ov.rdy = 0; ov.rmind = 0; ov.bakeSay = st.ovenSay || 'x_oven'; }
+    if (st.card && ov) { const ok = (st.seq || []).every((k, j) => k === st.card.seq[j]);      // order on the card -> challah; any other order -> a loaf
+      if (!ok) { ov.spawn = ov.altSpawn; ov.bakeSay = 'x_oven'; const sw = items.find(o => o.hid === ov.spawn0 && !o.got); if (sw) { sw.got = true; got++; const tb = sts.find(o => o.id === sw.to); if (tb) tb.wish = 'loaf'; } Voice.say('x_bread_other'); } }
     if (st.opts) { for (let k = pocket.length - 1; k >= 0; k--) if (pocket[k].to === st.id && st.opts.includes(pocket[k].kind)) pocket.splice(k, 1);      // d2: eggs and honey left in the bag are put away; with both in, the oven bakes a challah instead of a loaf
       if (ov && (st.extra || 0) >= st.opts.length) { ov.spawn = st.altSpawn; ov.bakeSay = 'x_oven'; const sw = items.find(o => o.hid === ov.spawn0 && !o.got); if (sw) { sw.got = true; got++; } const tb = sts.find(o => o.id === st.tab); if (tb) tb.wish = 'challah'; } }
     Voice.say('x_oven_tap'); }
@@ -1020,6 +1033,7 @@ function revealSeek(st, i){ const x = st.pts[i]; st.rev[i] = 1; st.n++; sfx.pick
 /* a tap or click on the picture (world position w): the numbered bubbles and the hiding places react to it. Returns true if the tap was used. */
 function tapWorld(w){
   for (const st of sts) { if (st.done) continue;
+    if (st.stirring > 0 && Math.abs(w.x - st.x) < 170 && w.y > G - 340 && w.y < G + 40 && Math.abs(p.x - st.x) < 800) { stirTap(st); return true; }
     if (COOK_PUT[st.kind] && Math.abs(w.x - st.x) < 160 && w.y > G - 340 && w.y < G + 40 && Math.abs(p.x - st.x) < 800) { const i = putFirst(st); if (i >= 0) { cookPut(st, i); return true; } }
     else if (st.kind === 'oven' && st.ready && Math.abs(w.x - st.x) < 170 && w.y > G - 360 && w.y < G + 40 && Math.abs(p.x - st.x) < 900) { bake(st); return true; }
     if (st.kind === 'count') { for (let i = st.n; i < st.pts.length; i++) { const q = st.pts[i]; if (Math.hypot(q[0] - w.x, q[1] - w.y) < 84) {
@@ -1159,6 +1173,7 @@ function update(dt){
         if (!st.done && Math.abs(p.x - o.x) < 80 && p.y > G - 130 && o.wob <= 0) {
           if (o.col === st.want) complete(st); else { o.wob = 60; sfx.boing(); if (st.cd <= 0) { st.cd = 300; Voice.say(st.want === 'red' ? 'ins_21' : 'ins_22'); } } } });
       return; }
+    if (st.stirring > 0) { if (p.on && Math.abs(p.x - st.x) < (st.r || 150) + 100) { st.dwc = (st.dwc || 0) + dt; if (st.dwc > 360) { st.dwc = 0; st.stirring = 0; complete(st); } } else st.dwc = 0; return; }
     if (COOK_PUT[st.kind]) { const i = putFirst(st);
       if (i >= 0 && p.on && Math.abs(p.x - st.x) < (st.r || 140)) { if (!st.toldPut) { st.toldPut = 1; Voice.say('x_tap_put'); } st.dwc = (st.dwc || 0) + dt; if (st.dwc > 360 && st.cd <= 0) cookPut(st, i); } else st.dwc = 0;
       return; }
@@ -1602,6 +1617,11 @@ function drawWishes(){
 }
 function drawStations(){
   sts.forEach(st => { const x = st.x, k = st.kind;
+    if (st.stirring > 0) { ctx.strokeStyle = 'rgba(255,240,120,.95)'; ctx.lineWidth = 8; ctx.beginPath(); ctx.arc(x, G - 90, 80 + Math.sin(T * 0.3) * 7, 0, 7); ctx.stroke(); ctx.strokeStyle = '#fff3c4'; ctx.lineWidth = 6; ctx.beginPath(); for (let a = 0; a < 9; a += 0.4) ctx.lineTo(x + Math.cos(a + T * 0.25) * (6 + a * 5), G - 96 + Math.sin(a + T * 0.25) * (3 + a * 2.4)); ctx.stroke(); }
+    if (st.card && !st.done && st.have < st.need && Math.abs(p.x - x) < 900) { const cw = 400, cy = G - 330; ctx.save(); rr(x - cw / 2, cy - 48, cw, 96, 30, 'rgba(255,255,255,.9)'); rr(x - cw / 2 + 6, cy - 42, cw - 12, 84, 25, 'rgba(255,230,190,.6)');
+      ctx.save(); ctx.translate(x - cw / 2 + 56, cy); ctx.scale(0.95, 0.95); drawItem('challah', 0, 0, null, T * 0.04); ctx.restore(); ctx.strokeStyle = '#b0409a'; ctx.lineWidth = 6; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(x - cw / 2 + 104, cy - 8); ctx.lineTo(x - cw / 2 + 122, cy - 8); ctx.moveTo(x - cw / 2 + 104, cy + 8); ctx.lineTo(x - cw / 2 + 122, cy + 8); ctx.stroke();
+      st.card.seq.forEach((k2, i) => { const sx = x - cw / 2 + 180 + i * 90, doneI = i < (st.seq || []).length, okI = doneI && st.seq.slice(0, i + 1).every((q, j) => q === st.card.seq[j]); if (i === (st.seq || []).length) circ(sx, cy, 40 + Math.sin(T * 0.2) * 4, 'rgba(255,240,120,.8)'); ctx.save(); ctx.translate(sx, cy); ctx.scale(0.85, 0.85); drawItem(k2, 0, 0, null, T * 0.04); ctx.restore(); if (doneI) { if (okI) tick(sx + 26, cy + 24); else circ(sx + 26, cy + 24, 12, '#ffb347'); } });
+      ctx.restore(); }
     if (COOK_PUT[k] && !st.done && Math.abs(p.x - x) < 800 && pocket.some(o => o.to === st.id)) { ctx.strokeStyle = 'rgba(255,240,120,.9)'; ctx.lineWidth = 7; ctx.beginPath(); ctx.arc(x, G - 110, 88 + Math.sin(T * 0.3) * 7, 0, 7); ctx.stroke(); }      // tap me
     if (k === 'cloud') { const im = IMG.prop_cotton_candy_platform, w = 640, top = G - 340; if (im) pic(im, x, top + 210, w); else ell(x, top + 110, 300, 90, '#ffb3d9');
       for (let i = 0; i < 3; i++) { const ux = x + (i - 1) * 200;
@@ -1621,7 +1641,8 @@ function drawStations(){
     else if (k === 'oven') { const im = IMG[st.done ? 'prop_oven_lit' : 'prop_oven']; if (im) pic(im, x, G + 4, 270); if (st.ready) { ctx.strokeStyle = 'rgba(255,240,120,.95)'; ctx.lineWidth = 8; ctx.beginPath(); ctx.arc(x, G - 120, 96 + Math.sin(T * 0.3) * 8, 0, 7); ctx.stroke(); } if (st.armed > 0) for (let i = 0; i < 3; i++) circ(x - 20 + i * 20, G - 250 - ((T * 1.5 + i * 25) % 70), 10, 'rgba(255,255,255,.7)'); }
     else if (k === 'candles') { const im = IMG[st.done ? 'prop_candle_lit' : 'prop_candle_unlit']; if (im) pic(im, x, G + 2, 150);
       for (let i = 0; i < 2; i++) { const sx = st.done ? x - 26 + i * 52 : x + Math.cos(T * 0.03 + i * 3.1) * 180, sy = st.done ? G - 140 : G - 200 + Math.sin(T * 0.05 + i * 2) * 60; drawItem('spark', sx, sy, null, T * 0.1 + i); } }
-    else if (k === 'table') { const im = IMG[st.img || 'prop_plank_bridge']; if (im) pic(im, x, G + 6, st.img ? 380 : 420); else rr(x - 200, G - 110, 400, 40, 8, '#c58a4a'); const sh = [].concat(st.altShow && st.last ? st.last : st.show || 'challah'); if (st.done) sh.forEach((k2, i) => drawItem(k2, x + (i - (sh.length - 1) / 2) * 110, G - 170, k2 === 'teacup' ? st.tea : null, T * 0.04 + i)); else for (let i = 0; i < st.need; i++) circ(x - (st.need - 1) * 15 + i * 30, G - 240, 9, i < st.have ? '#ffd028' : 'rgba(255,255,255,.7)'); }
+    else if (k === 'table') { const im = IMG[st.img || 'prop_plank_bridge']; if (im) pic(im, x, G + 6, st.img ? 380 : 420); else rr(x - 200, G - 110, 400, 40, 8, '#c58a4a'); st.gk = st.gk || new Set(); if (st.last) st.gk.add(st.last);
+      const sh = [].concat(st.altShow && st.last ? st.last : st.show || 'challah').map(k2 => k2 === 'challah' && st.gk.has('loaf') && !st.gk.has('challah') ? 'loaf' : k2); if (st.done) sh.forEach((k2, i) => drawItem(k2, x + (i - (sh.length - 1) / 2) * 110, G - 170, k2 === 'teacup' ? st.tea : null, T * 0.04 + i)); else for (let i = 0; i < st.need; i++) circ(x - (st.need - 1) * 15 + i * 30, G - 240, 9, i < st.have ? '#ffd028' : 'rgba(255,255,255,.7)'); }
     else if (k === 'bilam') { drawFriend('bilam', x, G, st.done, { face: -1, bounce: st.done }); for (let i = 0; i < st.need; i++) circ(x - 45 + i * 30, G - 210, 9, i < st.have ? '#ff9f43' : 'rgba(255,255,255,.7)'); }
     else if (k === 'plate') { const im = IMG.item_gift_plate; if (im) pic(im, x, G - 8, 82); else ell(x, G - 30, 40, 14, '#fff'); const ic = IMG['item_' + st.icon]; ctx.globalAlpha = st.done ? 1 : 0.32; if (ic) ctx.drawImage(ic, x - 24, G - 66, 48, 48); ctx.globalAlpha = 1; if (st.done) circ(x, G - 80, 6 + Math.sin(T * 0.2 + x) * 2, '#ffe14d'); }
     else if (k === 'bounce') { for (let i = 0; i < st.need; i++) circ(x - (st.need - 1) * 17 + i * 34, G - 200, 10, i < st.n ? '#ffd028' : 'rgba(255,255,255,.7)'); }

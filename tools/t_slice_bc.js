@@ -26,7 +26,7 @@ g.reset(); g.start(4); P = g.P(); items = g.items(); pk = g.pocket(); const S5 =
 ['milk', 'wheat'].forEach(k => items.filter(o => o.kind === k).forEach(o => { at5(o.x, o.y + 62); step(4); }));
 at5(S5('mill').x - 100); step(2); g.tap(S5('mill').x, 440); g.tap(S5('mill').x, 440); step(3);
 const fl = items.find(o => o.kind === 'flour' && o.to === 'fbowl'); at5(fl.x, fl.y + 62); step(3);
-at5(S5('fbowl').x - 100); step(2); g.tap(S5('fbowl').x, 440); g.tap(S5('fbowl').x, 440); step(3);
+at5(S5('fbowl').x - 100); step(2); for (let i = 0; i < 5; i++) { g.tap(S5('fbowl').x, 440); step(1); } step(3);
 const ov5 = S5('foven'); at5(ov5.x - 60); step(2); g.tap(ov5.x, 440); g.keys.right = true; n = 0; const tb = S5('ftable'), loaf = items.find(o => o.kind === 'loaf'); let loafSeen = null;
 while (!tb.done && n++ < 900) { step(1); if (loaf.got && loafSeen === null) loafSeen = 'picked at frame ' + n + ' she x ' + Math.round(P.x) + ' oven x ' + ov5.x + ' loaf x ' + Math.round(loaf.x); } g.keys.right = false;
 out.push('stage 5 taps then run on: loaf ' + loafSeen + '; table done ' + tb.done + ' after ' + n + ' frames, she x ' + Math.round(P.x));

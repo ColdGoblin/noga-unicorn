@@ -10,7 +10,7 @@ const run5 = withExtras => {
   at(mill.x - 100); step(2); g.tap(mill.x, 440); g.tap(mill.x, 440); step(3);
   const fl = items.find(o => o.kind === 'flour' && o.to === 'fbowl'); at(fl.x, fl.y + 62); step(3);
   out.push('bag before bowl ' + pk.map(o => o.kind).join(','));
-  at(bowl.x - 100); step(2); for (let i = 0; i < 5 && !bowl.done; i++) { g.tap(bowl.x, 440); step(2); }
+  at(bowl.x - 100); step(2); for (let i = 0; i < 9 && !bowl.done; i++) { g.tap(bowl.x, 440); step(2); }
   out.push('bowl done ' + bowl.done + ' extras ' + (bowl.extra || 0) + ' bag after ' + pk.map(o => o.kind).join(',') + ' oven ready ' + oven.ready + ' oven makes ' + oven.spawn + ' table wishes ' + tb.wish);
   at(oven.x - 100); step(2); g.tap(oven.x, 440); step(130);
   const prod = items.find(o => o.hid === oven.spawn); out.push('baked: ' + prod.kind + ' hidden ' + !!prod.hidden);

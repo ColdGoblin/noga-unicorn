@@ -38,6 +38,7 @@ function doStation(st) {
     for (let i = 0; i < st.tok.length; i++) { g.dragTok(st, i); step(40); } out.push('machine n=' + st.n + ' phase ' + st.phase); step(200); out.push('machine done ' + st.done); }
   else if (k === 'riddle') { step(1); at(st.x - 300, G); step(5); const o = st.objs.find(o => o.col === st.want); at(o.x, G); step(5); }
   else if (k === 'bounce') { const pd = g.LV().pads.find(q => q.st === st.id); let n = 0; while (!st.done && n++ < 20) { P.x = pd.x + pd.w / 2; P.y = pd.top + 2; P.vy = 3; P.on = false; step(3); } out.push('bounces ' + st.n); }
+  else if (st.stirring > 0) { at(st.x - 100, G); step(2); for (let i = 0; i < 4; i++) { g.tap(st.x, G - 120); step(1); } }
   else if (st.dance) { at(st.x, G); g.dance(); step(3); step(150); }
   else if (st.auto) { at(st.x - 150, G); step(2); if (st.ready) g.tap(st.x, G - 120); step(250); }
   else { at(st.x, G); step(80); }

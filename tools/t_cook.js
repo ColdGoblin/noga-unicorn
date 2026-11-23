@@ -10,7 +10,7 @@ out.push('walked straight through the bowl: pocket ' + pk.length + ' have ' + bo
 at(bowl.x - 120); step(2); g.tap(bowl.x, G - 120); out.push('tap bowl: have ' + bowl.have + ' pocket ' + pk.length);
 g.tap(bowl.x + 400, G - 120); out.push('tap far from the bowl (400 px right of it, in range 800 but not on it): have ' + bowl.have);
 const hudX = (g.bonus().length ? 220 : 18) + 78, hudY = 98 + 27; out.push('tap bag picture: ' + g.tapPocket(hudX, hudY) + ' have ' + bowl.have);
-g.tap(bowl.x, G - 120); out.push('tap bowl again: have ' + bowl.have + ' done ' + bowl.done + ' oven ready ' + oven.ready);
+g.tap(bowl.x, G - 120); out.push('tap bowl again: have ' + bowl.have + ' stirring ' + bowl.stirring + ' done ' + bowl.done); for (let i = 0; i < 3; i++) g.tap(bowl.x, G - 120); out.push('3 stir taps: done ' + bowl.done + ' oven ready ' + oven.ready);
 at(oven.x - 400); g.keys.right = true; step(120); g.keys.right = false;
 out.push('walked past the oven: armed ' + Math.round(oven.armed) + ' done ' + oven.done + ' (not baking by itself)');
 at(oven.x - 150); step(2); g.tap(oven.x, G - 120); out.push('tap oven: armed ' + Math.round(oven.armed)); step(130);
@@ -18,8 +18,8 @@ const ch = items.find(o => o.kind === 'challah'); out.push('baked: oven done ' +
 // ---- fallback: standing next to the bowl 6 s fills it by itself (nobody can get stuck) ----
 g.reset(); g.start(5); P = g.P(); items = g.items(); pk = g.pocket(); const bw = g.sts().find(s => s.id === 'bowl'), ov = g.sts().find(s => s.id === 'oven');
 items.filter(o => o.to === 'bowl').forEach(o => { at(o.x, o.y + 62); step(3); });
-at(bw.x); step(300); const h300 = bw.have; step(120); const h420 = bw.have; step(800);
-out.push('standing at the bowl: have after 5 s ' + h300 + ', 7 s ' + h420 + ', 20 s ' + bw.have + ' done ' + bw.done + ' oven ready ' + ov.ready);
+at(bw.x); step(300); const h300 = bw.have; step(120); const h420 = bw.have; step(1400);
+out.push('standing at the bowl (put in + stir by itself): have after 5 s ' + h300 + ', 7 s ' + h420 + ', 20 s ' + bw.have + ' done ' + bw.done + ' oven ready ' + ov.ready);
 step(400); out.push('standing near ready oven: baking started by itself (armed or done) ' + (ov.armed > 0 || ov.done));
 // ---- stage 3 (index 2): tea pot and fire ----
 g.reset(); g.start(2); P = g.P(); items = g.items(); pk = g.pocket(); const pot = g.sts().find(s => s.id === 'pot'), fire = g.sts().find(s => s.id === 'fire');

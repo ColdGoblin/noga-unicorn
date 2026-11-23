@@ -17,6 +17,11 @@ function doStation(st) {
   if (k === 'count') { g.tap(st.pts[st.pts.length - 1][0], st.pts[st.pts.length - 1][1]); for (const q of st.pts) { g.tap(q[0], q[1]); step(2); } }
   else if (k === 'rain') { at((st.zone[0] + st.zone[1]) / 2, G); let n = 0; while (!st.done && n++ < 6000) { step(1); for (const d of st.drops) if (d.y > G - 100 && d.y < G - 30) P.x = d.x; } }
   else if (k === 'seek') { for (const x of st.pts) { at(x, G); step(2); } const n0 = st.n; if (!st.done) out.push('seek by walking opened ' + n0); for (const x of st.pts) { g.tap(x + 20, G - 150); step(2); } }
+  else if (k === 'simon' && st.free) {
+    at(st.x, G); let n = 0; while (st.phase !== 'input' && n++ < 800) step(1);
+    for (const i of [2, 0, 2]) { g.tap(lanternX(st, i), G - 100); step(2); }
+    out.push('simon free tune ' + (st.tune || []).join('') + ' phase ' + st.phase); n = 0; while (!st.done && n++ < 600) step(1); out.push('simon free done ' + st.done);
+  }
   else if (k === 'simon') {
     at(st.x, G); let n = 0; while (st.phase !== 'input' && n++ < 800) step(1);
     out.push('simon seq ' + st.seq.join('') + ' phase ' + st.phase);

@@ -398,7 +398,7 @@ const LEVELS = [
     items: [{ x: 700, y: G - 60 }, { x: 2545, y: G - 640 }, { x: 3590, y: G - 560 }, { x: 4075, y: G - 220 }, { x: 5260, y: G - 60 }],
     stations: [{ id: 'steps', kind: 'count', x: 1930, pts: [[1565, G - 190], [1765, G - 280], [1965, G - 370], [2165, G - 460], [2365, G - 550]], hint: 'x_count', near: 700, say: ['pr_13'] },
                { id: 'lanterns', kind: 'simon', x: 4720, hint: 'x_simon', say: ['pr_13'] },
-               { id: 'moondance', kind: 'rhythm', finish: true, x: 6900, r: 380, need: 6, hint: 'x_rhythm', near: 700 }],
+               { id: 'moondance', kind: 'rhythm', finish: true, tuneBeat: true, x: 6900, r: 380, need: 6, hint: 'x_rhythm', near: 700 }],
     bonus: [].concat(arcRow(240, 1300, G - 80, 40, 8), arcRow(1480, 2350, G - 200, 40, 5), arcRow(2720, 2880, G - 100, 50, 3), arcRow(3100, 3450, G - 80, 30, 4), arcRow(3720, 4400, G - 190, 50, 6),
       arcRow(4500, 4950, G - 80, 30, 4), arcRow(5030, 5130, G - 130, 60, 2), arcRow(5300, 5780, G - 80, 30, 4), arcRow(5900, 6700, G - 80, 40, 7)),
     plats: [0, 1, 2, 3, 4].map(i => ({ x: 1500 + i * 200, w: 130, top: G - 90 * (i + 1), kind: 'cloud' })).concat([{ x: 2480, w: 130, top: G - 540, kind: 'cloud' }]),
@@ -627,7 +627,7 @@ addB(5, 6400, 7000, B => {
   B.hole(12500, 12650);
   B.ramp(8500, 8750, G, G - 110); B.flat(8750, 9100, G - 110); B.ramp(9100, 9350, G - 110, G);
   B.station({ id: 'shabcount', kind: 'count', x: 7000, pts: [[6700, G - 100], [6850, G - 190], [7000, G - 110], [7150, G - 200], [7300, G - 120]], hint: 'x_count', near: 650, say: ['pr_13'] });
-  B.station({ id: 'lights2', kind: 'simon', x: 7800, hint: 'x_simon', say: ['pr_13'] });
+  B.station({ id: 'lights2', kind: 'simon', free: true, x: 7800, hint: 'x_my_tune', say: ['pr_13'] });      // part 4b-1: play any three
   B.item({ x: 8250, y: G - 50, kind: 'carrot', to: 'bilam2' }); B.item({ x: 8400, y: G - 50, kind: 'carrot', to: 'bilam2' }); B.item({ x: 8900, y: G - 170, kind: 'carrot', to: 'bilam2' });
   B.plat({ x: 8830, w: 110, kind: 'mushroom', base: G - 110 }); B.item({ x: 8885, y: G - 275, kind: 'honey', to: 'bowl2' });
   B.station({ id: 'bilam2', kind: 'bilam', x: 9800, need: 3, r: 200, wish: 'carrot', wy: 310, say: ['fr_12', 'pr_16'] });
@@ -645,7 +645,7 @@ addB(6, 5600, 7100, B => {
   B.need(10, 'num_08', 'num_10'); B.rest(5700, ['pr_14', 'ins_10', 'num_10']);
   B.hole(8200, 8340);
   B.ramp(7100, 7350, G, G - 130); B.flat(7350, 7650, G - 130); B.ramp(7650, 7900, G - 130, G);
-  B.station({ id: 'lanterns2', kind: 'simon', x: 6300, hint: 'x_simon', say: ['pr_13'] });
+  B.station({ id: 'lanterns2', kind: 'simon', free: true, x: 6300, hint: 'x_my_tune', say: ['pr_13'] });      // part 4b-1: play any three
   B.item({ x: 6900, y: G - 50 }); B.item({ x: 7500, y: G - 190 });
   B.plat({ x: 8220, w: 110, kind: 'stone' });
   B.station({ id: 'shooting', kind: 'rain', x: 9000, zone: [8700, 9300], need: 5, hint: 'x_rain', near: 700, say: ['pr_13'] });
@@ -697,7 +697,7 @@ addB(9, 5900, 8750, B => {
   B.plat({ x: 7580, w: 130, top: G - 540, kind: 'cloud' });
   B.item({ x: 7645, y: G - 640 });
   B.station({ id: 'steps2', kind: 'count', x: 7065, pts: [[6665, G - 190], [6865, G - 280], [7065, G - 370], [7265, G - 460], [7465, G - 550]], hint: 'x_count', near: 700, say: ['pr_13'] });
-  B.station({ id: 'stars2', kind: 'simon', x: 8700, hint: 'x_simon', say: ['pr_13'] });
+  B.station({ id: 'stars2', kind: 'simon', free: true, x: 8700, hint: 'x_my_tune', say: ['pr_13'] });      // part 4b-1: play any three, the moon dance plays it back
   B.item({ x: 9100, y: G - 60 });
   B.station({ id: 'moonrain2', kind: 'rain', x: 9650, zone: [9350, 9950], need: 6, hint: 'x_rain', near: 700, say: ['pr_13'] });
   LEVELS[9].drafts.push({ x: 10600, w: 180, h: 590 }); B.item({ x: 10690, y: G - 560 });
@@ -818,7 +818,7 @@ function startLevel(i, party, resume){
   parts = []; hist = []; flowers = []; got = items.filter(o => o.opt).length; meter = 0; fin = null; arrived = false; hintT = 0; maxX = 0; said = {}; falls = 0; trail = false; camX = 0; camY = 0;
   L.friend.happy = false; L.friend.bloom = 0; L.friend.fly = 0;
   ['title', 'map', 'end', 'pick'].forEach(s => $(s).classList.add('hide'));
-  restDone = false; Voice.hush(); showButtons(); glow(null); startMusic(i);
+  restDone = false; myTune = null; Voice.hush(); showButtons(); glow(null); startMusic(i);
   if (resume && L.rest && save.half[i]) resumeHalf();
 }
 
@@ -925,6 +925,16 @@ function finishLevel(){
 const NUMV = n => 'num_' + (n < 10 ? '0' : '') + n;
 const SIMON_TONE = [392, 523, 659, 784];
 const lanternX = (st, i) => st.x + (i - 1.5) * 150;
+let myTune = null;      // part 4b-1: the three notes she chose on the free-play lanterns (the stage 10 moon dance plays them)
+/* one lantern is played (stood on for 12 frames, or tapped) */
+function simonHit(st, c){
+  st.idle = 0;
+  if (st.free) { st.lit[c] = 40; tone(SIMON_TONE[c], 0.4, 'triangle', 0.14); burst(lanternX(st, c), G - 130, 10, RB, 'star'); st.tune.push(c); st.k = st.tune.length; progress();
+    if (st.tune.length >= 3) { st.phase = 'echo'; st.t2 = 0; myTune = st.tune.slice(); Voice.say('x_tune_back'); } return; }
+  if (c === st.seq[st.k]) { st.on[c] = true; st.lit[c] = 40; tone(SIMON_TONE[c], 0.4, 'triangle', 0.14); burst(lanternX(st, c), G - 130, 10, RB, 'star'); st.k++; progress();
+    if (st.k >= 3) { st.on = [true, true, true, true]; st.phase = 'done'; complete(st); } else if (st.k === 2) Voice.say('pr_04'); }
+  else { st.shake = 40; sfx.boing(); Voice.say('pr_11'); st.phase = 'show'; st.t2 = 0; st.k = 0; st.on = [false, false, false, false]; }
+}
 function miniUpdate(st, dt){
   const cx = p.x, cy = p.y - 62, k = st.kind;
   if (k === 'count') {       // numbered bubbles, pop them 1, 2, 3 ...
@@ -940,10 +950,15 @@ function miniUpdate(st, dt){
   else if (k === 'seek') {      // touch the hay (or the sand) to see what hides in it
     st.dw = st.dw || {};         // round 9: you TAP the bush (hay, sand); standing next to it for 3 seconds also opens it
     st.pts.forEach((x, i) => { if (st.rev[i]) return; if (p.on && p.y >= G - 40 && Math.abs(p.x - x) < 70) { st.dw[i] = (st.dw[i] || 0) + dt; if (st.dw[i] > 90 && !st.tapped) { st.tapped = 1; Voice.say('x_tap'); } if (st.dw[i] > 180) revealSeek(st, i); } else st.dw[i] = 0; }); }
-  else if (k === 'simon') {     // four lanterns light up in a pattern of three; stand on them in the same order
+  else if (k === 'simon') {     // four lanterns light up in a pattern of three; stand on them (or TAP them) in the same order. Part 4b-1 (23 Nov): taps count too; st.free = "play any three, in any order" and the tune is played back
     const cur = p.on && p.y >= G - 8 ? [0, 1, 2, 3].find(i => Math.abs(p.x - lanternX(st, i)) < 55) : undefined, c = cur === undefined ? -1 : cur;
     st.lit = st.lit.map(v => Math.max(0, v - dt)); st.shake = Math.max(0, st.shake - dt);
-    if (st.phase === 'wait') { if (Math.abs(p.x - st.x) < 560) { st.phase = 'show'; st.t2 = 0; Voice.say('x_simon'); } return; }
+    if (st.phase === 'wait') { if (Math.abs(p.x - st.x) < 560) {
+        if (st.free) { st.phase = 'input'; st.k = 0; st.tune = []; st.stand = 0; st.idle = 0; st.ign = c; st.prev = c; Voice.say('x_my_tune'); }      // free play: no pattern to watch, she plays
+        else { st.phase = 'show'; st.t2 = 0; Voice.say('x_simon'); } } return; }
+    if (st.phase === 'echo') { st.t2 += dt;      // free play: her three notes come back, lantern by lantern, and then the station is done
+      for (let j = 0; j < 3; j++) { const t0 = 50 + j * 45; if (st.t2 >= t0 && st.t2 - dt < t0) { const q = st.tune[j]; st.lit[q] = 40; tone(SIMON_TONE[q], 0.4, 'triangle', 0.14); burst(lanternX(st, q), G - 130, 8, RB, 'star'); } }
+      if (st.t2 > 50 + 3 * 45 + 25) { st.on = [true, true, true, true]; st.phase = 'done'; complete(st); } return; }
     if (st.phase === 'show') { st.t2 += dt;
       for (let j = 0; j < 3; j++) { const t0 = 170 + j * 85; if (st.t2 >= t0 && st.t2 - dt < t0) { st.lit[st.seq[j]] = 55; tone(SIMON_TONE[st.seq[j]], 0.4, 'triangle', 0.14); } }
       if (st.t2 > 170 + 3 * 85 + 30) { st.phase = 'input'; st.k = 0; st.stand = 0; st.idle = 0; st.ign = c === st.seq[0] ? -2 : c; st.prev = c;      /* Keeper 22 Nov: standing already on the RIGHT first lantern counts (before it was ignored until she stepped off and on); a wrong one is still ignored so the show does not loop */ st.on = [false, false, false, false]; Voice.say('x_now'); }
@@ -951,11 +966,10 @@ function miniUpdate(st, dt){
     st.idle += dt;
     if (c !== st.prev) { st.prev = c; st.stand = 0; if (c !== st.ign) st.ign = -2; }
     if (c >= 0 && c !== st.ign && Math.abs(p.vx) < 0.5) st.stand += dt; else st.stand = 0;
-    if (st.idle > 1500) { st.phase = 'show'; st.t2 = 0; st.on = [false, false, false, false]; Voice.say('x_simon'); return; }       // nobody tried for a long time: show it again
-    if (st.stand >= 12) { st.stand = 0; st.ign = c; st.idle = 0;
-      if (c === st.seq[st.k]) { st.on[c] = true; st.lit[c] = 40; tone(SIMON_TONE[c], 0.4, 'triangle', 0.14); burst(lanternX(st, c), G - 130, 10, RB, 'star'); st.k++; progress();
-        if (st.k >= 3) { st.on = [true, true, true, true]; st.phase = 'done'; complete(st); } else if (st.k === 2) Voice.say('pr_04'); }
-      else { st.shake = 40; sfx.boing(); Voice.say('pr_11'); st.phase = 'show'; st.t2 = 0; st.k = 0; st.on = [false, false, false, false]; } } }
+    if (st.idle > 1500) { if (st.free) { st.idle = 0; Voice.say('x_my_tune'); return; }
+      st.phase = 'show'; st.t2 = 0; st.on = [false, false, false, false]; Voice.say('x_simon'); return; }       // nobody tried for a long time: show it again (free play: say it again)
+    if (st.idle > 540 && !st.tapSaid && !st.free) { st.tapSaid = 1; Voice.say('x_tap'); }      // a gentle "tap!" if she only stands about
+    if (st.stand >= 12) { st.stand = 0; st.ign = c; simonHit(st, c); } }
   else if (k === 'machine') {
     const h = hopperOf(st), busy = st.tok.some(t => t.s === 'in' || t.s === 'held');
     st.tok.forEach(t => { t.ph += 0.05 * dt;
@@ -970,7 +984,7 @@ function miniUpdate(st, dt){
       if (st.run > 110) { st.phase = 'done'; burst(st.x + 130, G - 130, 34, ['#ffd84d', '#ff8fc7', '#7fc4ff', '#fff'], 'star'); complete(st); } } }
   else if (k === 'rhythm') {     // dance on the beat: a ring shrinks to the target, press Dance when it closes
     st.fb = Math.max(0, st.fb - dt);
-    if (st.active && Math.abs(p.x - st.x) < st.r) { const c0 = st.clock; st.clock += dt; if (Math.floor(c0 / 64) !== Math.floor(st.clock / 64)) tone(440, 0.07, 'sine', 0.07); } }
+    if (st.active && Math.abs(p.x - st.x) < st.r) { const c0 = st.clock; st.clock += dt; if (Math.floor(c0 / 64) !== Math.floor(st.clock / 64)) { if (st.tuneBeat && myTune) tone(SIMON_TONE[myTune[Math.floor(st.clock / 64) % 3]], 0.2, 'triangle', 0.12); else tone(440, 0.07, 'sine', 0.07); } } }
 }
 /* round 10: press and drag an ingredient into the candy machine (Candy Land). A token let go near the hopper flies in; let go anywhere else it floats back. Standing next to the machine for 3 s also sends the next one in (never stuck). */
 let drag = null;
@@ -1036,6 +1050,9 @@ function tapWorld(w){
     if (st.stirring > 0 && Math.abs(w.x - st.x) < 170 && w.y > G - 340 && w.y < G + 40 && Math.abs(p.x - st.x) < 800) { stirTap(st); return true; }
     if (COOK_PUT[st.kind] && Math.abs(w.x - st.x) < 160 && w.y > G - 340 && w.y < G + 40 && Math.abs(p.x - st.x) < 800) { const i = putFirst(st); if (i >= 0) { cookPut(st, i); return true; } }
     else if (st.kind === 'oven' && st.ready && Math.abs(w.x - st.x) < 170 && w.y > G - 360 && w.y < G + 40 && Math.abs(p.x - st.x) < 900) { bake(st); return true; }
+    if (st.kind === 'simon' && st.phase === 'input' && Math.abs(p.x - st.x) < 800 && w.y > G - 300 && w.y < G + 30) {      // part 4b-1: tap a lantern = play it (the window is twice as wide as standing on it)
+      let bi = -1, bd = 98; for (let i = 0; i < 4; i++) { const d = Math.abs(w.x - lanternX(st, i)); if (d < bd) { bd = d; bi = i; } }
+      if (bi >= 0) { st.stand = 0; if (p.on && Math.abs(p.x - lanternX(st, bi)) < 55) st.ign = bi; simonHit(st, bi); return true; } }
     if (st.kind === 'count') { for (let i = st.n; i < st.pts.length; i++) { const q = st.pts[i]; if (Math.hypot(q[0] - w.x, q[1] - w.y) < 84) {
         if (i === st.n) popCount(st); else { st.wob[i] = 50; sfx.boing(); if (st.cd <= 0) { st.cd = 420; Voice.say('x_count'); } } return true; } } }
     else if (st.kind === 'seek') { for (let i = 0; i < st.pts.length; i++) if (!st.rev[i] && Math.abs(w.x - st.pts[i]) < 125 && w.y > G - 300 && w.y < G + 30) { revealSeek(st, i); return true; } }
@@ -1937,6 +1954,6 @@ showButtons();
 /* for testing in the browser console */
 window.__g = {
   get s(){ return { mode, li, meets: meets.map(m => m.kind + (m.done ? "!" : "")), x: p && Math.round(p.x), y: p && Math.round(p.y), on: p && p.on, got, total: items.length, meter, fin: !!fin, followers: followers.map(f => f.kind), said: Voice.last, save }; },
-  keys, flyers: () => flyers, rings: () => rings, fly: k => startFly(flyers[k || 0]), held: v => { jumpHeld = !!v; }, start: startLevel, finale: () => startFinale(), fx: () => fx, goLevel, pickSel: () => pickSel, P: () => p, sts: () => sts, pocket: () => pocket, goalMet: () => goalMet(), LV: () => L, gnd: groundAt, bonus: () => bonus, plats: () => plats, jump(){ wantJump = true; }, tapPocket, tap: (x, y) => tapWorld({ x, y }), dance(){ wantDance = true; }, sup(){ wantSuper = true; },
+  keys, flyers: () => flyers, rings: () => rings, fly: k => startFly(flyers[k || 0]), held: v => { jumpHeld = !!v; }, start: startLevel, finale: () => startFinale(), fx: () => fx, goLevel, pickSel: () => pickSel, P: () => p, sts: () => sts, pocket: () => pocket, goalMet: () => goalMet(), LV: () => L, gnd: groundAt, bonus: () => bonus, plats: () => plats, jump(){ wantJump = true; }, tapPocket, tune: () => myTune, tap: (x, y) => tapWorld({ x, y }), dance(){ wantDance = true; }, sup(){ wantSuper = true; },
   step(n){ if (mode === 'finale' || (mode === 'end' && fx)) { for (let i = 0; i < n; i++) finaleUpdate(1); drawFinale(); return; } for (let i = 0; i < n; i++) { if (mode === 'finale') { finaleUpdate(1); continue; } update(1); } if (mode === 'finale') drawFinale(); else draw(); }, tp(x){ p.x = x; p.y = G; p.vy = 0; }, dragTok(st, i, tx, ty){ const t = st.tok[i]; if (!dragStart({ x: t.x, y: t.y })) return false; dragMove({ x: tx === undefined ? st.x : tx, y: ty === undefined ? G - 330 : ty }); dragEnd(); return true; }, cam: () => ({ x: camX, y: camY }), items: () => items, meets: () => meets, reset(){ localStorage.removeItem(SAVE_KEY); }
 };

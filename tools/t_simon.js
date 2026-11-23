@@ -26,8 +26,8 @@ function waitInput(P, st) { P.x = st.x; P.y = G; P.vy = 0; let n = 0; while (st.
 { const { P, st } = setup(5, 'lights2'); waitInput(P, st);
   [0, 3, 1].forEach(i => { P.x = lx(st, i); P.y = G; P.vx = 0; step(16); P.x = st.x; step(2); }); out.push('E stand play tune ' + st.tune.join('') + ' phase ' + st.phase); let n = 0; while (!st.done && n++ < 600) step(1); out.push('E done ' + st.done); }
 // 6. stage 10: free play lanterns, then the moon dance plays her tune (no errors while dancing)
-{ const { P, st } = setup(9, 'stars2'); waitInput(P, st); [2, 0, 1].forEach(i => { g.tap(lx(st, i), G - 100); }); let n = 0; while (!st.done && n++ < 600) step(1);
-  out.push('F stars2 done ' + st.done + ' myTune ' + JSON.stringify(g.tune())); const md = g.sts().find(s => s.id === 'moondance'); out.push('F moondance tuneBeat ' + md.tuneBeat);
+{ const { P, st } = setup(9, 'moonbeat'); waitInput(P, st); [2, 0, 1].forEach(i => { g.tap(lx(st, i), G - 100); }); let n = 0; while (!st.done && n++ < 600) step(1);
+  out.push('F moonbeat (free play, stage 10) done ' + st.done + ' myTune ' + JSON.stringify(g.tune())); const md = g.sts().find(s => s.id === 'moondance'); out.push('F moondance tuneBeat ' + md.tuneBeat);
   P.x = md.x; P.y = G; step(2); g.dance(); step(3); step(300); out.push('F moondance active ' + md.active + ' clock ' + Math.round(md.clock)); }
 // 6b. the moon dance beat with her tune (forced active, no other station needed): no errors, clock runs
 { const md = g.sts().find(s => s.id === 'moondance'); md.active = true; md.clock = 1; g.P().x = md.x; step(200); out.push('F2 moondance beat with tune, clock ' + Math.round(md.clock)); }

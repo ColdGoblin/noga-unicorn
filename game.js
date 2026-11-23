@@ -120,10 +120,11 @@ const TITLES = { he: 'נוגה והחד-קרן', en: 'Noga and the Unicorn' };
 function applyLang(){ document.documentElement.lang = LANG; const h = document.querySelector('#title h1'); if (h) h.textContent = TITLES[LANG]; document.title = TITLES[LANG]; }
 const VOICE_ALIAS = { pr_05: 'pr_01', pr_12: 'pr_03' };   // two Hebrew clips (pr_05, pr_12) are still pending review: play a generic praise clip meanwhile
 const Voice = {
-  q: [], busy: false, files: false, cur: null, timer: null, gapT: null, last: '', tok: 0,
+  q: [], qm: {}, cmf: null, busy: false, files: false, cur: null, timer: null, gapT: null, last: '', tok: 0,
   init(){ this.files = false; const a = new Audio(); a.oncanplaythrough = () => { Voice.files = true; }; a.onerror = () => {}; a.src = voiceDir() + 'ins_01.mp3'; },
   low: id => /^(pr_|num_|col_|ex_)/.test(id),                       // praise and number words: nice to have, never worth a queue
-  say(id){ if (!lineText(id)) return; if (this.q.includes(id) || (this.busy && this.last === id)) return;
+  say(id, m){ if (!lineText(id)) return; if (m) this.qm[id] = m; else delete this.qm[id];      // m = the mission this line belongs to: when she is on another mission by the time it would play, it is dropped (Keeper 23 Nov: one mission at a time)
+    if (this.q.includes(id) || (this.busy && this.last === id)) return;
     const low = this.low(id);
     if (low && this.q.length >= 2) return;
     if (!low) this.q = this.q.filter(x => !Voice.low(x));           // a real instruction pushes out praise that has not started yet
@@ -134,7 +135,8 @@ const Voice = {
   stopNow(){ try { if (this.cur) { this.cur.onended = this.cur.onerror = this.cur.onloadedmetadata = null; this.cur.pause(); } window.speechSynthesis && window.speechSynthesis.cancel(); } catch (e) {} this.cur = null; },
   pump(){
     if (this.busy || !this.q.length) return;
-    const id = this.q.shift(); this.last = id;
+    let id = this.q.shift(); while (id !== undefined && this.qm[id] && this.cmf && this.qm[id] !== this.cmf()) { delete this.qm[id]; id = this.q.shift(); }
+    if (id === undefined) return; delete this.qm[id]; this.last = id;
     if (!soundOn) return this.pump();
     this.busy = true; const tok = ++this.tok;                      // every clip has its own token: a late callback of an old clip can never end or start anything
     const done = () => { if (tok !== Voice.tok || !Voice.busy) return; Voice.tok++; Voice.busy = false; clearTimeout(Voice.timer); Voice.stopNow(); clearTimeout(Voice.gapT); Voice.gapT = setTimeout(() => Voice.pump(), 450); };
@@ -160,7 +162,7 @@ const Voice = {
       play(id, true); }
     else tts();
   },
-  hush(){ this.q.length = 0; this.tok++; clearTimeout(this.timer); clearTimeout(this.gapT); this.stopNow(); this.busy = false; }
+  hush(){ this.q.length = 0; this.qm = {}; this.tok++; clearTimeout(this.timer); clearTimeout(this.gapT); this.stopNow(); this.busy = false; }
 };
 Voice.init(); applyLang();
 const PRAISE = ['pr_01', 'pr_03', 'pr_04', 'pr_06', 'pr_13', 'pr_14'];
@@ -744,6 +746,53 @@ addB(11, 4000, 6500, B => {
     if (!ov || !prod || new Set(kinds).size !== 3 || !['flour', 'eggs', 'honey'].every(k => kinds.includes(k))) return;
     b.card = { seq: ['flour', 'eggs', 'honey'] }; ov.spawn0 = ov.spawn; ov.altSpawn = ov.spawn + 'A';
     lv.items.push({ x: 0, y: 0, kind: 'loaf', to: prod.to, hid: ov.altSpawn, hidden: true, nochip: true, opt: true, say: null }); }); });
+/* Keeper 23 Nov (owner correction 4, HALF_TWIST): the second half (B) of an extended stage must be a DIFFERENT activity from the first half (A), not the same mission again with other numbers.
+   Rule used here, stage by stage (details in REVIEW-AND-PLAN-HE.md part 5): a little game kind (count, rain, seek, simon, rhythm) that already appeared in A is not repeated in B; B gets a kind A did not have, or the repeat is taken out.
+   A repeated carry chain is turned into the tea chain (flowers and water -> teapot -> fire -> cup -> table), which uses the clips and pictures that already exist.
+   Everything stays index-safe: items are only changed in place (never removed, never re-ordered) and the saved half-way positions of old saves still point at the same things.
+   Taken-out stations: their things become invisible and optional (they never count toward the goal), their friend decoration is removed. */
+const HALF_TWIST = {
+  rainbow: lv => { asRhythm(lv, 'bubbles2'); },                                              // A: count, rain | B: rhythm, seek
+  forest: lv => { asRhythm(lv, 'hide3b'); takeOut(lv, 'rain', 'steps2'); },                  // A: seek, tea | B: simon, rhythm, rain, count
+  sky: lv => { asRhythm(lv, 'rain2'); },                                                     // A: rain | B: rhythm, count, cloud
+  farm: lv => { asRhythm(lv, 'chicks2'); takeOut(lv, 'bed2', 'horses2');                    // A: chicks, bed, bridge, horses, bread | B: rhythm, tea for Grandpa, count
+    teaChain(lv, { k: 'F', drop: ['mill2', 'fbowl2', 'foven2', 'ftable2'], flowers: it => it.filter(o => o.to === 'mill2'), water: it => it.find(o => o.kind === 'milk' && o.to === 'fbowl2'), pot: it => it.find(o => o.hid === 'flour2'), cup: it => it.find(o => o.hid === 'loaf2'), at: [13100, 13330, 13880], img: 'prop_farmtable' }); },
+  shabbat: lv => { asRhythm(lv, 'bilam2'); takeOutItems(lv, 'bilam2'); },                    // A: lights, bread, donkey, candles | B: count, own tune, rhythm, ordered bread, rain
+  night: lv => { asRhythm(lv, 'nightcount'); takeOut(lv, 'riddle2'); },                      // A: lanterns, count | B: own tune, rain, seek, rhythm, riddle
+  castle: lv => { takeOut(lv, 'beat2', 'hide8b'); },                                         // A: seek, rhythm | B: count, rain, lanterns
+  oasis: lv => { takeOut(lv, 'well2'); asRhythm(lv, 'gems2'); asRain(lv, 'drops9b');         // A: gems, count, well | B: rhythm, rain, tea, bread
+    teaChain(lv, { k: 'O', drop: ['bowl2', 'oven2', 'table2'], flowers: it => it.filter(o => o.to === 'bowl2' && (o.kind === 'flour' || o.kind === 'eggs')), water: it => it.find(o => o.to === 'bowl2' && o.kind === 'honey'), pot: it => it.find(o => o.hid === 'challah2'), cup: null, at: [11300, 11560, 11950] }); },
+  moon: lv => { asSeek(lv, 'steps2', ['luna', 'koko', 'shluli']); takeOut(lv, 'stars2', 'moonrain2'); asFree(lv, 'moonbeat'); },       // A: count, rain, lantern pattern | B: seek, own tune, dance with the moon
+  party: lv => { takeOut(lv, 'pot', 'fire'); const tb = stOf(lv, 'table'); if (tb) { tb.need = 1; tb.show = ['challah']; } lv.items.forEach(o => { if (o.hid === 'cup' && o.to === 'table') hideItem(o); }); asCount(lv, 'partycount', 9770); asFree(lv, 'beat2'); },    // A: bread | B: tea, rain, own tune, seek, count, party dance
+  bouncy: lv => { const pd = lv.pads.find(o => o.st === 'bigpad2'); if (pd) delete pd.st; asRain(lv, 'bigpad2', 'padrain'); asRhythm(lv, 'skybubbles'); }       // A: bounce | B: rain, count, rhythm
+};
+function stOf(lv, id){ return lv.stations.find(s => s.id === id); }
+function reshape(lv, id, spec, nid){ const st = stOf(lv, id); if (!st) { console.warn('HALF_TWIST: no station ' + id); return null; } const x = st.x; Object.keys(st).forEach(k => delete st[k]); Object.assign(st, { id: nid || id, x }, spec); return st; }
+function asRhythm(lv, id){ reshape(lv, id, { kind: 'rhythm', r: 330, need: 6, hint: 'x_rhythm', near: 520, say: ['pr_14'] }); }
+function asSimon(lv, id){ reshape(lv, id, { kind: 'simon', hint: 'x_simon', say: ['pr_13'] }); }
+function asFree(lv, id){ reshape(lv, id, { kind: 'simon', free: true, hint: 'x_my_tune', say: ['pr_13'] }); }
+function asRain(lv, id, nid){ const st = stOf(lv, id); if (st) reshape(lv, id, { kind: 'rain', zone: [st.x - 300, st.x + 300], need: 5, hint: 'x_rain', near: 700, say: ['pr_13'] }, nid); }
+function asSeek(lv, id, peeks){ const st = stOf(lv, id); if (st) reshape(lv, id, { kind: 'seek', what: 'peek', mounds: BUSHES, peeks, pts: [st.x - 215, st.x, st.x + 215], hint: 'x_hide', near: 600, say: ['pr_13'] }); }
+function asCount(lv, id, x){ lv.stations.push({ id, kind: 'count', x, pts: [[x - 300, G - 100], [x - 150, G - 190], [x, G - 110], [x + 150, G - 200], [x + 300, G - 120]], hint: 'x_count', near: 650, say: ['pr_13'] }); }
+function hideItem(o){ o.hidden = true; o.opt = true; o.nochip = true; delete o.to; }
+function takeOutItems(lv, ...ids){ lv.items.forEach(o => { if (ids.includes(o.to)) hideItem(o); }); }
+function takeOut(lv, ...ids){ lv.stations = lv.stations.filter(s => !ids.includes(s.id)); takeOutItems(lv, ...ids); lv.decos = (lv.decos || []).filter(d => !ids.includes(d.hap)); }
+function teaChain(lv, o){
+  const fl = o.flowers(lv.items), wa = o.water(lv.items), tp = o.pot(lv.items), cu = o.cup ? o.cup(lv.items) : null, k = o.k;
+  if (!fl.length || !wa || !tp) { console.warn('HALF_TWIST: tea chain ' + k + ' incomplete'); return; }
+  lv.stations = lv.stations.filter(s => !o.drop.includes(s.id));
+  const plain = (it, fields) => { delete it.hid; delete it.hidden; delete it.opt; delete it.nochip; Object.assign(it, fields, { say: null }); };
+  fl.forEach((it, i) => plain(it, { kind: 'flower_' + (i + 1), grp: 'flower', to: 'pot' + k }));
+  plain(wa, { kind: 'water_drop', to: 'pot' + k }); delete wa.grp;
+  const hid = (it, fields) => { delete it.grp; Object.assign(it, fields, { hidden: true, nochip: true, opt: false, say: null }); delete it.opt; };
+  hid(tp, { kind: 'teapot', to: 'fire' + k, hid: 'pot' + k });
+  if (cu) hid(cu, { kind: 'teacup', to: 'serve' + k, hid: 'cup' + k }); else lv.items.push({ x: 0, y: 0, kind: 'teacup', to: 'serve' + k, hid: 'cup' + k, hidden: true, nochip: true, say: null });
+  lv.stations.push({ id: 'pot' + k, kind: 'pot', x: o.at[0], need: fl.length + 1, r: 160, spawn: 'pot' + k, hint: 'x_tea_pot', near: 420, say: ['x_tea_fire'] },
+    { id: 'fire' + k, kind: 'fire', x: o.at[1], need: 1, r: 170, spawn: 'cup' + k, say: ['x_tea_boil', 'fr_14'] },
+    Object.assign({ id: 'serve' + k, kind: 'table', x: o.at[2], need: 1, r: 220, show: 'teacup', wish: 'teacup', wy: 440, say: ['x_tea_thanks', 'pr_15'] }, o.img ? { img: o.img } : {}));
+  lv.cues.push({ x: o.at[0] - 450, say: ['x_tea_start'] });
+}
+LEVELS.forEach(lv => { const f = HALF_TWIST[lv.name]; if (f) { f(lv); lv.stations.sort((a, b) => a.x - b.x); } });
 const REST_W = 1.25;        // picture is a bit wider than the part you stand on
 function prepLevel(lv){
   lv.gaps = []; for (let i = 0; i + 1 < lv.terrain.length; i++) if (lv.terrain[i + 1].x0 > lv.terrain[i].x1) lv.gaps.push({ x: lv.terrain[i].x1, w: lv.terrain[i + 1].x0 - lv.terrain[i].x1 });
@@ -797,7 +846,8 @@ function startLevel(i, party, resume){
   pocket = []; sts = (L.stations || []).map(o => ({ ...o, have: 0, done: false, t: 0, cd: 0, armed: 0 }));
   sts.forEach(st => { if (st.kind === 'riddle') { st.want = Math.random() < 0.5 ? 'red' : 'blue'; st.objs = [['apple', 'red'], ['ball', 'blue'], ['leaf', 'green']].sort(() => Math.random() - 0.5).map((o, i) => ({ k: o[0], col: o[1], x: st.x + (i - 1) * 250, wob: 0 })); } });
   const SH = { bowl: 'x_bowl', table: 'x_table', bilam: 'x_feed', mill: 'x_mill', bridge: 'x_bridge', horses: 'x_horses', grow: 'x_bed', feed: 'x_eat' };      // what to do with the things she carries (said once, when she comes near carrying them)
-  sts.forEach(st => { if (!st.hint && SH[st.kind]) { st.hint = SH[st.kind]; st.carryHint = true; } if (st.kind === 'bounce') st.n = 0; });
+  sts.forEach(st => { if (!st.hint && SH[st.kind]) { st.hint = SH[st.kind]; st.carryHint = true; } if (st.kind === 'bounce') st.n = 0;
+    if (st.carryHint) { const nm = st.kind === 'feed' ? { bunicorn_pink: 'x_eat_pink', bunicorn_blue: 'x_eat_blue' }[st.who] : st.kind === 'bilam' ? 'x_feed_bilam' : st.kind === 'table' && st.img === 'prop_farmtable' ? 'x_table_farm' : null; if (nm) st.hint = nm; } });      // Keeper 23 Nov: the hint names who or whose it is
   sts.forEach(st => { const k = st.kind;
     if (k === 'count') { st.n = 0; st.need = st.pts.length; st.wob = st.pts.map(() => 0); }
     else if (k === 'rain') { st.n = 0; st.drops = []; st.sp = 40; }
@@ -818,7 +868,7 @@ function startLevel(i, party, resume){
   parts = []; hist = []; flowers = []; got = items.filter(o => o.opt).length; meter = 0; fin = null; arrived = false; hintT = 0; maxX = 0; said = {}; falls = 0; trail = false; camX = 0; camY = 0;
   L.friend.happy = false; L.friend.bloom = 0; L.friend.fly = 0;
   ['title', 'map', 'end', 'pick'].forEach(s => $(s).classList.add('hide'));
-  restDone = false; myTune = null; Voice.hush(); showButtons(); glow(null); startMusic(i);
+  restDone = false; myTune = null; act = null; lastStar = -9999; lastMk = ''; Voice.hush(); showButtons(); glow(null); startMusic(i);
   if (resume && L.rest && save.half[i]) resumeHalf();
 }
 
@@ -840,7 +890,8 @@ function stPos(st){        // where the sparkle trail and the hints should point
 }
 const readyFr = () => got === items.length && starsOK() && sts.every(s => s.done || s.dance);     // only dance stations (the candles) are left: dancing at the friend lights them
 const goalMet = () => got === items.length && starsOK() && stationsOK();       // to finish a level: all the things (and each one put to use) AND enough gold stars
-function target(){ const it = items.find(o => !o.got && !o.hidden && !o.opt);
+function target(){ if (act && !act.done) return stPos(act);
+  const it = items.find(o => !o.got && !o.hidden && !o.opt);
   { const rd = sts.find(s => s.ready && !s.done); if (rd) return { x: rd.x, y: G - 60 }; }
   if (pocket.length) { const st = sts.find(s => s.id === pocket[0].to); if (st) return { x: st.x, y: G - 60 }; }
   if (it) return { x: it.x, y: it.y };
@@ -848,14 +899,28 @@ function target(){ const it = items.find(o => !o.got && !o.hidden && !o.opt);
   { const dz = sts.find(s => !s.done && s.dance); if (dz && starsOK() && got === items.length && sts.every(z => z === dz || z.done || z.dance)) return { x: dz.x, y: G - 60 }; }
   if (!starsOK()) { const b = bonus.filter(o => !o.got).sort((a, c) => Math.abs(a.x - p.x) - Math.abs(c.x - p.x))[0]; if (b) return { x: b.x, y: b.y }; }
   return { x: L.friend.x, y: G - 60 }; }
-function curIns(){
-  if (got < items.length) { const nx = items.find(o => !o.got && !o.hidden && !o.opt); if (nx) return nx.say !== undefined ? nx.say : L.noIns ? null : L.ins; if (!L.hintStations) return null; }
-  if (!starsOK()) return 'ins_10';
-  if (!stationsOK() || got < items.length) { const s = sts.find(o => !o.done && o.hint && (o.kind !== 'rhythm' || !o.finish || restOK(o)) && (!o.dance || sts.every(z => z === o || z.done || z.dance))); return s ? s.hint : null; }
-  if (Math.abs(p.x - L.friend.x) > 190) return 'ins_24';
-  return L.auto ? null : 'ins_06';
+/* Keeper 23 Nov (owner correction 3 and 2): ONE active mission at a time. missionNow() says which one it is and what the voice may say about it.
+   - a station she is busy with ("act") owns the voice until it is done or she walks away from it;
+   - otherwise: the oven that is ready, the things to find, the stars, the next station, the friend;
+   - go-to directions name the real destination (GO, one line per character). */
+const GO = { bird: 'go_bird', pitzi: 'go_pitzi', tree: 'go_tree', koko: 'go_koko', armon: 'go_farm', rhino: 'go_rhino', riddletree: 'go_riddletree', princess1: 'go_princesses', sheba: 'go_sheba', moon: 'go_moon', bouncy: 'go_bouncy', bunicorn_mint: 'go_bunicorn_mint', jumbo: 'go_jumbo', shoshi: 'go_shoshi' };
+const goLine = () => GO[L.friend.kind] || 'ins_24';
+let act = null, lastStar = -9999;
+const starBusy = () => T - lastStar < 240;      // she just picked up a star: bubbles, lanterns and the rest wait their turn
+const stElig = st => !st.done && !st.auto && !st.dance && (st.hint || st.kind === 'riddle') && (!st.carryHint || pocket.some(o => o.to === st.id)) && !(st.kind === 'rhythm' && st.finish && !restOK(st));
+const stTrig = st => st.kind === 'riddle' ? Math.abs(p.x - st.x) < 800 && got >= items.length : st.kind === 'simon' ? Math.abs(p.x - st.x) < 560 : st.kind === 'rain' ? p.x > st.zone[0] - 300 && p.x < st.zone[1] + 300 : Math.abs(p.x - stPos(st).x) < (st.near || 520);
+function missionNow(){
+  if (act && !act.done) return { key: 'st:' + act.id, ins: act.kind === 'riddle' ? (act.asked ? (act.want === 'red' ? 'ins_21' : 'ins_22') : null) : act.hint };
+  { const rd = sts.find(s => s.auto && s.ready && !s.done); if (rd) return { key: 'st:' + rd.id, ins: 'x_oven_tap' }; }
+  if (got < items.length) { const nx = items.find(o => !o.got && !o.hidden && !o.opt); if (nx) return { key: 'items', ins: nx.say !== undefined ? nx.say : L.noIns ? null : L.ins }; if (!L.hintStations) return { key: 'wait', ins: null }; }
+  if (!starsOK()) return { key: 'stars', ins: 'ins_10' };
+  if (!stationsOK() || got < items.length) { const s = sts.find(o => !o.done && o.hint && (o.kind !== 'rhythm' || !o.finish || restOK(o)) && (!o.dance || sts.every(z => z === o || z.done || z.dance))); return s ? { key: 'st:' + s.id, ins: s.hint } : { key: 'wait', ins: null }; }
+  if (Math.abs(p.x - L.friend.x) > 190) return { key: 'friend', ins: goLine() };
+  return { key: 'friend', ins: L.auto ? null : 'ins_06' };
 }
-let nextHint = 480;
+const curIns = () => missionNow().ins;
+Voice.cmf = () => (mode === 'play' && L && p) ? missionNow().key : null;
+let nextHint = 480, lastMk = '';
 function progress(){ hintT = 0; nextHint = 480; trail = false; }
 /* round 11: stages are twice as long, with a flag halfway. Reaching it saves her place (what she has gathered); coming back to the stage starts her at the flag. Finishing the stage clears it. */
 function reachRest(){
@@ -879,7 +944,7 @@ function pickup(it){
   if (got <= 10) Voice.say('num_' + (got < 10 ? '0' : '') + got);
   if (L.collect === 'candy') Voice.say('x_candy_got');      // round 9: "sweet!" for each candy instead of the colour word
   else if (it.col && COL[it.col]) Voice.say(COL[it.col][1]);
-  if (got === items.length) { Voice.say('pr_12'); if (!starsOK()) Voice.say('ins_10'); else if (stationsOK()) Voice.say('ins_24'); }
+  if (got === items.length) { Voice.say('pr_12'); if (!starsOK()) Voice.say('ins_10', 'stars'); else if (stationsOK()) Voice.say(goLine(), 'friend'); }
   else if (items.length - got === 1) Voice.say('ins_25');
   else praise();
 }
@@ -898,7 +963,7 @@ function complete(st){
     Voice.say('x_oven_tap'); }
   if (st.kind === 'riddle') st.objs.forEach(o => burst(o.x, G - 70, 8, RB, 'star'));
   if (st.finish) { finish(); return; }
-  if (got === items.length && starsOK() && stationsOK() && !sts.some(o => o.finish)) Voice.say('ins_24');
+  if (got === items.length && starsOK() && stationsOK() && !sts.some(o => o.finish)) Voice.say(goLine(), 'friend');
 }
 function finish(){
   fin = { t: 0 }; L.friend.happy = true; progress(); glow(null); sfx.win();
@@ -940,7 +1005,7 @@ function miniUpdate(st, dt){
   if (k === 'count') {       // numbered bubbles, pop them 1, 2, 3 ...
     st.wob = st.wob.map(w => Math.max(0, w - dt));
     const nq = st.pts[st.n];      // round 9: you TAP the bubbles; waiting right next to the next one for 3 seconds also pops it
-    if (nq && Math.hypot(nq[0] - cx, nq[1] - cy) < 66) { st.dw = (st.dw || 0) + dt; if (st.dw > 90 && !st.tapped) { st.tapped = 1; Voice.say('x_tap'); } if (st.dw > 180) popCount(st); } else st.dw = 0; }
+    if (nq && Math.hypot(nq[0] - cx, nq[1] - cy) < 66) { st.dw = (st.dw || 0) + dt; if (st.dw > 90 && !st.tapped) { st.tapped = 1; Voice.say('x_tap', 'st:' + st.id); } if (st.dw > 180) popCount(st); } else st.dw = 0; }
   else if (k === 'rain') {      // falling stars: stand under them
     const z = st.zone;
     if (p.x > z[0] && p.x < z[1]) { st.sp += dt; if (st.sp >= 55) { st.sp = 0; st.drops.push({ x: clamp(p.x + rand(-200, 420), z[0], z[1]), y: camY - 40, vy: rand(2.8, 3.6), w: rand(0, 6) }); } }
@@ -949,26 +1014,26 @@ function miniUpdate(st, dt){
     st.drops = st.drops.filter(d => !d.dead && d.y < G + 40); }
   else if (k === 'seek') {      // touch the hay (or the sand) to see what hides in it
     st.dw = st.dw || {};         // round 9: you TAP the bush (hay, sand); standing next to it for 3 seconds also opens it
-    st.pts.forEach((x, i) => { if (st.rev[i]) return; if (p.on && p.y >= G - 40 && Math.abs(p.x - x) < 70) { st.dw[i] = (st.dw[i] || 0) + dt; if (st.dw[i] > 90 && !st.tapped) { st.tapped = 1; Voice.say('x_tap'); } if (st.dw[i] > 180) revealSeek(st, i); } else st.dw[i] = 0; }); }
+    st.pts.forEach((x, i) => { if (st.rev[i]) return; if (p.on && p.y >= G - 40 && Math.abs(p.x - x) < 70) { st.dw[i] = (st.dw[i] || 0) + dt; if (st.dw[i] > 90 && !st.tapped) { st.tapped = 1; Voice.say('x_tap', 'st:' + st.id); } if (st.dw[i] > 180) revealSeek(st, i); } else st.dw[i] = 0; }); }
   else if (k === 'simon') {     // four lanterns light up in a pattern of three; stand on them (or TAP them) in the same order. Part 4b-1 (23 Nov): taps count too; st.free = "play any three, in any order" and the tune is played back
     const cur = p.on && p.y >= G - 8 ? [0, 1, 2, 3].find(i => Math.abs(p.x - lanternX(st, i)) < 55) : undefined, c = cur === undefined ? -1 : cur;
     st.lit = st.lit.map(v => Math.max(0, v - dt)); st.shake = Math.max(0, st.shake - dt);
-    if (st.phase === 'wait') { if (Math.abs(p.x - st.x) < 560) {
-        if (st.free) { st.phase = 'input'; st.k = 0; st.tune = []; st.stand = 0; st.idle = 0; st.ign = c; st.prev = c; Voice.say('x_my_tune'); }      // free play: no pattern to watch, she plays
-        else { st.phase = 'show'; st.t2 = 0; Voice.say('x_simon'); } } return; }
+    if (st.phase === 'wait') { if (Math.abs(p.x - st.x) < 560 && act === st) {
+        if (st.free) { st.phase = 'input'; st.k = 0; st.tune = []; st.stand = 0; st.idle = 0; st.ign = c; st.prev = c; Voice.say('x_my_tune', 'st:' + st.id); }      // free play: no pattern to watch, she plays
+        else { st.phase = 'show'; st.t2 = 0; Voice.say('x_simon', 'st:' + st.id); } } return; }
     if (st.phase === 'echo') { st.t2 += dt;      // free play: her three notes come back, lantern by lantern, and then the station is done
       for (let j = 0; j < 3; j++) { const t0 = 50 + j * 45; if (st.t2 >= t0 && st.t2 - dt < t0) { const q = st.tune[j]; st.lit[q] = 40; tone(SIMON_TONE[q], 0.4, 'triangle', 0.14); burst(lanternX(st, q), G - 130, 8, RB, 'star'); } }
       if (st.t2 > 50 + 3 * 45 + 25) { st.on = [true, true, true, true]; st.phase = 'done'; complete(st); } return; }
     if (st.phase === 'show') { st.t2 += dt;
       for (let j = 0; j < 3; j++) { const t0 = 170 + j * 85; if (st.t2 >= t0 && st.t2 - dt < t0) { st.lit[st.seq[j]] = 55; tone(SIMON_TONE[st.seq[j]], 0.4, 'triangle', 0.14); } }
-      if (st.t2 > 170 + 3 * 85 + 30) { st.phase = 'input'; st.k = 0; st.stand = 0; st.idle = 0; st.ign = c === st.seq[0] ? -2 : c; st.prev = c;      /* Keeper 22 Nov: standing already on the RIGHT first lantern counts (before it was ignored until she stepped off and on); a wrong one is still ignored so the show does not loop */ st.on = [false, false, false, false]; Voice.say('x_now'); }
+      if (st.t2 > 170 + 3 * 85 + 30) { st.phase = 'input'; st.k = 0; st.stand = 0; st.idle = 0; st.ign = c === st.seq[0] ? -2 : c; st.prev = c;      /* Keeper 22 Nov: standing already on the RIGHT first lantern counts (before it was ignored until she stepped off and on); a wrong one is still ignored so the show does not loop */ st.on = [false, false, false, false]; Voice.say('x_now', 'st:' + st.id); }
       return; }
     st.idle += dt;
     if (c !== st.prev) { st.prev = c; st.stand = 0; if (c !== st.ign) st.ign = -2; }
     if (c >= 0 && c !== st.ign && Math.abs(p.vx) < 0.5) st.stand += dt; else st.stand = 0;
-    if (st.idle > 1500) { if (st.free) { st.idle = 0; Voice.say('x_my_tune'); return; }
-      st.phase = 'show'; st.t2 = 0; st.on = [false, false, false, false]; Voice.say('x_simon'); return; }       // nobody tried for a long time: show it again (free play: say it again)
-    if (st.idle > 540 && !st.tapSaid && !st.free) { st.tapSaid = 1; Voice.say('x_tap'); }      // a gentle "tap!" if she only stands about
+    if (st.idle > 1500) { if (st.free) { st.idle = 0; Voice.say('x_my_tune', 'st:' + st.id); return; }
+      st.phase = 'show'; st.t2 = 0; st.on = [false, false, false, false]; Voice.say('x_simon', 'st:' + st.id); return; }       // nobody tried for a long time: show it again (free play: say it again)
+    if (st.idle > 540 && !st.tapSaid && !st.free) { st.tapSaid = 1; Voice.say('x_tap', 'st:' + st.id); }      // a gentle "tap!" if she only stands about
     if (st.stand >= 12) { st.stand = 0; st.ign = c; simonHit(st, c); } }
   else if (k === 'machine') {
     const h = hopperOf(st), busy = st.tok.some(t => t.s === 'in' || t.s === 'held');
@@ -1004,7 +1069,7 @@ function recipeAdd(st, t){
 }
 function recipeReset(st){ const h = hopperOf(st); st.tok.forEach(t => { t.s = 'back'; t.x = h.x; t.y = h.y; }); st.seq = []; st.n = 0; st.sel = null; st.phase = 'fill'; st.fbk = null; }
 function recipeTick(st, dt){
-  if (!st.told && st.phase === 'fill' && p && Math.abs(p.x - st.x) < 650) { st.told = 1; Voice.say('x_rc_target'); }
+  if (!st.told && st.phase === 'fill' && p && Math.abs(p.x - st.x) < 650 && (!act || act === st)) { st.told = 1; Voice.say('x_rc_target', 'st:' + st.id); }
   if (st.fbk) { st.fbk.t -= dt; if (st.fbk.t <= 0) st.fbk = null; }
   if (st.demo > 0) { st.demo += dt; if (st.demo > st.rc.target.length * 50 + 40) st.demo = 0; }
   if (st.phase === 'alt') { const r0 = st.run; st.run += dt; if (Math.floor(r0 / 16) !== Math.floor(st.run / 16)) { tone(280 + (Math.floor(st.run / 16) % 4) * 70, 0.1, 'triangle', 0.08); burst(st.x + 100, G - 120, 3, ['#ffd84d', '#ff8fc7', '#7fc4ff'], 'dot'); }
@@ -1038,7 +1103,7 @@ function dragMove(w){ if (drag) { if (Math.hypot(w.x - drag.sx, w.y - drag.sy) >
 function dragEnd(){
   if (!drag) return; const { st, t, moved } = drag; drag = null; const h = hopperOf(st);
   if (st.rc && !moved) { if (st.sel === t) { sendTok(st, t); } else { st.sel = t; t.s = 'back'; sfx.pop(); } return; }      // a tap, not a drag: select it (tap it again or tap the machine to send it)
-  if (Math.hypot(t.x - h.x, t.y - h.y) < 180) sendTok(st, t); else { t.s = 'back'; sfx.boing(); if (st.cd <= 0) { st.cd = 480; Voice.say('x_machine'); } }
+  if (Math.hypot(t.x - h.x, t.y - h.y) < 180) sendTok(st, t); else { t.s = 'back'; sfx.boing(); if (st.cd <= 0) { st.cd = 480; Voice.say('x_machine', 'st:' + st.id); } }
 }
 function bounceCount(st){ st.n = (st.n || 0) + 1; progress(); burst(st.x, G - 200, 10, RB, 'star'); if (st.n <= 10) Voice.say(NUMV(st.n)); if (st.n >= st.need) { burst(st.x, G - 260, 40, RB, 'star'); complete(st); } }
 function popCount(st){ const q = st.pts[st.n]; st.n++; st.dw = 0; sfx.pop(); burst(q[0], q[1], 14, RB, 'star'); progress(); Voice.say(NUMV(st.n)); if (st.n >= st.pts.length) complete(st); }
@@ -1054,7 +1119,7 @@ function tapWorld(w){
       let bi = -1, bd = 98; for (let i = 0; i < 4; i++) { const d = Math.abs(w.x - lanternX(st, i)); if (d < bd) { bd = d; bi = i; } }
       if (bi >= 0) { st.stand = 0; if (p.on && Math.abs(p.x - lanternX(st, bi)) < 55) st.ign = bi; simonHit(st, bi); return true; } }
     if (st.kind === 'count') { for (let i = st.n; i < st.pts.length; i++) { const q = st.pts[i]; if (Math.hypot(q[0] - w.x, q[1] - w.y) < 84) {
-        if (i === st.n) popCount(st); else { st.wob[i] = 50; sfx.boing(); if (st.cd <= 0) { st.cd = 420; Voice.say('x_count'); } } return true; } } }
+        if (i === st.n) popCount(st); else { st.wob[i] = 50; sfx.boing(); if (st.cd <= 0) { st.cd = 420; Voice.say('x_count', 'st:' + st.id); } } return true; } } }
     else if (st.kind === 'seek') { for (let i = 0; i < st.pts.length; i++) if (!st.rev[i] && Math.abs(w.x - st.pts[i]) < 125 && w.y > G - 300 && w.y < G + 30) { revealSeek(st, i); return true; } }
     else if (st.kind === 'machine' && st.rc && st.phase === 'fill') {
       const cw = 150 + st.rc.target.length * 100; if (Math.abs(w.x - st.x) < cw / 2 && Math.abs(w.y - (G - 478)) < 66 && st.demo <= 0) { st.demo = 1; sfx.pop(); return true; }      // tap the picture card: a ghost shows the order (it does not play the turn)
@@ -1076,7 +1141,7 @@ function update(dt){
 
   if (L.rest && !restDone && p.x >= L.rest.x) reachRest();      // round 11: the halfway flag
   // cues: spoken instructions tied to places
-  L.cues.forEach(c => { if (!c.done && p.x >= c.x) { c.done = true; c.say.forEach(id => Voice.say(id)); if (c.glow) glow(c.glow);
+  L.cues.forEach(c => { if (!c.done && p.x >= c.x) { c.done = true; let af = false; c.say.forEach(id => { const star = id === 'ins_10' || (af && /^num_/.test(id)); af = id === 'ins_10'; Voice.say(id, star ? 'stars' : (id === L.ins || /^x_find_/.test(id)) ? 'items' : undefined); }); if (c.glow) glow(c.glow);
     if (c.show === 'dance' && !save.dance) { save.dance = true; persist(); showButtons(); } } });
 
   const dancing = p.dance > 0, locked = !!fin || p.bubble > 0;
@@ -1163,47 +1228,51 @@ function update(dt){
   if (L.recover && !fin && p.on && !locked) items.forEach(it => { if (it.got || it.hidden || it.x > p.x - 900) return;
     let nx = Math.min(L.len - 220, p.x + 420), g = groundAt(nx), n = 0; while (g === null && n++ < 8) { nx += 110; g = groundAt(Math.min(nx, L.len - 220)); }
     if (g === null) return; it.x = Math.min(nx, L.len - 220); it.y = g - 100; burst(it.x, it.y, 14, ['#ffe14d', '#fff'], 'star'); tone(660, 0.25, 'sine', 0.1, 990);
-    trail = true; hintT = Math.max(hintT, 1200); Voice.say(L.noIns ? 'ins_25' : L.ins); said.back = (said.back || 0) + 1; });
+    trail = true; hintT = Math.max(hintT, 1200); Voice.say(L.noIns ? 'ins_25' : L.ins, 'items'); said.back = (said.back || 0) + 1; });
   items.forEach(it => { it.bob += 0.05 * dt; if (has('fetch')) fetchTo(it, cx, cy, dt); if (!it.got && !it.hidden && Math.hypot(it.x - cx, it.y - cy) < 72 && !(it.to && !pocketRoom(it))) pickup(it);
     if (!it.got && !it.hidden && hintT > 2400 && it === items.find(o => !o.got && !o.hidden)) { it.x += Math.sign(cx - it.x) * 1.4 * dt; it.y += Math.sign(cy - it.y) * 1.0 * dt; } });
   flyCheck(cx, cy, dt); if (has('fetch')) bonus.forEach(b => fetchTo(b, cx, cy, dt, 230));
-  bonus.forEach(b => { if (!b.got && Math.hypot(b.x - cx, b.y - cy) < 60) { b.got = true; bonusN++; sfx.star(); burst(b.x, b.y, 6, ['#ffe14d', '#fff'], 'star');
-    if (bonusN === L.need) { Voice.say('pr_12'); if (got === items.length && stationsOK()) Voice.say('ins_24'); } else if (bonusN % 10 === 0) praise(); } });
+  bonus.forEach(b => { if (!b.got && Math.hypot(b.x - cx, b.y - cy) < 60) { b.got = true; bonusN++; lastStar = T; sfx.star(); burst(b.x, b.y, 6, ['#ffe14d', '#fff'], 'star');
+    if (bonusN === L.need) { Voice.say('pr_12'); if (got === items.length && stationsOK()) Voice.say(goLine(), 'friend'); } else if (bonusN % 10 === 0) praise(); } });
   stars.forEach(st => {
-    if (!st.got && Math.hypot(st.x - cx, st.y - cy) < 66 && meter < 3) { st.got = true; st.back = 300; meter++; sfx.star(); burst(st.x, st.y, 8, ['#ffe14d', '#fff'], 'star');
+    if (!st.got && Math.hypot(st.x - cx, st.y - cy) < 66 && meter < 3) { st.got = true; st.back = 300; meter++; lastStar = T; sfx.star(); burst(st.x, st.y, 8, ['#ffe14d', '#fff'], 'star');
       if (meter === 3) { Voice.say('ex_03'); if (!save.sup) { save.sup = true; persist(); showButtons(); Voice.say('ins_08'); } $('bs').classList.add('ready', 'glow'); } }
     else if (st.got) { const need = items.find(o => o.high === st.g && !o.got); if (need && meter < 3 && !p.wings) { st.back -= dt; if (st.back <= 0) st.got = false; } }
   });
 
+  // ONE mission at a time: the station she is busy with owns the voice, the hints and the glow until it is done or she walks away (0.75 s)
+  if (act && (act.done || !stTrig(act))) { act.gone = (act.gone || 0) + dt; if (act.done || act.gone > 45) { act.gone = 0; act = null; } } else if (act) act.gone = 0;
+  if (!act && !starBusy() && !fin) { let best = null, bd = 1e9; sts.forEach(s => { if (!stElig(s) || !stTrig(s)) return; const d = Math.abs(p.x - stPos(s).x); if (d < bd) { bd = d; best = s; } }); act = best; }
+  { const mk = missionNow().key; if (mk !== lastMk) { lastMk = mk; Voice.q = Voice.q.filter(id => !Voice.qm[id] || Voice.qm[id] === mk); } }
   // stations: what she carries drops in when she walks up to the right place
   sts.forEach(st => { st.cd -= dt; st.t += dt;
     if (st.done) return;
-    if (st.hint && !st.intro && Math.abs(p.x - stPos(st).x) < (st.near || 520) && (!st.carryHint || pocket.some(o => o.to === st.id))) { st.intro = 1; Voice.say(st.hint); if (st.kind === 'rhythm') glow('bd'); }
+    if (st.hint && !st.intro && (st.dance ? (!act && !starBusy() && stTrig(st) && readyFr()) : act === st)) { st.intro = 1; Voice.say(st.hint, 'st:' + st.id); if (st.kind === 'rhythm') glow('bd'); }
     if (st.auto) { if (st.armed > 0) { st.armed -= dt; if (st.armed <= 0) complete(st); }
-      else if (st.ready) { if (Math.abs(p.x - st.x) < 520) { st.rdy += dt; if (st.rdy > 360) bake(st); } else st.rdy = 0; st.rmind = (st.rmind || 0) + dt; if (st.rmind > 700 && Voice.idle() && Math.abs(p.x - st.x) < 700) { st.rmind = 0; Voice.say('x_oven_tap'); } }
+      else if (st.ready) { if (Math.abs(p.x - st.x) < 520) { st.rdy += dt; if (st.rdy > 360) bake(st); } else st.rdy = 0; st.rmind = (st.rmind || 0) + dt; if (st.rmind > 700 && Voice.idle() && !act && !starBusy() && Math.abs(p.x - st.x) < 700) { st.rmind = 0; Voice.say('x_oven_tap', 'st:' + st.id); } }
       return; }
     if (st.dance) return;
     if (MINI[st.kind]) { miniUpdate(st, dt); return; }
     if (st.kind === 'riddle') {
-      if (!st.asked && Math.abs(p.x - st.x) < 800 && got >= items.length) { st.asked = 1; Voice.say('l7_b'); Voice.say('fr_15'); Voice.say(st.want === 'red' ? 'ins_21' : 'ins_22'); }
+      if (!st.asked && act === st) { st.asked = 1; Voice.say('l7_b'); Voice.say('fr_15'); Voice.say(st.want === 'red' ? 'ins_21' : 'ins_22', 'st:' + st.id); }
       if (st.asked) st.objs.forEach(o => { o.wob = Math.max(0, o.wob - dt);
         if (!st.done && Math.abs(p.x - o.x) < 80 && p.y > G - 130 && o.wob <= 0) {
-          if (o.col === st.want) complete(st); else { o.wob = 60; sfx.boing(); if (st.cd <= 0) { st.cd = 300; Voice.say(st.want === 'red' ? 'ins_21' : 'ins_22'); } } } });
+          if (o.col === st.want) complete(st); else { o.wob = 60; sfx.boing(); if (st.cd <= 0) { st.cd = 300; Voice.say(st.want === 'red' ? 'ins_21' : 'ins_22', 'st:' + st.id); } } } });
       return; }
     if (st.stirring > 0) { if (p.on && Math.abs(p.x - st.x) < (st.r || 150) + 100) { st.dwc = (st.dwc || 0) + dt; if (st.dwc > 360) { st.dwc = 0; st.stirring = 0; complete(st); } } else st.dwc = 0; return; }
     if (COOK_PUT[st.kind]) { const i = putFirst(st);
-      if (i >= 0 && p.on && Math.abs(p.x - st.x) < (st.r || 140)) { if (!st.toldPut) { st.toldPut = 1; Voice.say('x_tap_put'); } st.dwc = (st.dwc || 0) + dt; if (st.dwc > 360 && st.cd <= 0) cookPut(st, i); } else st.dwc = 0;
+      if (i >= 0 && p.on && Math.abs(p.x - st.x) < (st.r || 140)) { if (!st.toldPut && (!act || act === st)) { st.toldPut = 1; Voice.say('x_tap_put', 'st:' + st.id); } st.dwc = (st.dwc || 0) + dt; if (st.dwc > 360 && st.cd <= 0) cookPut(st, i); } else st.dwc = 0;
       return; }
     if (st.cd <= 0 && Math.abs(p.x - st.x) < (st.r || 140)) { const i = pocket.findIndex(o => o.to === st.id);
       if (i >= 0) { const o = pocket.splice(i, 1)[0]; st.last = o.kind; if (/^tea\d$/.test(o.col || '')) st.tea = o.col; st.have++; st.cd = 16; sfx.pop(); burst(st.x, G - 110, 10, RB, 'star'); if (st.have >= st.need) complete(st); else if (Math.random() < 0.4) praise(); } } });
 
   // friends she meets on the way: say what to do when she comes close, glow the button
-  meets.forEach(m => { if (m.hop > 0) m.hop -= dt; if (!m.done && !m.seen && !fin && Math.abs(p.x - m.x) < 520) { m.seen = true; Voice.say(m.do === 'dance' ? 'ins_06' : 'ins_02'); glow(m.do === 'dance' ? 'bd' : 'bj'); } });
+  meets.forEach(m => { if (m.hop > 0) m.hop -= dt; if (!m.done && !m.seen && !fin && !act && !starBusy() && Math.abs(p.x - m.x) < 520) { m.seen = true; Voice.say(m.do === 'dance' ? 'ins_06' : 'ins_02'); glow(m.do === 'dance' ? 'bd' : 'bj'); } });
   // friend
   const near = Math.abs(p.x - L.friend.x) < 170;
   if (!fin && (goalMet() || readyFr()) && near && !sts.some(o => o.finish)) {
     if (L.auto) finish();
-    else if (!arrived) { arrived = true; if (L.arriveSay) Voice.say(L.arriveSay); Voice.say('ins_06'); glow('bd'); }
+    else if (!arrived) { arrived = true; if (L.arriveSay) Voice.say(L.arriveSay); Voice.say('ins_06', 'friend'); glow('bd'); }
   }
   if (fin) {
     fin.t += dt; L.friend.fly = fin.t;
@@ -1216,9 +1285,9 @@ function update(dt){
   // help when she is stuck
   if (p.x > maxX + 220) { maxX = p.x; progress(); }
   if (!fin) { hintT += dt;
-    const ins = curIns();
+    const mi = missionNow(), ins = mi.ins;
     if (ins && hintT >= nextHint && Voice.idle()) {
-      nextHint = hintT + 840; Voice.say(ins); const tg = target();
+      nextHint = hintT + 840; Voice.say(ins, mi.key); const tg = target();
       glow(ins === 'ins_06' || ins === 'x_rhythm' || ins === 'l6_b' ? 'bd' : (tg.y < p.y - 150 && Math.abs(tg.x - p.x) < 160) ? 'bj' : tg.x < p.x ? 'bl' : 'br'); }
     if (hintT > 1200) trail = true;
   }
@@ -1903,40 +1972,49 @@ function showPick(i){
   paint(); $('pick').classList.remove('hide');
   $('pickgo').onclick = () => { ac(); save.party = pickSel.slice(); persist(); $('pick').classList.add('hide'); startLevel(i, pickSel.slice(), true); };
 }
+/* Keeper 23 Nov, owner correction 1: levels 10, 11, 12 and 13 live on a SECOND map screen (stops keep their level ids, unlock rule and save); the first screen keeps the other stages. A big arrow card on each screen turns the page. */
+const MAP_PAGE2 = [9, 10, 11, 12];
+const mapPageOf = i => MAP_PAGE2.includes(i) ? 1 : 0;
+let mapPage = 0;
+function mapSpot(i){ if (MAP_PAGE2.includes(i)) return [15.5 + 23 * MAP_PAGE2.indexOf(i), 50]; if (i === 13) return [10, 47]; if (i === 14) return [90, 47]; return (IMG.map10 ? MAP10_POS : MAP_POS)[i]; }
 function refreshMapArtwork(){
   if (mode !== 'map') return;
-  const mapImage = IMG.map12 || IMG.map11 || IMG.map10;
   const box = $('stops');
-  box.classList.toggle('map-eleven', !!(IMG.map11 || IMG.map12));
-  box.classList.toggle('map-twelve', !!IMG.map12);
-  box.style.backgroundImage = mapImage ? 'url("' + mapImage.src + '")' : '';
-  const stops = mapImage ? MAP10_POS.slice() : MAP_POS;
-  stops[13] = [10, 47]; stops[14] = [90, 47];      // the jungle and the deep sea: free spots on the map
-  if (IMG.map12) stops[11] = [30.5, 47];      // stop 12 (the Bouncy Castle bubble) on art/ui/map12.jpg, measured on the picture
-  Array.from(box.children).forEach((button, i) => {
-    button.style.left = stops[i][0] + '%';
-    button.style.top = stops[i][1] + '%';
-  });
+  box.classList.toggle('page2', mapPage === 1);
+  box.style.backgroundImage = mapPage === 0 && IMG.map10 ? 'url("' + IMG.map10.src + '")' : '';
+  box.querySelectorAll('.stop').forEach(b => { const s = mapSpot(+b.dataset.i); b.style.left = s[0] + '%'; b.style.top = s[1] + '%'; });
 }
-function showMap(){
-  mode = 'map'; fx = null; showButtons(); glow(null); Voice.hush(); Song.play('title');
+function showMap(page){
+  const from = mode; mode = 'map'; fx = null; showButtons(); glow(null); Voice.hush(); Song.play('title');
   ['title', 'end', 'pick'].forEach(s => $(s).classList.add('hide'));
   const box = $('stops'); box.innerHTML = '';
   const nextI = LEVELS.findIndex((lv, i) => !save.done[i]);
+  if (page === 0 || page === 1) mapPage = page;
+  else { const ref = from === 'end' && save.done[li] && nextI >= 0 ? nextI : from === 'end' ? li : nextI >= 0 ? nextI : li; mapPage = mapPageOf(ref); }
+  const isOpen = i => i === 0 || save.done[i - 1] || save.done[i];
   LEVELS.forEach((lv, i) => {
-    const open = !!lv && (i === 0 || save.done[i - 1] || save.done[i]), b = document.createElement('button');
-    b.className = 'stop' + (lv && save.done[i] ? ' done' : '') + (open ? '' : ' locked') + (i === nextI ? ' next' : '');
-    b.innerHTML = !open ? '\u{1F512}' : save.done[i] ? '<img alt="" src="art/ui/sticker_' + lv.sticker + '.png" onerror="this.onerror=null;this.src=\'art/ui/sticker_8.png\'">' : '\u25B6';
+    if (!lv || mapPageOf(i) !== mapPage) return;
+    const open = isOpen(i), b = document.createElement('button');
+    b.className = 'stop' + (mapPage === 1 ? ' s4' : '') + (save.done[i] ? ' done' : '') + (open ? '' : ' locked') + (i === nextI ? ' next' : '');
+    const st = '<img alt="" src="art/ui/sticker_' + lv.sticker + '.png" onerror="this.onerror=null;this.src=\'art/ui/sticker_8.png\'">';
+    b.innerHTML = mapPage === 1 ? st + (!open ? '<i class="bd">\u{1F512}</i>' : !save.done[i] ? '<i class="bd">\u25B6</i>' : '')
+      : !open ? '\u{1F512}' : save.done[i] ? st : '\u25B6';
     if (open && !save.done[i]) b.classList.add('play');
-    b.setAttribute('aria-label', 'level ' + (i + 1));
+    b.dataset.i = i; b.setAttribute('aria-label', 'level ' + (i + 1));
     if (open) b.addEventListener('click', () => { ac(); goLevel(i); });
     box.appendChild(b);
   });
+  const turn = document.createElement('button'), other = mapPage === 0 ? 1 : 0;
+  turn.className = (mapPage === 0 ? 'gate' : 'back') + (nextI >= 0 && mapPageOf(nextI) === other ? ' next' : '');
+  turn.setAttribute('aria-label', mapPage === 0 ? 'next map: levels 10 to 13' : 'back to the first map');
+  turn.innerHTML = mapPage === 0 ? MAP_PAGE2.map(i => '<img alt="" src="art/ui/sticker_' + LEVELS[i].sticker + '.png">').join('') + '<b>\u279C</b>' : '<b>\u25C0</b>';
+  turn.addEventListener('click', () => { ac(); sfx.pick(); showMap(other); });
+  box.appendChild(turn);
   refreshMapArtwork();
   $('map').classList.remove('hide');
 }
 $('play').addEventListener('click', () => { ac(); const first = !save.done.some(Boolean); if (first) startLevel(0, undefined, true); else showMap(); Voice.say(first ? 'ex_01' : 'ex_02'); });
-$('toMap').addEventListener('click', showMap);
+$('toMap').addEventListener('click', () => showMap());
 $('next').addEventListener('click', () => { if (li + 1 < LEVELS.length) goLevel(li + 1); else showMap(); });
 /* back to the main title (21 Nov, owner request): a small house button on every screen except the title itself */
 function goTitle(){ if (mode === 'play' && typeof persist === 'function') persist(); mode = 'title'; fx = null; showButtons(); glow(null); Voice.hush(); Song.play('title'); ['map', 'end', 'pick'].forEach(s => $(s).classList.add('hide')); $('title').classList.remove('hide'); homeBtn(); }
@@ -1954,6 +2032,6 @@ showButtons();
 /* for testing in the browser console */
 window.__g = {
   get s(){ return { mode, li, meets: meets.map(m => m.kind + (m.done ? "!" : "")), x: p && Math.round(p.x), y: p && Math.round(p.y), on: p && p.on, got, total: items.length, meter, fin: !!fin, followers: followers.map(f => f.kind), said: Voice.last, save }; },
-  keys, flyers: () => flyers, rings: () => rings, fly: k => startFly(flyers[k || 0]), held: v => { jumpHeld = !!v; }, start: startLevel, finale: () => startFinale(), fx: () => fx, goLevel, pickSel: () => pickSel, P: () => p, sts: () => sts, pocket: () => pocket, goalMet: () => goalMet(), LV: () => L, gnd: groundAt, bonus: () => bonus, plats: () => plats, jump(){ wantJump = true; }, tapPocket, tune: () => myTune, tap: (x, y) => tapWorld({ x, y }), dance(){ wantDance = true; }, sup(){ wantSuper = true; },
+  keys, flyers: () => flyers, rings: () => rings, fly: k => startFly(flyers[k || 0]), held: v => { jumpHeld = !!v; }, start: startLevel, finale: () => startFinale(), fx: () => fx, goLevel, pickSel: () => pickSel, P: () => p, sts: () => sts, pocket: () => pocket, goalMet: () => goalMet(), LV: () => L, gnd: groundAt, bonus: () => bonus, plats: () => plats, jump(){ wantJump = true; }, tapPocket, tune: () => myTune, tap: (x, y) => tapWorld({ x, y }), showMap: p => showMap(p), Voice, act: () => act && act.id, mission: () => missionNow(), vq: () => ({ q: Voice.q.slice(), qm: { ...Voice.qm }, last: Voice.last, busy: Voice.busy }), goLine, starBusy, mapInfo: () => ({ page: mapPage, stops: Array.from(document.querySelectorAll('#stops .stop')).map(b => +b.dataset.i), turn: (document.querySelector('#stops .gate,#stops .back') || {}).className }), dance(){ wantDance = true; }, sup(){ wantSuper = true; },
   step(n){ if (mode === 'finale' || (mode === 'end' && fx)) { for (let i = 0; i < n; i++) finaleUpdate(1); drawFinale(); return; } for (let i = 0; i < n; i++) { if (mode === 'finale') { finaleUpdate(1); continue; } update(1); } if (mode === 'finale') drawFinale(); else draw(); }, tp(x){ p.x = x; p.y = G; p.vy = 0; }, dragTok(st, i, tx, ty){ const t = st.tok[i]; if (!dragStart({ x: t.x, y: t.y })) return false; dragMove({ x: tx === undefined ? st.x : tx, y: ty === undefined ? G - 330 : ty }); dragEnd(); return true; }, cam: () => ({ x: camX, y: camY }), items: () => items, meets: () => meets, reset(){ localStorage.removeItem(SAVE_KEY); }
 };

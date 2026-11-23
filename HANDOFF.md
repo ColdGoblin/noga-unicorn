@@ -74,3 +74,11 @@ Not committed on purpose: `art-orig/` (incl. `round9-alt/`), `noga-he-voice-addi
 
 ## Working rules for several sessions
 One writer per file at a time (parallel sessions overwrote each other's edits before); commit only your own files; never stash, reset or switch branches. After a meaningful piece: `oasis done noga-unicorn "..."` and `oasis next noga-unicorn "..."`. At the end of a long session do the dream pass in `DREAM.md` instead of appending a paragraph here.
+
+## Keeper 23 Nov 2026 (night): four direct owner corrections, PRIVATE candidate (not live, not pushed)
+Base live main `a91b8a2`; candidate branch `keeper-improvements-20261122` (private clone). Details and evidence: `agent-handoffs/noga-keeper-improvements-20261122/REVIEW-AND-PLAN-HE.md` part 5.
+1. **Map in two screens:** levels 10-13 (`MAP_PAGE2`) on a second screen with an arrow card both ways; level ids, unlock rule and save unchanged (`showMap(page)`, `mapSpot`).
+2. **Named directions:** `GO` + `goLine()` (14 go_* lines), `x_eat_pink/blue`, `x_feed_bilam`, `x_table_farm`; `ins_24` is only a fallback. 18 new voice ids need Whisper clips (`VOICE-MANIFEST-NAMED-DIRECTIONS-HE.md`).
+3. **One mission at a time:** `missionNow()` (active station `act` > ready oven > things to find > stars > next station > friend), `starBusy()`, mission-tagged voice lines (`Voice.say(id, mission)`; a line whose mission is over is dropped when its turn comes).
+4. **Second halves differ:** `HALF_TWIST` (keyed by stage name) swaps or removes little games that repeated from the first half and turns repeated carry chains into the tea chain; items are changed in place only (saved half indices stay valid).
+Tests: `tools/t_map_pages.js`, `t_mission.js`, `t_halves.js`, `runvoice.sh`; all-stage bot, `t_half_all.py` (live -> candidate) and the focused tests pass (see the handoff folder).
